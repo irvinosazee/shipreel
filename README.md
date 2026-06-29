@@ -27,9 +27,22 @@ rsync -a --exclude '.DS_Store' skills/brag/ ~/.claude/skills/brag/
 Restart Claude Code after copying.
 </details>
 
+### Also works with
+
+This repo exposes the skill at every agent's standard discovery path via symlinks. No extra config needed.
+
+| Agent | How it discovers |
+|---|---|
+| **opencode** | Auto-detects from `.opencode/skills/brag/` at project root |
+| **Codex CLI** | Reads `.agents/skills/brag/`, walking up to repo root |
+| **Claude Code** | Also reads `.claude/skills/brag/` (in addition to the `.claude-plugin/` marketplace install above) |
+| **Other agents** | Point custom instructions at `skills/brag/SKILL.md` — see [`docs/other-agents.md`](docs/other-agents.md) |
+
+> **Windows users:** Git requires `git config core.symlinks true` (or `git clone -c core.symlinks=true`) and Windows Developer Mode or Administrator privileges to create symlinks. If symlinks don't work on your system, copy `skills/brag/` to the agent's skill directory manually instead.
+
 ## Use it
 
-From any project directory, ask Claude:
+From any project directory, ask your agent:
 
 ```text
 let's /brag
@@ -49,7 +62,7 @@ You get a `brag-output/` folder with the plan, a composition brief, share copy, 
 
 ## Requirements
 
-- Claude Code (with skill/plugin support)
+- An agent that supports Agent Skills — Claude Code, opencode, Codex CLI, or any agent with custom instructions (see "Also works with" above)
 - Node.js 22+
 - FFmpeg on `PATH`
 - Hyperframes CLI — `npx hyperframes` (check it with `npx hyperframes doctor`)
@@ -60,6 +73,9 @@ You get a `brag-output/` folder with the plan, a composition brief, share copy, 
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
 - `.claude-plugin/` — plugin manifest + marketplace catalog
+- `.claude/skills/brag/` — symlink → `skills/brag/` (Claude Code discovery)
+- `.agents/skills/brag/` — symlink → `skills/brag/` (Codex CLI + opencode discovery)
+- `.opencode/skills/brag/` — symlink → `skills/brag/` (opencode discovery)
 
 ## Credits
 
