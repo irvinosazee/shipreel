@@ -17,6 +17,10 @@ The gallery videos ship committed: each demo shown (`examples/horse-tinder/`, `e
 
 ## Adding / updating a gallery example
 
-1. Render the brag video and place `brag.mp4`, `brag.jpg` (poster), and `site.jpg` (thumbnail) under `examples/<slug>/`, next to the demo's `index.html` and `styles.css`.
+1. Render the brag video and place `brag.mp4`, `brag.jpg` (poster), and `site.jpg` (thumbnail) under `examples/<slug>/`, next to the demo's `index.html` and `styles.css`. Pick `brag.jpg` as the **best** frame, not an arbitrary one — grab the video's strongest settled beat (the hook line, or the hero/logo reveal) full-res with ffmpeg:
+
+   ```bash
+   ffmpeg -ss 3.2 -i docs/examples/<slug>/brag.mp4 -frames:v 1 -q:v 2 docs/examples/<slug>/brag.jpg
+   ```
 2. Add a card in `index.html` pointing at those paths.
 3. Un-ignore the slug in `.gitignore` and commit the assets.
