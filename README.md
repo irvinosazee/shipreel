@@ -17,8 +17,16 @@ The looping video on the [launch site](https://latent-spaces.github.io/brag/) wa
 
 Then run `/brag` inside any project.
 
+**Any other agent** — one command via the [`skills`](https://github.com/vercel-labs/skills) CLI (Cursor, Codex, Copilot, Gemini CLI, opencode, and more):
+
+```bash
+npx skills add https://github.com/latent-spaces/brag --skill brag
+```
+
+Add `-g` to install globally (available in every project); drop it to scope to the current one. ([browse on skills.sh](https://www.skills.sh/latent-spaces/brag/brag))
+
 <details>
-<summary>No plugin system? Install the skill directly.</summary>
+<summary>No installer? Copy the skill directly.</summary>
 
 ```bash
 rsync -a --exclude '.DS_Store' skills/brag/ ~/.claude/skills/brag/

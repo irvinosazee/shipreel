@@ -188,6 +188,23 @@ button { font: inherit; cursor: pointer; }
 .install .copy:focus-visible { opacity: 1; background: oklch(38% 0.08 var(--hue)); outline: none; }
 .install .copy[data-state="copied"] { background: oklch(58% 0.18 145); color: oklch(15% 0.05 145); }
 
+.install-stack {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+  max-width: 100%;
+}
+.install-label {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hero-ink-soft);
+  margin-top: 2px;
+}
+.install-stack .install-label:first-child { margin-top: 0; }
+
 .hero-meta {
   font-family: "Geist Mono", ui-monospace, monospace;
   font-size: 12px;
