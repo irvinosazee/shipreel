@@ -1,7 +1,7 @@
 {
   "name": "brag",
   "description": "Turn the current project into a short, polished, shareable launch video using HyperFrames.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Shunit Haviv",
     "email": "shunithaviv@gmail.com"
