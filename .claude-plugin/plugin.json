@@ -3,9 +3,10 @@
   "description": "Turn the current project into a short, polished, shareable launch video using HyperFrames.",
   "version": "0.2.0",
   "author": {
-    "name": "Shunit Haviv",
+    "name": "Shunit Haviv Hakimi",
     "email": "shunithaviv@gmail.com"
   },
+  "license": "MIT",
   "homepage": "https://github.com/latent-spaces/brag",
   "repository": "https://github.com/latent-spaces/brag",
   "keywords": ["video", "launch", "hyperframes", "skill"]
