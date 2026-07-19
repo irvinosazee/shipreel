@@ -27,7 +27,7 @@ Suggested plan notation:
 Audio-reactive treatment: subtle; use music RMS/bass to make the hero glow and product card presence breathe. No waveform/equalizer visuals.
 ```
 
-Hyperframes implementation note: follow the current hyperframes audio-reactive workflow (its `references/audio-reactive.md`) to extract per-frame audio data and sample it synchronously inside the composition timeline. The extraction helper ships with the Hyperframes/GSAP skills — `/brag` does not provide it, so don't hardcode a path to it.
+Hyperframes implementation note: follow the Hyperframes audio-reactive workflow, owned by the `hyperframes-creative` skill (`references/audio-reactive.md` and `scripts/extract-audio-data.py`), to extract per-frame audio data and sample it synchronously inside the composition timeline. The extraction helper ships with that skill — `/brag` does not provide it, so don't hardcode a path to it.
 
 ---
 

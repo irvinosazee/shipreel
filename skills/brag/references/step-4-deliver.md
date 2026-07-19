@@ -4,12 +4,10 @@
 
 ```bash
 cd brag-output/composition
-npx hyperframes lint       # static checks: track overlaps, unregistered timelines, missing ids
-npx hyperframes validate   # loads in headless Chrome: WCAG contrast audit + console errors
-npx hyperframes inspect    # text / container overflow across the timeline
+npx hyperframes check   # one browser gate: reruns lint, then audits runtime, layout/overflow, motion, and WCAG contrast
 ```
 
-Fix all errors. The contrast warnings come from `validate` (`lint` is static-only): fix anything below 3:1 for large text or 4.5:1 for body text. Accept borderline cases (3:1–4:1) — brag videos are not accessibility documents, but text must be legible. `inspect` backstops the "keep all text readable" creative law — fix any reported overflow.
+Fix all errors. `check` is the single gate — it reruns lint, so don't add a standalone `lint` before it. WCAG contrast failures are gating **errors** (4.5:1 for normal text, 3:1 for large text — 24px+, or 19px+ bold), not warnings. Each finding carries the sampled fg/bg colors, the measured-vs-required ratio, and a `suggestedColor` in the right palette direction — apply it or adjust within the palette family, then re-run `check`; most fixes need no screenshot. There is no per-element contrast escape hatch for real text (the `data-layout-allow-*` hatches cover overflow / overlap / occlusion only). The only bypass is `check --no-contrast`, which skips the entire WCAG pass (all-or-nothing) — not a way to accept one borderline element. `check`'s layout pass backstops the "keep all text readable" creative law — fix any reported overflow.
 
 For a visual gut-check before rendering, optionally capture key frames:
 
@@ -158,7 +156,7 @@ brag-output/
   share-copy.txt          — the share caption
   composition/            — the Hyperframes project
     index.html
-    DESIGN.md
+    frame.md
     ...
 ```
 
