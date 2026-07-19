@@ -4,15 +4,15 @@
 
 ```bash
 cd brag-output/composition
-npx hyperframes check   # one browser gate: reruns lint, then audits runtime, layout/overflow, motion, and WCAG contrast
+npx hyperframes check   # brag's single pre-render gate — fix every error it reports
 ```
 
-Fix all errors. `check` is the single gate — it reruns lint, so don't add a standalone `lint` before it. WCAG contrast failures are gating **errors** (4.5:1 for normal text, 3:1 for large text — 24px+, or 19px+ bold), not warnings. Each finding carries the sampled fg/bg colors, the measured-vs-required ratio, and a `suggestedColor` in the right palette direction — apply it or adjust within the palette family, then re-run `check`; most fixes need no screenshot. There is no per-element contrast escape hatch for real text (the `data-layout-allow-*` hatches cover overflow / overlap / occlusion only). The only bypass is `check --no-contrast`, which skips the entire WCAG pass (all-or-nothing) — not a way to accept one borderline element. `check`'s layout pass backstops the "keep all text readable" creative law — fix any reported overflow.
+Fix all errors. `check` is brag's single pre-render gate — run it and fix everything it reports, including WCAG contrast failures (they gate as errors, not warnings). Each contrast finding carries a suggested compliant color, so apply it or adjust within the palette family and re-run `check` — most fixes need no screenshot. There is no per-element contrast escape hatch for real text; the only bypass is `check --no-contrast`, which skips the entire WCAG pass (all-or-nothing), not a way to accept one borderline element. For exact contrast thresholds, layout escape hatches, and reporting details, follow the current hyperframes-cli `check` guidance. `check`'s layout pass backstops the "keep all text readable" creative law — fix any reported overflow.
 
 For a visual gut-check before rendering, optionally capture key frames:
 
 ```bash
-npx hyperframes snapshot   # PNG key frames (adds Gemini frame analysis when GEMINI_API_KEY is set)
+npx hyperframes snapshot   # PNG key frames
 ```
 
 ## Preview
@@ -21,7 +21,7 @@ npx hyperframes snapshot   # PNG key frames (adds Gemini frame analysis when GEM
 npx hyperframes preview
 ```
 
-Tell the user the preview is running and give them the localhost URL. Invite them to check it before rendering. The preview hot-reloads on file changes.
+Tell the user the preview is running and give them the localhost URL. Invite them to check it before rendering.
 
 If the user approves or asks to render:
 
@@ -156,7 +156,6 @@ brag-output/
   share-copy.txt          — the share caption
   composition/            — the Hyperframes project
     index.html
-    frame.md
     ...
 ```
 
