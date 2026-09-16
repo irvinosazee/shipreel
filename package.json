@@ -2,10 +2,14 @@
   "name": "brag-repo",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "check:docs": "node scripts/check-docs.mjs",
-    "doctor": "node skills/brag/scripts/brag_doctor.mjs"
+    "doctor": "node skills/brag/scripts/brag_doctor.mjs",
+    "validate": "node scripts/validate-repo.mjs",
+    "eval": "node scripts/eval-examples.mjs"
   }
 }

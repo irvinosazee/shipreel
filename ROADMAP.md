@@ -8,7 +8,7 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - [x] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
 - [x] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
 - [x] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
-- [ ] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
+- [x] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
 
 - [ ] **Fix the gallery assets.** `verify_render.mjs` found that Fish Flight School and Horse Tinder do not have their poster baked into frame 0, Psychologists for Chatbots opens on a flat frame, and every example mixes at -24 to -28.5 LUFS. Re-master to -14 LUFS and bake posters.
 
@@ -58,6 +58,10 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - **Loudness mastering** to -14 LUFS with a limiter and a clean tail.
 - **Optional "made with /brag" watermark** (off by default) as a growth loop.
 - **Reduced-motion and audio-description variants** for accessibility.
+
+### Quality gates
+- **Rendered eval in CI.** A nightly job that runs a real `/brag` over one example headless and checks the output with `verify_render.mjs`, so Hyperframes upgrades that break the pipeline are caught within a day.
+- **Golden-frame regression.** Store review contact sheets for each example and compare new renders with SSIM to flag unintended visual changes.
 
 ### Distribution
 - **Launch kit bundle.** Video in all formats, OG image, X thread, LinkedIn post, Product Hunt gallery images, README embed snippet, and `credits.txt` in one folder.

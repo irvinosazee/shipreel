@@ -1,0 +1,20 @@
+{
+  "bicycles-for-snakes": [
+    "render:loudness"
+  ],
+  "fish-flight-school": [
+    "render:poster-not-baked",
+    "render:loudness"
+  ],
+  "horse-tinder": [
+    "render:poster-not-baked",
+    "render:loudness"
+  ],
+  "psychologists-for-chatbots": [
+    "render:flat-frame0",
+    "render:loudness"
+  ],
+  "taxi-for-taxis": [
+    "render:loudness"
+  ]
+}

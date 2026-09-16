@@ -104,7 +104,9 @@ node skills/brag/scripts/brag_doctor.mjs
 - `skills/brag/` — the skill, references, and bundled music + SFX
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
-- `tests/` — Node test suite (`npm test`)
+- `tests/` — Node test suite (`npm test`) and the examples eval baseline
+- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`
+- `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `ROADMAP.md` — backlog and feature ideas
 - `.claude-plugin/` — plugin manifest + marketplace catalog
 - `.claude/skills/brag/` — symlink → `skills/brag/` (Claude Code discovery)
@@ -121,3 +123,5 @@ node skills/brag/scripts/brag_doctor.mjs
 ## Contributing
 
 Contributions, ideas, and new demo brags are welcome — open an issue or a PR.
+
+Before opening a PR, run `npm test && npm run validate && npm run eval` (Node 22+ and FFmpeg). If you fix an example's render, run `node scripts/eval-examples.mjs --update-baseline` so the fix is locked in.

@@ -95,8 +95,17 @@ test("evaluate flags duration, size, silence, and missing audio as errors", () =
 });
 
 test("evaluate: poster not baked into frame 0 is an error when a poster exists", () => {
-  const { errors } = evaluate({ ...goodFacts, posterSsim: 0.41 }, { poster: true });
+  const { errors, errorCodes } = evaluate({ ...goodFacts, posterSsim: 0.41 }, { poster: true });
   assert.match(errors.join("\n"), /frame 0/);
+  assert.deepEqual(errorCodes, ["poster-not-baked"]);
+});
+
+test("evaluate returns one stable code per message", () => {
+  const result = evaluate({ ...goodFacts, duration: 40, integratedLufs: -30, faststart: false }, {});
+  assert.deepEqual(result.errorCodes, ["duration"]);
+  assert.deepEqual(result.warningCodes, ["loudness", "no-faststart"]);
+  assert.equal(result.errors.length, result.errorCodes.length);
+  assert.equal(result.warnings.length, result.warningCodes.length);
 });
 
 test("evaluate: blank frame 0, quiet mix, and delivery issues are warnings", () => {

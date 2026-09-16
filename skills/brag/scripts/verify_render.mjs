@@ -163,6 +163,17 @@ export function probeVideo(file, { posterPath } = {}) {
 export function evaluate(facts, expect = {}) {
   const errors = [];
   const warnings = [];
+  const errorCodes = [];
+  const warningCodes = [];
+  // Stable codes let CI compare runs without depending on message wording or measured numbers.
+  const fail = (code, message) => {
+    errorCodes.push(code);
+    errors.push(message);
+  };
+  const warn = (code, message) => {
+    warningCodes.push(code);
+    warnings.push(message);
+  };
   const minDuration = expect.minDuration ?? 15;
   const maxDuration = expect.maxDuration ?? 25;
   const [width, height] =
@@ -170,53 +181,53 @@ export function evaluate(facts, expect = {}) {
   const wantsAudio = expect.audio !== false;
 
   if (facts.duration < minDuration - DURATION_TOLERANCE || facts.duration > maxDuration + DURATION_TOLERANCE) {
-    errors.push(`Duration is ${facts.duration.toFixed(1)}s; the plan allows ${minDuration}–${maxDuration}s.`);
+    fail("duration", `Duration is ${facts.duration.toFixed(1)}s; the plan allows ${minDuration}–${maxDuration}s.`);
   }
   if (facts.width !== width || facts.height !== height) {
-    errors.push(`Frame size is ${facts.width}x${facts.height}; expected ${width}x${height}.`);
+    fail("frame-size", `Frame size is ${facts.width}x${facts.height}; expected ${width}x${height}.`);
   }
   if (wantsAudio && !facts.hasAudio) {
-    errors.push("The video has no audio stream, but the plan includes music or SFX.");
+    fail("no-audio", "The video has no audio stream, but the plan includes music or SFX.");
   } else if (wantsAudio && facts.maxVolumeDb != null && facts.maxVolumeDb <= SILENT_MAX_DB) {
-    errors.push(`The audio track is silent (peak ${facts.maxVolumeDb} dB) — check that audio assets were copied into composition/assets/.`);
+    fail("silent-audio", `The audio track is silent (peak ${facts.maxVolumeDb} dB) — check that audio assets were copied into composition/assets/.`);
   }
   if (expect.poster && facts.posterSsim != null && facts.posterSsim < POSTER_MIN_SSIM) {
-    errors.push(
+    fail("poster-not-baked", 
       `The poster is not baked into frame 0 (similarity ${facts.posterSsim.toFixed(2)}); thumbnails on Slack, X, and Discord will show the wrong frame.`,
     );
   }
   if (expect.maxMb && facts.sizeBytes > expect.maxMb * 1024 * 1024) {
-    errors.push(`File is ${(facts.sizeBytes / 1024 / 1024).toFixed(1)} MB, over the ${expect.maxMb} MB budget.`);
+    fail("over-budget", `File is ${(facts.sizeBytes / 1024 / 1024).toFixed(1)} MB, over the ${expect.maxMb} MB budget.`);
   }
 
   if (facts.frame0 && facts.frame0.ymax - facts.frame0.ymin < FLAT_FRAME_SPREAD && facts.posterSsim == null) {
-    warnings.push("Frame 0 is a flat, featureless frame; bake the best-beat poster into frame 0 so idle thumbnails are postable.");
+    warn("flat-frame0", "Frame 0 is a flat, featureless frame; bake the best-beat poster into frame 0 so idle thumbnails are postable.");
   }
   if (facts.integratedLufs != null && (facts.integratedLufs < LUFS_RANGE[0] || facts.integratedLufs > LUFS_RANGE[1])) {
-    warnings.push(
+    warn("loudness", 
       `Integrated loudness is ${facts.integratedLufs} LUFS; aim for about -14 LUFS (${LUFS_RANGE[0]} to ${LUFS_RANGE[1]}) so it holds up next to other posts.`,
     );
   }
   if (facts.faststart === false) {
-    warnings.push("The moov atom is at the end of the file; re-mux with -movflags +faststart so web players start instantly.");
+    warn("no-faststart", "The moov atom is at the end of the file; re-mux with -movflags +faststart so web players start instantly.");
   }
   if (facts.videoCodec && facts.videoCodec !== "h264") {
-    warnings.push(`Video codec is ${facts.videoCodec}; H.264 is the most widely accepted for social uploads.`);
+    warn("codec", `Video codec is ${facts.videoCodec}; H.264 is the most widely accepted for social uploads.`);
   }
   if (facts.pixFmt && facts.pixFmt !== "yuv420p") {
-    warnings.push(`Pixel format is ${facts.pixFmt}; use yuv420p for compatibility with phones and social platforms.`);
+    warn("pixel-format", `Pixel format is ${facts.pixFmt}; use yuv420p for compatibility with phones and social platforms.`);
   }
   if (facts.fps && !COMMON_FPS.some((fps) => Math.abs(fps - facts.fps) < 0.05 || Math.abs(fps * 1000 / 1001 - facts.fps) < 0.05)) {
-    warnings.push(`Frame rate is ${Number(facts.fps.toFixed(2))} fps; use 30 or 60.`);
+    warn("frame-rate", `Frame rate is ${Number(facts.fps.toFixed(2))} fps; use 30 or 60.`);
   }
 
-  return { errors, warnings };
+  return { errors, warnings, errorCodes, warningCodes };
 }
 
 export function verifyRender(file, expect = {}) {
   const facts = probeVideo(file, { posterPath: expect.posterPath });
-  const { errors, warnings } = evaluate(facts, { ...expect, poster: Boolean(expect.posterPath) });
-  return { file, ok: errors.length === 0, errors, warnings, facts };
+  const result = evaluate(facts, { ...expect, poster: Boolean(expect.posterPath) });
+  return { file, ok: result.errors.length === 0, ...result, facts };
 }
 
 function parseArgs(argv) {
