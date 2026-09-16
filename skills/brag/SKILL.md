@@ -1,6 +1,6 @@
 ---
 name: brag
-description: Turn the current project website into a short, polished, shareable launch video using Hyperframes. Use when someone says "/brag", "let's brag about this", "make a launch video", "turn this into a video", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed.
+description: Turn the current project — website, web app, CLI, library, API, mobile app, game, or ML project — into a short, polished, shareable launch video using Hyperframes. Use when someone says "/brag", "let's brag about this", "make a launch video", "turn this into a video", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed.
 ---
 
 # /brag
@@ -18,7 +18,7 @@ Never enable narration without the flag or an explicit request.
 
 ## What this skill does
 
-1. Reads the current project code to understand the app.
+1. Detects the kind of project and reads its code to understand it.
 2. Plans a short brag concept specific to this project.
 3. Scripts and storyboards the video.
 4. Hands a focused composition brief to Hyperframes.
@@ -106,9 +106,9 @@ Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it 
 
 ## Step 1: Inspect the project
 
-**Read:** [references/step-1-inspect.md](references/step-1-inspect.md)
+**Read:** [references/step-1-inspect.md](references/step-1-inspect.md) and [references/project-types.md](references/project-types.md)
 
-Scan the project directory and extract the information needed to plan the brag video.
+Run `detect_project.mjs`, follow the strategy for the detected project type, and extract the information needed to plan the brag video.
 
 **Gate:** You can answer all 9 questions in the brag planning rubric.
 

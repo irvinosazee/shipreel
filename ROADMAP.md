@@ -5,7 +5,7 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 ## Now — core backlog
 
 - [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/brag_doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
-- [ ] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
+- [x] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
 - [ ] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
 - [ ] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
 - [ ] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
@@ -19,6 +19,11 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - **Size-budget encoding.** Two-pass encode to hit hard limits (Discord 10 MB, X 512 MB, Slack inline preview).
 - **Seamless loop ending.** The last frame matches the first, so autoplaying feeds loop without a visible jump.
 - **README-ready loop.** `brag.gif` / `brag-loop.webp` sized for GitHub READMEs, where MP4s do not autoplay.
+- **Cutdowns.** `--cutdown 6` produces a 6-second bumper and a 15-second TikTok cut from the same plan, keeping the hook and payoff.
+- **Stories splitter.** Split into 15-second Instagram/WhatsApp story segments, each ending on a readable frame.
+- **Carousel export.** Storyboard frames as a LinkedIn document carousel (PDF) and an Instagram carousel (1080x1350 stills).
+- **Sound-off check.** Every beat must read with audio muted, since most feeds autoplay silently; the review pass fails scenes that rely on narration alone.
+- **Phone-legible type.** Minimum on-screen text size per format (9:16 is watched at arm's length on a small screen), enforced at check time.
 - **Platform cover frames.** Per-platform thumbnail and cover pick (TikTok cover, YouTube 1280x720 thumbnail, OG 1200x630 image).
 
 ### Story and content
@@ -29,6 +34,8 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - **Truth mode.** For non-parody projects, every claim on screen must quote the source; the plan lists the citation for each line.
 - **Hook tournament.** Three hook variants rendered as stills; pick one (or let the agent judge) before building the whole video.
 - **Device frames and cursor choreography.** iPhone, browser chrome and laptop frames; eased cursor paths with click ripples and typing.
+- **Type-native scene kits.** Ready-made, brand-themed building blocks per project type: terminal window with real typing, HTTP request/response card, code editor with live output, phone frame with swipe physics, game HUD.
+- **Monorepo story mode.** When a repo has an app and an API, cut between the screen and the real request powering it ("this tap → this call → this result").
 - **Explainer mode.** `--duration 45-60` with chapters for demos that need more than 25 seconds.
 - **Localization.** `--lang es,ja,pt` translates on-screen copy and share copy, with matching Kokoro voices when `--voice` is on.
 

@@ -2,7 +2,17 @@
 
 Read the project directory to understand what you're bragging about.
 
-## What to look for
+## Detect the project type first
+
+```bash
+node <skill-root>/scripts/detect_project.mjs <project-dir>
+```
+
+Read [project-types.md](project-types.md) for the detected `type`. It says what to read, which real material to use, which user flow to show, and what to avoid for that kind of project. Start reading from the `inspect` list in the result. Record the type, confidence, and the strategy you chose in `brag-plan.md`.
+
+The priority list below is the detailed guide for websites and web apps. For CLIs, libraries, APIs, mobile apps, games, and data/ML projects, follow the matching section in `project-types.md` and use this list only where it applies (README, styles, assets).
+
+## What to look for (websites and web apps)
 
 Read these in priority order:
 
@@ -120,6 +130,7 @@ Write down the display font (used for headings) and the body font separately.
 Don't read:
 - Generated build artifacts (`dist/`, `.next/`, `build/`)
 - Lock files (`package-lock.json`, `yarn.lock`)
-- Test files
+- Test files (except as a source of realistic example output for CLIs, libraries, and APIs)
 - `.git/`
+- `.env*` files and anything that looks like secrets — never read them, and never put keys, tokens, or private URLs on screen
 

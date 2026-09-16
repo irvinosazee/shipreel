@@ -18,6 +18,10 @@ mkdir -p <output-dir>
 ## What is this app?
 [One sentence. What it does, what makes it funny or impressive.]
 
+## Project type
+- Detected: [type] ([confidence]) — framework: [framework or none]
+- Strategy used: [type from project-types.md, and why if it differs from the detected type]
+
 ## The angle
 [The creative premise. The joke, the hook, the claim.
 What makes this video specific to this project and not generic.]
