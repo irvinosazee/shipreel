@@ -32,6 +32,7 @@ The user may invoke with natural language or flags:
 /brag
 /brag --tone chaotic
 /brag --tone polished --format vertical
+/brag --for tiktok,reels,x
 /brag this. Make it feel like a ridiculous startup launch.
 ```
 
@@ -40,7 +41,9 @@ Parse these options:
 | Option | Values | Default |
 |---|---|---|
 | `--tone` | preset or freeform description | inferred |
-| `--format` | `landscape`, `vertical`, `square` | `landscape` |
+| `--format` | `landscape`, `vertical`, `square`, `feed` (4:5) | `landscape` |
+| `--for` | platforms or groups: `tiktok`, `reels`, `shorts`, `x`, `linkedin`, `youtube`, `producthunt`, `readme`, `discord`, `vertical`, `social`, `all` | none (single `--format` render) |
+| `--captions` | `auto`, `burned`, `sidecar`, `off` | `auto` (from `--for`; sidecar `.srt` otherwise) |
 | `--duration` | seconds | auto (15-25s) |
 | `--no-music` | flag | music on |
 | `--no-sfx` | flag | sfx on |
@@ -49,6 +52,8 @@ Parse these options:
 
 Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes. Kokoro is
 the only supported narration provider; do not add provider-selection logic.
+
+`--for` plans one render per frame size, with each platform's safe zones, caption mode, and size budget, then exports a ready-to-upload file per platform. Read [references/platforms.md](references/platforms.md) whenever `--for`, `--captions`, or a non-landscape `--format` is used.
 
 Tone can be a preset (`default`, `polished`, `yc-parody`, `chaotic`, `deadpan`, `cinematic`, `app-store`) or a creative direction such as "fake Series A launch from 2016", "museum exhibit", or "overproduced mobile game ad".
 
@@ -122,7 +127,9 @@ Write `<output-dir>/brag-plan.md` (where `<output-dir>` is `brag-output/` or the
 
 When music is selected, include a compact `Music cue guidance` section: read the bundled track's cue preset from `assets/music/cues/` if present, otherwise note cues will be detected at composition time (any track now supports beat sync — see `references/audio.md`). Cue metadata is optional timing guidance only: story, readability, pacing, and product clarity stay primary.
 
-**Gate:** `<output-dir>/brag-plan.md` exists with a full storyboard. Scene durations sum to 15–25 seconds.
+With `--for`, run `platforms.mjs plan`, add a `## Delivery` section with the renders, and write a layout note per scene for every extra format (see `references/platforms.md`).
+
+**Gate:** `<output-dir>/brag-plan.md` exists with a full storyboard. Scene durations sum to 15–25 seconds. Every planned format has layout notes and its safe rectangle.
 
 ---
 
@@ -145,6 +152,8 @@ Write the composition brief and use Hyperframes to create the video implementati
 **Read:** [references/step-4-deliver.md](references/step-4-deliver.md)
 
 Validate, preview, render a draft, review its settled frames against the creative laws and fix what fails, render the final to `<output-dir>/brag.mp4`, master loudness, pick the best poster frame into `<output-dir>/brag.jpg`, bake it as frame 0, verify the render, and write `<output-dir>/share-copy.txt`.
+
+With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, and run `platforms.mjs export`.
 
 **Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/brag.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
 

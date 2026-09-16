@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "note": "Delivery presets for --for. Safe zones are conservative fractions of the frame covered by each app's own UI (buttons, captions, progress bars); apps change their UI, so keep important text well inside them and check the preview. Size limits are the smallest common limit (free tiers).",
+  "formats": {
+    "landscape": { "size": [1920, 1080], "aspect": "16:9" },
+    "vertical": { "size": [1080, 1920], "aspect": "9:16" },
+    "square": { "size": [1080, 1080], "aspect": "1:1" },
+    "feed": { "size": [1080, 1350], "aspect": "4:5" }
+  },
+  "groups": {
+    "vertical": ["tiktok", "reels", "shorts"],
+    "social": ["tiktok", "reels", "shorts", "x", "linkedin"],
+    "all": ["tiktok", "reels", "shorts", "x", "linkedin", "youtube", "producthunt", "readme", "discord"]
+  },
+  "platforms": {
+    "tiktok": {
+      "label": "TikTok",
+      "format": "vertical",
+      "safeZone": { "top": 0.08, "right": 0.13, "bottom": 0.25, "left": 0.06 },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Pick a cover frame in the app; use the poster's moment.",
+      "notes": "Right rail holds like/comment/share; bottom holds the caption and sound name. Plays muted-to-sound, loops."
+    },
+    "reels": {
+      "label": "Instagram Reels",
+      "format": "vertical",
+      "safeZone": { "top": 0.13, "right": 0.08, "bottom": 0.22, "left": 0.06 },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Upload brag.jpg cropped to 1080x1920; the grid shows the center 1080x1350.",
+      "notes": "Grid crops to 4:5, so keep the hook inside the center 1080x1350. Autoplays muted in feed."
+    },
+    "shorts": {
+      "label": "YouTube Shorts",
+      "format": "vertical",
+      "safeZone": { "top": 0.12, "right": 0.14, "bottom": 0.24, "left": 0.06 },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Chosen from the video frames in YouTube Studio.",
+      "notes": "Channel name, title, and subscribe button sit over the bottom; actions on the right."
+    },
+    "x": {
+      "label": "X",
+      "format": "landscape",
+      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.1, "left": 0.05 },
+      "captions": "burned",
+      "maxMb": 512,
+      "maxDurationSec": 140,
+      "cover": "X uses frame 0 — the baked poster.",
+      "notes": "Autoplays muted in the timeline. Put the link in a reply for reach."
+    },
+    "linkedin": {
+      "label": "LinkedIn",
+      "format": "feed",
+      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.1, "left": 0.05 },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Upload brag.jpg as the thumbnail in the post editor.",
+      "notes": "4:5 takes the most feed height on mobile. Autoplays muted; also accepts an .srt upload."
+    },
+    "youtube": {
+      "label": "YouTube",
+      "format": "landscape",
+      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.12, "left": 0.05 },
+      "captions": "sidecar",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Upload a 1280x720 thumbnail made from brag.jpg.",
+      "notes": "Upload brag.srt as subtitles; the progress bar covers the bottom edge on hover."
+    },
+    "producthunt": {
+      "label": "Product Hunt",
+      "format": "landscape",
+      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.12, "left": 0.05 },
+      "captions": "sidecar",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Gallery images are 1270x760; export stills from the review frames.",
+      "notes": "The gallery video is a YouTube link — upload the YouTube export first."
+    },
+    "readme": {
+      "label": "GitHub README",
+      "format": "landscape",
+      "exportWidth": 1280,
+      "gif": true,
+      "safeZone": { "top": 0.04, "right": 0.04, "bottom": 0.04, "left": 0.04 },
+      "captions": "none",
+      "maxMb": 10,
+      "maxDurationSec": null,
+      "cover": "The GIF's first frame; frame 0 is the baked poster.",
+      "notes": "Drag the MP4 into the README editor to host it (10 MB on free plans). MP4s do not autoplay there; the GIF does."
+    },
+    "discord": {
+      "label": "Discord",
+      "format": "landscape",
+      "safeZone": { "top": 0.04, "right": 0.04, "bottom": 0.1, "left": 0.04 },
+      "captions": "none",
+      "maxMb": 10,
+      "maxDurationSec": null,
+      "cover": "Discord shows frame 0 — the baked poster.",
+      "notes": "Free uploads are capped at 10 MB, so the export is re-encoded to fit."
+    }
+  }
+}

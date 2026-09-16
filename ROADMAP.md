@@ -7,7 +7,7 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/brag_doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
 - [x] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
 - [x] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
-- [ ] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
+- [x] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
 - [ ] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
 
 - [ ] **Fix the gallery assets.** `verify_render.mjs` found that Fish Flight School and Horse Tinder do not have their poster baked into frame 0, Psychologists for Chatbots opens on a flat frame, and every example mixes at -24 to -28.5 LUFS. Re-master to -14 LUFS and bake posters.
@@ -15,6 +15,7 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 ## Next — end-to-end ideas
 
 ### Formats and platforms
+- **Hyperframes format variables.** One composition that reads the frame size and restacks itself, instead of a copied `composition-<format>/` per format, so layout fixes land everywhere at once.
 - **Vertical-first reflow, never center-crop.** Each scene declares a layout for 16:9, 9:16, 1:1 and 4:5; text and UI restack instead of being cropped.
 - **4:5 feed format** for Instagram and LinkedIn feeds (1080x1350), which take up more of the screen than 1:1.
 - **Platform safe zones** drawn as a debug overlay in preview (TikTok right rail and caption area, Reels bottom sheet, Shorts subscribe bar).
@@ -24,6 +25,8 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - **Cutdowns.** `--cutdown 6` produces a 6-second bumper and a 15-second TikTok cut from the same plan, keeping the hook and payoff.
 - **Stories splitter.** Split into 15-second Instagram/WhatsApp story segments, each ending on a readable frame.
 - **Carousel export.** Storyboard frames as a LinkedIn document carousel (PDF) and an Instagram carousel (1080x1350 stills).
+- **Caption styles.** Named burned-caption styles (word-pop, karaoke highlight, lower-third) themed from the project's fonts and colors.
+- **Upload checklist page.** `exports/index.html` with each platform's file, cover image, caption text, and notes in one place, ready to post in order.
 - **Sound-off check.** Every beat must read with audio muted, since most feeds autoplay silently; the review pass fails scenes that rely on narration alone.
 - **Phone-legible type.** Minimum on-screen text size per format (9:16 is watched at arm's length on a small screen), enforced at check time.
 - **Platform cover frames.** Per-platform thumbnail and cover pick (TikTok cover, YouTube 1280x720 thumbnail, OG 1200x630 image).

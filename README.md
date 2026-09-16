@@ -62,6 +62,14 @@ Or steer the tone:
 /brag --tone "fake Series A launch from 2016"
 ```
 
+Post it everywhere — one plan, a layout for every screen, captions, and a ready-to-upload file per platform:
+
+```text
+/brag --for tiktok,reels,shorts,x,linkedin
+```
+
+Vertical renders respect each app's buttons and caption areas, Discord and README exports are squeezed under 10 MB, and the README export comes with an autoplaying GIF.
+
 Voiceover is off by default. Enable it explicitly with:
 
 ```text
@@ -70,7 +78,7 @@ Voiceover is off by default. Enable it explicitly with:
 
 Narration uses Kokoro through Hyperframes when enabled.
 
-You get a `brag-output/` folder with the plan, a composition brief, share copy, and the rendered `brag.mp4`.
+You get a `brag-output/` folder with the plan, a composition brief, a self-review, share copy, and the rendered `brag.mp4` (plus `exports/` and captions when you use `--for`).
 
 ## How it works
 

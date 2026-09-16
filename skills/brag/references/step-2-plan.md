@@ -49,7 +49,12 @@ landing-page-only, write "none — landing-page only" and rely on Key moments in
 - Creative direction: [freeform phrase, inferred or user-provided]
 - Interpretation: [one sentence on how this affects pacing, writing, visual energy, and restraint]
 
-## Format: [landscape / vertical / square] — [width]x[height]
+## Format: [landscape / vertical / square / feed] — [width]x[height]
+
+## Delivery (only with --for)
+- Platforms: [list]
+- Renders: [format — size — platforms — safe rectangle — captions — size budget], from `platforms.mjs plan`
+- Caption band: [where burned captions sit, inside the safe rectangle]
 ## Duration: [target seconds]
 
 ## Visual identity (from the project)
@@ -82,6 +87,7 @@ Audio intent: [what the sound should do emotionally]
 Audio-coupled idea: [typed text, beat-aligned reveal, counter ticks, card-by-card sequence, simulated tap/swipe/type — or none]
 Music: [mood, or "none" only if disabled / missing / intentionally silent]
 Transition mood: [clean / hard / dramatic / soft / chaotic] → Scene 2
+Other formats: [one layout note per extra format, e.g. "vertical: headline top third, card fills middle" — only with --for]
 
 ### Scene 2 — [name] — [duration]s
 [...]

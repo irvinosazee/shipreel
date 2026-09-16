@@ -13,7 +13,8 @@ Create a short launch-style brag video for [App Name].
 ## Output
 - Composition directory: `brag-output/composition/`
 - Rendered video: `brag-output/brag.mp4`
-- Format: [landscape / vertical / square] — [width]x[height]
+- Format: [landscape / vertical / square / feed] — [width]x[height]
+- Additional renders (with --for): [format — size — composition-<format>/ — safe rectangle px — captions mode]
 - Duration: [15-25 seconds]
 
 ## Source Material
@@ -74,6 +75,8 @@ Load the composition-building Hyperframes domain skills — `hyperframes-core` (
 
 Requirements:
 - Show at least one real UI, copy, or visual element from the source project.
+- Keep all text, faces, and product UI inside each format's safe rectangle. Extra formats reuse the same timeline with a restacked layout — never a crop or letterbox (see `platforms.md`).
+- When captions are burned, draw them as styled composition elements in a reserved band inside the safe rectangle.
 - Keep all text readable in the final render.
 - Keep the video within 15-25 seconds.
 - Include the planned music/SFX layer unless audio was explicitly disabled or documented as intentionally silent.
