@@ -10,9 +10,9 @@ You built it. Now let's brag about it.
 ## Invocation dispatch (must happen first)
 
 Before inspecting the project, parse the complete `/brag` invocation. If the
-invocation contains `--voice`, set `voice.enabled = true`. Enable narration
-only for that run. Do not enable narration automatically and do not fall back
-to the normal no-voice workflow.
+invocation contains `--voice`, set `voice.enabled = true` for this run only.
+Narration is added on top of the normal workflow; it never replaces any step.
+Never enable narration without the flag or an explicit request.
 
 `/brag` turns the current project website or app into a short, polished, shareable launch video using Hyperframes. It is narrow, opinionated, and fun.
 
@@ -47,9 +47,8 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 
-Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes and do
-not add any provider-selection logic. The voice workflow is intentionally
-single-provider in this PR.
+Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes. Kokoro is
+the only supported narration provider; do not add provider-selection logic.
 
 Tone can be a preset (`default`, `polished`, `yc-parody`, `chaotic`, `deadpan`, `cinematic`, `app-store`) or a creative direction such as "fake Series A launch from 2016", "museum exhibit", or "overproduced mobile game ad".
 
@@ -62,6 +61,30 @@ not simply read visible text, matches scene pacing, sounds natural and
 conversational, and moves smoothly between scenes. Keep the script concise and
 specific to the product so the voice feels like part of the edit rather than a
 separate narration track.
+
+---
+
+## Skill root and preflight
+
+`<skill-root>` is the directory that contains this `SKILL.md`. Resolve it from
+where this file was loaded — it differs between a plugin install (Claude Code
+plugin cache), `npx skills`, a manual copy, and this repo. Never assume
+`~/.claude/skills/brag`. Every bundled path in the references is relative to
+`<skill-root>`, e.g. `<skill-root>/assets/music/`.
+
+Run the doctor before Step 1, passing through the audio and voice flags:
+
+```bash
+node <skill-root>/scripts/brag_doctor.mjs --json [--no-music] [--no-sfx] [--voice]
+```
+
+- Non-empty `blockers` (Node < 22, missing FFmpeg/ffprobe, no Hyperframes):
+  stop and tell the user exactly what to install. Do not start planning.
+- `capabilities.music` / `capabilities.sfx` false without the matching flag:
+  continue, and tell the user up front that the video will be missing that layer.
+- `capabilities.beatSync.bundled` / `.custom` name the cue source to use later
+  (`preset`, `analyze-script`, `hyperframes-beats`, or `unavailable`).
+- Use `assetsRoot` from the report as `<skill-assets>` everywhere.
 
 ---
 

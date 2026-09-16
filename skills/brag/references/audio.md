@@ -33,26 +33,22 @@ Hyperframes implementation note: follow the audio-reactive guidance owned by the
 
 ## Asset paths
 
-SFX live under `sfx/{casino,impact,interface,ui}/`, and the individual keypress set under `sfx/keyboard/`. The assets root is `~/.claude/skills/brag/assets/` in the installed skill and `skills/brag/assets/` in this repo copy.
+All bundled audio lives under `<skill-assets>` = `<skill-root>/assets/` (the `assetsRoot` reported by `brag_doctor.mjs`). Do not hardcode an install location: plugin installs, `npx skills` installs, manual copies, and this repo all put the skill in different places.
 
-Music lives in the installed skill at `~/.claude/skills/brag/assets/music/`. In this repo copy, it lives at `skills/brag/assets/music/`.
+SFX live under `<skill-assets>/sfx/{casino,impact,interface,ui}/`, and the individual keypress set under `<skill-assets>/sfx/keyboard/`. Music lives under `<skill-assets>/music/`.
 
 Bundled music cue presets live beside the music:
 
 ```text
-skills/brag/assets/music/cues/<track-stem>.music-cues.md
-skills/brag/assets/music/cues/<track-stem>.music-cues.json
-~/.claude/skills/brag/assets/music/cues/<track-stem>.music-cues.md
-~/.claude/skills/brag/assets/music/cues/<track-stem>.music-cues.json
+<skill-assets>/music/cues/<track-stem>.music-cues.md
+<skill-assets>/music/cues/<track-stem>.music-cues.json
 ```
 
 SFX analysis lives beside the SFX library:
 
 ```text
-skills/brag/assets/sfx/sfx-analysis.md
-skills/brag/assets/sfx/sfx-analysis.json
-~/.claude/skills/brag/assets/sfx/sfx-analysis.md
-~/.claude/skills/brag/assets/sfx/sfx-analysis.json
+<skill-assets>/sfx/sfx-analysis.md
+<skill-assets>/sfx/sfx-analysis.json
 ```
 
 **Critical: copy audio files into the composition project before rendering.** Hyperframes validates and serves assets from the composition directory. Always copy the files you need into `brag-output/composition/assets/` first:
@@ -62,13 +58,11 @@ skills/brag/assets/sfx/sfx-analysis.json
 mkdir -p brag-output/composition/assets/sfx/interface brag-output/composition/assets/sfx/impact brag-output/composition/assets/sfx/casino brag-output/composition/assets/sfx/ui
 mkdir -p brag-output/composition/assets/music
 
-# Copy only the files you plan to use (not the entire library)
-# From the repo copy:
-cp skills/brag/assets/sfx/interface/bong_001.ogg brag-output/composition/assets/sfx/interface/
-cp skills/brag/assets/sfx/impact/impactBell_heavy_000.ogg brag-output/composition/assets/sfx/impact/
-cp skills/brag/assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3 brag-output/composition/assets/music/
-
-# From an installed Claude skill, use ~/.claude/skills/brag/assets/... instead.
+# Copy only the files you plan to use (not the entire library).
+# <skill-assets> is the assetsRoot reported by brag_doctor.mjs.
+cp "<skill-assets>/sfx/interface/bong_001.ogg" brag-output/composition/assets/sfx/interface/
+cp "<skill-assets>/sfx/impact/impactBell_heavy_000.ogg" brag-output/composition/assets/sfx/impact/
+cp "<skill-assets>/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3" brag-output/composition/assets/music/
 ```
 
 Then in the composition HTML, paths are **relative to the `composition/` directory**:
@@ -256,11 +250,11 @@ assets/music/cues/<track-stem>.music-cues.md
 assets/music/cues/<track-stem>.music-cues.json
 ```
 
-2. **Any track → extended analysis (richest for custom tracks; needs Python, any Hyperframes version).** For a custom track — or to refresh a bundled one — run `analyze_music_cues.py` on the audio file. It produces the same rich cue JSON/Markdown for any track. Run it via `uv`, which auto-provisions the deps (`librosa`, `numpy`, `scipy`, `soundfile`) from `skills/brag/scripts/pyproject.toml` — no manual `pip install` needed:
+2. **Any track → extended analysis (richest for custom tracks; needs Python, any Hyperframes version).** For a custom track — or to refresh a bundled one — run `analyze_music_cues.py` on the audio file. It produces the same rich cue JSON/Markdown for any track. Run it via `uv`, which auto-provisions the deps (`librosa`, `numpy`, `scipy`, `soundfile`) from `<skill-root>/scripts/pyproject.toml` — no manual `pip install` needed:
 
 ```bash
-uv run --project skills/brag/scripts \
-  python skills/brag/scripts/analyze_music_cues.py <track>.mp3 \
+uv run --project "<skill-root>/scripts" \
+  python "<skill-root>/scripts/analyze_music_cues.py" <track>.mp3 \
   --output-json <output-dir>/composition/assets/music/cues/<stem>.music-cues.json \
   --output-md  <output-dir>/composition/assets/music/cues/<stem>.music-cues.md
 ```

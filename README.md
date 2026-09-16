@@ -83,11 +83,21 @@ You get a `brag-output/` folder with the plan, a composition brief, share copy, 
 - FFmpeg on `PATH`
 - Hyperframes CLI — `npx hyperframes` (check it with `npx hyperframes doctor`)
 
+Check everything at once, including the bundled music and SFX:
+
+```bash
+node skills/brag/scripts/brag_doctor.mjs
+```
+
+`/brag` runs the same check before every video and tells you what it will skip.
+
 ## What's in this repo
 
 - `skills/brag/` — the skill, references, and bundled music + SFX
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
+- `tests/` — Node test suite (`npm test`)
+- `ROADMAP.md` — backlog and feature ideas
 - `.claude-plugin/` — plugin manifest + marketplace catalog
 - `.claude/skills/brag/` — symlink → `skills/brag/` (Claude Code discovery)
 - `.agents/skills/brag/` — symlink → `skills/brag/` (Codex CLI + opencode discovery)

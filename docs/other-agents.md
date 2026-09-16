@@ -29,3 +29,5 @@ Regardless of method, the environment needs:
 - **FFmpeg** on `PATH`
 - **Hyperframes CLI** — `npx hyperframes doctor` to verify
 - **This repo cloned** (or `skills/brag/` accessible) for assets (music, SFX, reference docs)
+
+Verify with `node skills/brag/scripts/brag_doctor.mjs`.

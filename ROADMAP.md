@@ -1,0 +1,53 @@
+# /brag roadmap
+
+Working backlog. Items are implemented one at a time, each with tests, and ticked off when merged to `main`.
+
+## Now — core backlog
+
+- [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/brag_doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
+- [ ] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
+- [ ] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
+- [ ] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
+- [ ] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
+
+## Next — end-to-end ideas
+
+### Formats and platforms
+- **Vertical-first reflow, never center-crop.** Each scene declares a layout for 16:9, 9:16, 1:1 and 4:5; text and UI restack instead of being cropped.
+- **4:5 feed format** for Instagram and LinkedIn feeds (1080x1350), which take up more of the screen than 1:1.
+- **Platform safe zones** drawn as a debug overlay in preview (TikTok right rail and caption area, Reels bottom sheet, Shorts subscribe bar).
+- **Size-budget encoding.** Two-pass encode to hit hard limits (Discord 10 MB, X 512 MB, Slack inline preview).
+- **Seamless loop ending.** The last frame matches the first, so autoplaying feeds loop without a visible jump.
+- **README-ready loop.** `brag.gif` / `brag-loop.webp` sized for GitHub READMEs, where MP4s do not autoplay.
+- **Platform cover frames.** Per-platform thumbnail and cover pick (TikTok cover, YouTube 1280x720 thumbnail, OG 1200x630 image).
+
+### Story and content
+- **Real UI capture (`--capture`).** Boot the dev server, record real screens and cursor flows with Playwright or `hyperframes capture`, and use them as layers.
+- **Bring your own footage (`--footage demo.mov`).** Scene-detect a screen recording, cut the best 3 moments, and weave them into the edit.
+- **Git-powered stories.** `--since v1.2` release videos, `--week` build-in-public recaps, "3 days · 142 commits" build-story cards.
+- **Live proof metrics.** Pull GitHub stars, npm downloads, or a Lighthouse score as real, sourced numbers — never invented ones for real products.
+- **Truth mode.** For non-parody projects, every claim on screen must quote the source; the plan lists the citation for each line.
+- **Hook tournament.** Three hook variants rendered as stills; pick one (or let the agent judge) before building the whole video.
+- **Device frames and cursor choreography.** iPhone, browser chrome and laptop frames; eased cursor paths with click ripples and typing.
+- **Explainer mode.** `--duration 45-60` with chapters for demos that need more than 25 seconds.
+- **Localization.** `--lang es,ja,pt` translates on-screen copy and share copy, with matching Kokoro voices when `--voice` is on.
+
+### Review and iteration
+- **Brag Studio review page.** `brag-output/index.html` shows every format side by side, the storyboard synced to playback, share copy with copy buttons, and per-scene "re-roll" notes saved to `feedback.json` for the next run.
+- **Scene re-roll.** `--reroll 3`, `--retone deadpan`, `--shorter`, reusing the existing plan and composition.
+- **Resumable runs.** `.brag-state.json` records completed steps and inputs so an interrupted run continues.
+- **Versioned renders** with a contact-sheet comparison between `v1`, `v2`, ...
+
+### Brand and polish
+- **Brand kit (`.brag/config.json`).** Tone, palette, fonts, logo, handle, CTA URL, banned words, and intro/outro cards reused across runs.
+- **End card with QR code** to the product URL, plus handle and GitHub avatar.
+- **Loudness mastering** to -14 LUFS with a limiter and a clean tail.
+- **Optional "made with /brag" watermark** (off by default) as a growth loop.
+- **Reduced-motion and audio-description variants** for accessibility.
+
+### Distribution
+- **Launch kit bundle.** Video in all formats, OG image, X thread, LinkedIn post, Product Hunt gallery images, README embed snippet, and `credits.txt` in one folder.
+- **Embed into the user's site.** Offer a patch that adds the brag video (with poster) to the project's own landing page.
+- **GitHub Action.** On release, run `/brag` headless against the diff and attach `brag.mp4` and share copy to the release.
+- **PR preview videos.** A 10-second clip of UI changes posted on the pull request from the preview deploy.
+- **Standalone `npx brag` CLI** for people who do not use a coding agent.
