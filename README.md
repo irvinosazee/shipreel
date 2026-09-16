@@ -2,16 +2,16 @@
 
 **You built it. Now brag.**
 
-[![the /brag launch site — you built it, now brag](docs/assets/hero.png)](https://latent-spaces.github.io/brag/)
+[![the /brag launch site — you built it, now brag](docs/assets/hero.png)](https://irvinosazee.github.io/brag/)
 
 `/brag` is a Claude Code skill that turns the project you created into a short, shareable launch video — music, motion, and share copy included. One command, powered by [Hyperframes](https://hyperframes.heygen.com/).
 
-The looping video on the [launch site](https://latent-spaces.github.io/brag/) was made by `/brag` on this very repo. 
+The looping video on the [launch site](https://irvinosazee.github.io/brag/) was made by `/brag` on this very repo. 
 
 ## Install
 
 ```bash
-/plugin marketplace add latent-spaces/brag
+/plugin marketplace add irvinosazee/brag
 /plugin install brag@brag
 ```
 
@@ -20,10 +20,10 @@ Then run `/brag` inside any project.
 **Any other agent** — one command via the [`skills`](https://github.com/vercel-labs/skills) CLI (Cursor, Codex, Copilot, Gemini CLI, opencode, and more):
 
 ```bash
-npx skills add https://github.com/latent-spaces/brag --skill brag
+npx skills add https://github.com/irvinosazee/brag --skill brag
 ```
 
-Add `-g` to install globally (available in every project); drop it to scope to the current one. ([browse on skills.sh](https://www.skills.sh/latent-spaces/brag/brag))
+Add `-g` to install globally (available in every project); drop it to scope to the current one. ([browse on skills.sh](https://www.skills.sh/irvinosazee/brag/brag))
 
 <details>
 <summary>No installer? Copy the skill directly.</summary>
