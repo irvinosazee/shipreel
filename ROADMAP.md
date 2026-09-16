@@ -6,9 +6,11 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 
 - [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/brag_doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
 - [x] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
-- [ ] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
+- [x] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
 - [ ] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
 - [ ] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
+
+- [ ] **Fix the gallery assets.** `verify_render.mjs` found that Fish Flight School and Horse Tinder do not have their poster baked into frame 0, Psychologists for Chatbots opens on a flat frame, and every example mixes at -24 to -28.5 LUFS. Re-master to -14 LUFS and bake posters.
 
 ## Next — end-to-end ideas
 
@@ -40,6 +42,8 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - **Localization.** `--lang es,ja,pt` translates on-screen copy and share copy, with matching Kokoro voices when `--voice` is on.
 
 ### Review and iteration
+- **Automatic readability metrics.** Measure text height and contrast in each settled review frame (OCR bounding boxes plus local contrast) so "readable at phone size" becomes a number, not a judgment.
+- **Reading-time check from the composition.** Compare each text element's visible duration against 0.3s per word before rendering, straight from the Hyperframes timeline.
 - **Brag Studio review page.** `brag-output/index.html` shows every format side by side, the storyboard synced to playback, share copy with copy buttons, and per-scene "re-roll" notes saved to `feedback.json` for the next run.
 - **Scene re-roll.** `--reroll 3`, `--retone deadpan`, `--shorter`, reusing the existing plan and composition.
 - **Resumable runs.** `.brag-state.json` records completed steps and inputs so an interrupted run continues.

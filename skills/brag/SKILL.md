@@ -144,9 +144,9 @@ Write the composition brief and use Hyperframes to create the video implementati
 
 **Read:** [references/step-4-deliver.md](references/step-4-deliver.md)
 
-Validate, preview, render to `<output-dir>/brag.mp4`, pick the best poster frame into `<output-dir>/brag.jpg`, bake that poster as the video's frame 0 so it's the idle thumbnail everywhere, and write `<output-dir>/share-copy.txt`.
+Validate, preview, render a draft, review its settled frames against the creative laws and fix what fails, render the final to `<output-dir>/brag.mp4`, master loudness, pick the best poster frame into `<output-dir>/brag.jpg`, bake it as frame 0, verify the render, and write `<output-dir>/share-copy.txt`.
 
-**Gate:** `<output-dir>/brag.mp4` exists. A best-frame poster `<output-dir>/brag.jpg` is picked (not an arbitrary frame) and baked as frame 0 of `brag.mp4`. Share copy is written.
+**Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/brag.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
 
 ---
 

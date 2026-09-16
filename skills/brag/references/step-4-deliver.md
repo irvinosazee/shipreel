@@ -23,25 +23,61 @@ npx hyperframes preview
 
 Tell the user the preview is running and give them the localhost URL. Invite them to check it before rendering.
 
-If the user approves or asks to render:
+If the user approves or asks to render, render a draft first, review it, then render the final.
 
-## Render
+## Draft render
 
 ```bash
-npx hyperframes render --output ../brag.mp4
+npx hyperframes render --quality draft --output ../brag.draft.mp4
 ```
 
-This outputs to `brag-output/brag.mp4` (one level up from the composition directory).
+## Self-review pass (before the final render)
 
-For a faster iteration render:
-```bash
-npx hyperframes render --quality draft --output ../brag.mp4
-```
+A draft that passes `check` can still fail the creative laws: text that is on screen for too short a time, a hook that lands late, a blank frame between scenes, small type that is unreadable on a phone. Look at the actual frames before spending a high-quality render.
 
-For final delivery:
+1. **Pick the settled moments.** For each scene in the storyboard, the settled time is when the scene's text has finished entering and has not started leaving — usually the entrance end plus about 0.3s. Include the hook at about 1.5s and the final frame minus 0.5s.
+2. **Pull the frames and a contact sheet:**
+
+   ```bash
+   node <skill-root>/scripts/review_frames.mjs ../brag.draft.mp4 \
+     --out ../review --times 1.5,3.2,6.8,10.4,14.1,19.5
+   ```
+
+   (Without planned times, `--every 1` samples one frame per second.)
+3. **Look at `review/sheet.jpg`** (and individual `review/frame-XX.jpg` files when detail matters). Score each criterion 1–5 in `<output-dir>/review.md`:
+
+   | Criterion | What a 5 looks like |
+   |---|---|
+   | Hook | By 1.5s the first line is on screen, legible, and specific to this project. |
+   | Readability | Every settled frame's text reads at phone size: big enough, high contrast, not over busy imagery, not clipped. |
+   | Shows the thing | Real UI, copy, or visuals from the project appear, not abstract filler. |
+   | No dead frames | No blank or mid-transition frame lands on a settled moment. |
+   | Specificity | Nothing on screen could belong to a different project. |
+   | Payoff | The final frame lands the name and punchline cleanly. |
+   | Poster candidate | At least one settled frame is postable on its own. |
+
+4. **Fix anything scored 2 or lower** in the composition, re-run `npx hyperframes check`, re-render the draft, and review again. Stop after two fix rounds and note any remaining issue for the user.
+5. Record the scores, what you changed, and the frame you chose as the poster in `review.md`.
+
+## Final render
+
 ```bash
 npx hyperframes render --quality high --output ../brag.mp4
 ```
+
+This outputs to `brag-output/brag.mp4` (one level up from the composition directory). Delete `brag.draft.mp4` once the final render exists.
+
+## Master the loudness
+
+Social platforms normalize playback to about -14 LUFS. A quieter mix sounds weak next to other posts (unmastered brags measure around -24 to -28 LUFS). Skip this when the video has no audio. From `brag-output`:
+
+```bash
+ffmpeg -y -i brag.mp4 -c:v copy \
+  -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k \
+  -movflags +faststart brag.mastered.mp4 && mv brag.mastered.mp4 brag.mp4
+```
+
+Do this before baking the poster, which copies the audio through unchanged.
 
 ## Pick the poster frame
 
@@ -69,6 +105,17 @@ ffmpeg -y -i brag.mp4 -i brag.jpg \
   -c:a copy -movflags +faststart brag.poster.mp4 \
   && mv brag.poster.mp4 brag.mp4
 ```
+
+## Verify the render
+
+```bash
+node <skill-root>/scripts/verify_render.mjs brag.mp4 --poster brag.jpg \
+  --format <landscape|vertical|square> [--no-audio] [--min 15 --max 25]
+```
+
+It checks the contract with ffprobe/ffmpeg: duration inside the planned range, exact frame size, an audio stream that is not silent, the poster actually baked into frame 0, and file size (`--max-mb`). It also warns about delivery problems: loudness far from -14 LUFS, no faststart, a pixel format phones reject, or an unusual frame rate.
+
+Fix every error before telling the user the video is ready. Fix warnings when the fix is mechanical (loudness, faststart); otherwise mention them.
 
 The poster (`brag.jpg`) matches the video's dimensions because it was pulled from the same render, so the overlay lines up exactly. Keep `brag.jpg` alongside — it's the custom-thumbnail asset for platforms that accept an upload (Instagram, TikTok, YouTube, Facebook, and the LinkedIn post editor) and the `poster="brag.jpg"` image for any `<video>` that embeds the brag (a gallery card, the user's site).
 
@@ -151,6 +198,8 @@ After this step, `brag-output/` should contain:
 brag-output/
   brag.mp4                — the rendered video
   brag.jpg                — the poster (best frame, for <video poster>)
+  review.md               — self-review scores, fixes, and poster choice
+  review/                 — review frames and contact sheet
   brag-plan.md            — the plan and storyboard
   composition-brief.md    — the Hyperframes handoff brief
   share-copy.txt          — the share caption
