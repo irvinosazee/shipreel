@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -80,6 +80,40 @@ test("the studio server serves the page and media with ranges, saves feedback, a
     assert.equal((await fetch(`${studio.url}feedback`, { method: "POST", body: "not json" })).status, 400);
     assert.equal((await fetch(`${studio.url}..%2F..%2Fetc%2Fpasswd`)).status, 403);
     assert.equal((await fetch(`${studio.url}missing.mp4`)).status, 404);
+  } finally {
+    await studio.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a file that cannot be read returns 500 and the server keeps running", { skip: process.getuid?.() === 0 && "root ignores file permissions" }, async () => {
+  const dir = outputDir();
+  const locked = path.join(dir, "locked.jpg");
+  writeFileSync(locked, "secret");
+  chmodSync(locked, 0o000);
+  const studio = await startStudio(dir, { port: 0 });
+  try {
+    assert.equal((await fetch(`${studio.url}locked.jpg`)).status, 500);
+    assert.equal((await fetch(studio.url)).status, 200, "still serving after the failed read");
+  } finally {
+    chmodSync(locked, 0o644);
+    await studio.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the server sends browser-correct types for web assets, so stylesheets and scripts apply", async () => {
+  const dir = outputDir();
+  for (const [name, body] of [["site.css", "body{}"], ["app.js", "1"], ["app.mjs", "1"], ["logo.svg", "<svg/>"], ["font.woff2", "x"], ["favicon.ico", "x"]]) writeFileSync(path.join(dir, name), body);
+  const studio = await startStudio(dir, { port: 0 });
+  try {
+    const type = async (name) => (await fetch(`${studio.url}${name}`)).headers.get("content-type");
+    assert.match(await type("site.css"), /^text\/css/);
+    assert.match(await type("app.js"), /^text\/javascript/);
+    assert.match(await type("app.mjs"), /^text\/javascript/);
+    assert.equal(await type("logo.svg"), "image/svg+xml");
+    assert.equal(await type("font.woff2"), "font/woff2");
+    assert.equal(await type("favicon.ico"), "image/x-icon");
   } finally {
     await studio.close();
     rmSync(dir, { recursive: true, force: true });

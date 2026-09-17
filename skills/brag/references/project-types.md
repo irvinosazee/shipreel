@@ -37,7 +37,7 @@ Next.js, Remix, SvelteKit, Nuxt, Vite + React/Vue/Svelte, Django, Electron.
 
 - **Read:** the user-facing routes in `inspect` (pages before API handlers), key feature components, global styles or theme tokens, seed data and fixtures for realistic content.
 - **Real material:** the main screen in a realistic state, real labels and empty-state copy, the design tokens.
-- **Flow to show:** entry → key action → result. For example: "create a project → paste a link → dashboard fills with results".
+- **Flow to show:** entry → key action → result. For example: "create a project → paste a link → dashboard fills with results". If the app runs locally, capture the real screens (`capture.mjs`, see `footage-and-capture.md`) instead of recreating them.
 - **Hook pattern:** the result screen first, then rewind to how fast it was to get there.
 - **Avoid:** login screens, settings pages, and admin panels unless they are the product.
 

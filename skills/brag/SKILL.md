@@ -53,6 +53,8 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 | `--resume` | flag — continue an interrupted run | off |
+| `--footage` | path to a screen recording — cut its best moments into the video | none |
+| `--capture` | flag — run the project and capture real screens | off |
 | `--explainer` | flag — 45–60s demo with chapters | off |
 | `--hooks` | flag — render hook variants side by side before building | off |
 | `--truth` | flag — strict claim checking (default for non-parody projects) | inferred |
@@ -123,6 +125,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+For `--footage` or `--capture`, read [references/footage-and-capture.md](references/footage-and-capture.md).
 
 For terminals, API cards, code, phone or browser frames, cursors, and game HUDs, and for `--hooks` or `--explainer`, read [references/scene-kits.md](references/scene-kits.md).
 

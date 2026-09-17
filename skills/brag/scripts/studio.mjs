@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 
 import { listVersions } from "./versions.mjs";
 
-const TYPES = { ".html": "text/html; charset=utf-8", ".mp4": "video/mp4", ".jpg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".json": "application/json", ".md": "text/markdown; charset=utf-8", ".txt": "text/plain; charset=utf-8", ".srt": "text/plain; charset=utf-8", ".vtt": "text/vtt" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".mp4": "video/mp4", ".jpg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".json": "application/json", ".md": "text/markdown; charset=utf-8", ".txt": "text/plain; charset=utf-8", ".srt": "text/plain; charset=utf-8", ".vtt": "text/vtt", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".otf": "font/otf", ".ico": "image/x-icon", ".jpeg": "image/jpeg", ".avif": "image/avif", ".webm": "video/webm", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".ogg": "audio/ogg", ".xml": "application/xml", ".webmanifest": "application/manifest+json" };
 const MAX_FEEDBACK_BYTES = 256 * 1024;
 
 const escapeHtml = (text) => String(text ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -152,7 +152,7 @@ function pageFor(dir, mode) {
   });
 }
 
-function serveFile(root, request, response) {
+export function serveFile(root, request, response) {
   let rel;
   try {
     rel = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
@@ -171,6 +171,19 @@ function serveFile(root, request, response) {
   }
   const size = statSync(file).size;
   const type = TYPES[path.extname(file).toLowerCase()] ?? "application/octet-stream";
+  // A read can fail after the stat succeeded (permissions, a cloud placeholder that times out);
+  // answer 500 instead of letting the stream error crash the server.
+  const send = (status, headers, options) => {
+    const stream = createReadStream(file, options);
+    stream.once("open", () => {
+      response.writeHead(status, headers);
+      stream.pipe(response);
+    });
+    stream.once("error", () => {
+      if (!response.headersSent) response.writeHead(500, { "Content-Type": "text/plain" }).end("Could not read file");
+      else response.destroy();
+    });
+  };
   const match = /^bytes=(\d*)-(\d*)$/.exec(request.headers.range ?? "");
   if (match) {
     const start = match[1] === "" ? Math.max(0, size - Number(match[2])) : Number(match[1]);
@@ -179,12 +192,10 @@ function serveFile(root, request, response) {
       response.writeHead(416, { "Content-Range": `bytes */${size}` }).end();
       return;
     }
-    response.writeHead(206, { "Content-Type": type, "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${size}`, "Accept-Ranges": "bytes" });
-    createReadStream(file, { start, end }).pipe(response);
+    send(206, { "Content-Type": type, "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${size}`, "Accept-Ranges": "bytes" }, { start, end });
     return;
   }
-  response.writeHead(200, { "Content-Type": type, "Content-Length": size, "Accept-Ranges": "bytes" });
-  createReadStream(file).pipe(response);
+  send(200, { "Content-Type": type, "Content-Length": size, "Accept-Ranges": "bytes" });
 }
 
 export function startStudio(dir, { port = 4318, host = "127.0.0.1" } = {}) {
