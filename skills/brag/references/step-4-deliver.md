@@ -73,11 +73,11 @@ Social platforms normalize playback to about -14 LUFS. A quieter mix sounds weak
 
 ```bash
 ffmpeg -y -i brag.mp4 -c:v copy \
-  -af loudnorm=I=-14:TP=-1.5:LRA=11 -c:a aac -b:a 192k \
+  -af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 48000 -c:a aac -b:a 192k \
   -movflags +faststart brag.mastered.mp4 && mv brag.mastered.mp4 brag.mp4
 ```
 
-Do this before baking the poster, which copies the audio through unchanged.
+`loudnorm` upsamples internally, so keep `-ar 48000` or the AAC track comes out at 96 kHz. Do this before baking the poster, which copies the audio through unchanged.
 
 ## Pick the poster frame
 

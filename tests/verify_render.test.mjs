@@ -12,7 +12,7 @@ import {
   parseVolumedetect,
   parseEbur128,
   parseSignalstats,
-  parseSsim,
+  parsePsnr,
   atomOrder,
   evaluate,
   probeVideo,
@@ -42,7 +42,9 @@ test("parsers read ffmpeg and ffprobe output", () => {
     yavg: 36.1,
     ymax: 44,
   });
-  assert.equal(parseSsim("[Parsed_ssim_1] SSIM Y:0.98 U:0.99 V:0.99 All:0.984213 (18.0)"), 0.984213);
+  assert.equal(parsePsnr("[Parsed_psnr_2] PSNR y:44.1 u:49.2 v:50.0 average:44.756619 min:44.7 max:44.7"), 44.756619);
+  assert.equal(parsePsnr("[Parsed_psnr_2] PSNR y:inf u:inf v:inf average:inf min:inf max:inf"), Infinity);
+  assert.equal(parsePsnr("nothing"), null);
 });
 
 function atom(type, size = 16) {
@@ -70,7 +72,7 @@ const goodFacts = {
   maxVolumeDb: -3,
   integratedLufs: -14.5,
   frame0: { ymin: 0, yavg: 80, ymax: 255 },
-  posterSsim: 0.97,
+  posterPsnr: 48,
 };
 
 test("evaluate passes a well-formed landscape render", () => {
@@ -95,9 +97,17 @@ test("evaluate flags duration, size, silence, and missing audio as errors", () =
 });
 
 test("evaluate: poster not baked into frame 0 is an error when a poster exists", () => {
-  const { errors, errorCodes } = evaluate({ ...goodFacts, posterSsim: 0.41 }, { poster: true });
+  // Measured on real brags: unbaked frame 0 vs poster scored 10.5–21.7 dB, baked 44.8–52.3 dB.
+  const { errors, errorCodes } = evaluate({ ...goodFacts, posterPsnr: 21.7 }, { poster: true });
   assert.match(errors.join("\n"), /frame 0/);
   assert.deepEqual(errorCodes, ["poster-not-baked"]);
+});
+
+test("evaluate warns about audio sample rates above 48 kHz", () => {
+  const { warnings, warningCodes } = evaluate({ ...goodFacts, audioSampleRate: 96000 }, {});
+  assert.deepEqual(warningCodes, ["audio-sample-rate"]);
+  assert.match(warnings[0], /96 kHz/);
+  assert.deepEqual(evaluate({ ...goodFacts, audioSampleRate: 48000 }, {}).warningCodes, []);
 });
 
 test("evaluate returns one stable code per message", () => {
@@ -113,7 +123,7 @@ test("evaluate: blank frame 0, quiet mix, and delivery issues are warnings", () 
     {
       ...goodFacts,
       frame0: { ymin: 222, yavg: 222, ymax: 222 },
-      posterSsim: null,
+      posterPsnr: null,
       integratedLufs: -27.2,
       faststart: false,
       pixFmt: "yuv444p",
@@ -152,6 +162,7 @@ test("verifyRender end to end on generated clips", { skip: !hasFfmpeg && "ffmpeg
     const expect = { minDuration: 1, maxDuration: 3, width: 320, height: 180 };
     const unbaked = verifyRender(good, { ...expect, posterPath: poster });
     assert.equal(unbaked.facts.hasAudio, true);
+    assert.equal(unbaked.facts.audioSampleRate, 44100);
     assert.equal(unbaked.facts.faststart, true);
     assert.match(unbaked.errors.join("\n"), /frame 0/);
 
@@ -163,7 +174,7 @@ test("verifyRender end to end on generated clips", { skip: !hasFfmpeg && "ffmpeg
     );
     const ok = verifyRender(baked, { ...expect, posterPath: poster });
     assert.deepEqual(ok.errors, [], ok.errors.join("\n"));
-    assert.ok(ok.facts.posterSsim > 0.9);
+    assert.ok(ok.facts.posterPsnr > 35, String(ok.facts.posterPsnr));
 
     const black = path.join(dir, "black.mp4");
     ff("-f", "lavfi", "-i", "color=black:size=320x180:rate=30:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", black);

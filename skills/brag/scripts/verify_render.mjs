@@ -34,7 +34,9 @@ export const FORMAT_SIZES = {
 const LUFS_RANGE = [-18, -10];
 const SILENT_MAX_DB = -50;
 const DURATION_TOLERANCE = 0.25;
-const POSTER_MIN_SSIM = 0.9;
+// Frame 0 vs brag.jpg: baked posters measure 44–52 dB, unbaked 10–22 dB. SSIM could not separate a flat
+// light intro frame from a light poster with little text (0.95–0.97), so PSNR is used.
+const POSTER_MIN_PSNR = 35;
 const FLAT_FRAME_SPREAD = 40;
 const COMMON_FPS = [24, 25, 30, 50, 60];
 
@@ -67,8 +69,10 @@ export function parseSignalstats(stderr) {
   return stats.ymin == null ? null : stats;
 }
 
-export function parseSsim(stderr) {
-  return numberAfter(stderr, /All:([\d.]+)/);
+export function parsePsnr(stderr) {
+  const match = String(stderr ?? "").match(/average:(inf|[\d.]+)/);
+  if (!match) return null;
+  return match[1] === "inf" ? Infinity : Number(match[1]);
 }
 
 /** Top-level MP4 atom types in file order, up to and including the first moov or mdat. */
@@ -96,7 +100,7 @@ function run(cmd, args) {
   };
 }
 
-// ffmpeg writes filter reports (volumedetect, ebur128, signalstats, ssim) to stderr.
+// ffmpeg writes filter reports (volumedetect, ebur128, signalstats, psnr) to stderr.
 function ffmpegStderr(args) {
   return run("ffmpeg", ["-hide_banner", "-nostats", ...args, "-f", "null", "-"]).stderr;
 }
@@ -132,11 +136,12 @@ export function probeVideo(file, { posterPath } = {}) {
     pixFmt: video?.pix_fmt ?? null,
     hasAudio: Boolean(audio),
     audioCodec: audio?.codec_name ?? null,
+    audioSampleRate: audio?.sample_rate ? Number(audio.sample_rate) : null,
     faststart: faststart(file),
     maxVolumeDb: null,
     integratedLufs: null,
     frame0: null,
-    posterSsim: null,
+    posterPsnr: null,
   };
 
   if (audio) {
@@ -149,10 +154,10 @@ export function probeVideo(file, { posterPath } = {}) {
     );
   }
   if (video && posterPath && existsSync(posterPath)) {
-    facts.posterSsim = parseSsim(
+    facts.posterPsnr = parsePsnr(
       ffmpegStderr([
         "-i", file, "-i", posterPath, "-an",
-        "-filter_complex", `[0:v]select=eq(n\\,0),setsar=1[f0];[1:v]scale=${video.width}:${video.height},setsar=1,format=${video.pix_fmt ?? "yuv420p"}[p];[f0][p]ssim`,
+        "-filter_complex", `[0:v]select=eq(n\\,0),setsar=1[f0];[1:v]scale=${video.width}:${video.height},setsar=1,format=${video.pix_fmt ?? "yuv420p"}[p];[f0][p]psnr`,
         "-frames:v", "1",
       ]),
     );
@@ -191,21 +196,27 @@ export function evaluate(facts, expect = {}) {
   } else if (wantsAudio && facts.maxVolumeDb != null && facts.maxVolumeDb <= SILENT_MAX_DB) {
     fail("silent-audio", `The audio track is silent (peak ${facts.maxVolumeDb} dB) — check that audio assets were copied into composition/assets/.`);
   }
-  if (expect.poster && facts.posterSsim != null && facts.posterSsim < POSTER_MIN_SSIM) {
+  if (expect.poster && facts.posterPsnr != null && facts.posterPsnr < POSTER_MIN_PSNR) {
     fail("poster-not-baked", 
-      `The poster is not baked into frame 0 (similarity ${facts.posterSsim.toFixed(2)}); thumbnails on Slack, X, and Discord will show the wrong frame.`,
+      `The poster is not baked into frame 0 (frame 0 differs from brag.jpg: ${facts.posterPsnr.toFixed(1)} dB PSNR); thumbnails on Slack, X, and Discord will show the wrong frame.`,
     );
   }
   if (expect.maxMb && facts.sizeBytes > expect.maxMb * 1024 * 1024) {
     fail("over-budget", `File is ${(facts.sizeBytes / 1024 / 1024).toFixed(1)} MB, over the ${expect.maxMb} MB budget.`);
   }
 
-  if (facts.frame0 && facts.frame0.ymax - facts.frame0.ymin < FLAT_FRAME_SPREAD && facts.posterSsim == null) {
+  if (facts.frame0 && facts.frame0.ymax - facts.frame0.ymin < FLAT_FRAME_SPREAD && facts.posterPsnr == null) {
     warn("flat-frame0", "Frame 0 is a flat, featureless frame; bake the best-beat poster into frame 0 so idle thumbnails are postable.");
   }
   if (facts.integratedLufs != null && (facts.integratedLufs < LUFS_RANGE[0] || facts.integratedLufs > LUFS_RANGE[1])) {
     warn("loudness", 
       `Integrated loudness is ${facts.integratedLufs} LUFS; aim for about -14 LUFS (${LUFS_RANGE[0]} to ${LUFS_RANGE[1]}) so it holds up next to other posts.`,
+    );
+  }
+  if (facts.audioSampleRate && facts.audioSampleRate > 48000) {
+    warn(
+      "audio-sample-rate",
+      `Audio is ${facts.audioSampleRate / 1000} kHz; resample to 48 kHz (-ar 48000) — loudnorm upsamples, and some players and uploaders reject high rates.`,
     );
   }
   if (facts.faststart === false) {

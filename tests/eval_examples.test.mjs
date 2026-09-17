@@ -55,6 +55,10 @@ test("evalExample reports structure, detection, and render issues with stable co
     const result = evalExample(root, "tiny");
     assert.equal(result.type, "landing-page");
     assert.deepEqual(result.issues, ["structure:missing-PRODUCT.md", "render:duration", "render:no-audio"]);
+
+    // A poster next to the example (not in the docs gallery) is still checked against frame 0.
+    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-ss", "1", "-i", path.join(dir, "brag.mp4"), "-frames:v", "1", path.join(dir, "brag.jpg")]);
+    assert.ok(evalExample(root, "tiny").issues.includes("render:poster-not-baked"));
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

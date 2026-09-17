@@ -2,8 +2,8 @@
 /**
  * Static eval over examples/: each demo project must have its source files,
  * be detected as a landing page, and ship a brag.mp4 that passes
- * verify_render.mjs (poster checked against docs/examples/<slug>/brag.jpg when
- * the example is in the gallery).
+ * verify_render.mjs (poster checked against examples/<slug>/brag.jpg, or
+ * docs/examples/<slug>/brag.jpg for gallery examples).
  *
  *   node scripts/eval-examples.mjs [--update-baseline]
  *
@@ -38,8 +38,8 @@ export function evalExample(root, slug) {
   if (!existsSync(video)) {
     issues.push("render:missing-brag.mp4");
   } else {
-    const poster = path.join(root, "docs", "examples", slug, "brag.jpg");
-    const report = verifyRender(video, { format: "landscape", posterPath: existsSync(poster) ? poster : undefined });
+    const poster = [path.join(dir, "brag.jpg"), path.join(root, "docs", "examples", slug, "brag.jpg")].find((p) => existsSync(p));
+    const report = verifyRender(video, { format: "landscape", posterPath: poster });
     issues.push(...report.errorCodes.map((code) => `render:${code}`), ...report.warningCodes.map((code) => `render:${code}`));
     render = { duration: report.facts.duration, lufs: report.facts.integratedLufs, errors: report.errors, warnings: report.warnings };
   }
