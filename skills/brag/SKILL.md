@@ -53,6 +53,10 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 | `--resume` | flag — continue an interrupted run | off |
+| `--truth` | flag — strict claim checking (default for non-parody projects) | inferred |
+| `--metrics` | flag — fetch real GitHub/npm numbers | off |
+| `--since` | git tag or ref — release video of what changed | none |
+| `--week` | flag — build-in-public recap of the last 7 days | off |
 | `--endcard` | flag — QR end card (default on when `.brag/config.json` has a `url`) | off |
 | `--watermark` | flag — small "made with /brag" label | off |
 | `--reduced-motion` | flag — also render a no-movement variant | off |
@@ -117,6 +121,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+Every run keeps a claims ledger; read [references/truth-and-proof.md](references/truth-and-proof.md) in Step 2, and whenever `--truth`, `--metrics`, `--since`, or `--week` is used.
 
 If the project has `.brag/config.json`, or the user asks for an end card, watermark, reduced-motion variant, or audio descriptions, read [references/brand-and-polish.md](references/brand-and-polish.md).
 

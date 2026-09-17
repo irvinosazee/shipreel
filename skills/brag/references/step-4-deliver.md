@@ -25,6 +25,14 @@ Tell the user the preview is running and give them the localhost URL. Invite the
 
 If the user approves or asks to render, render a draft first, review it, then render the final.
 
+## Claims (before the draft render)
+
+```bash
+node <skill-root>/scripts/claims.mjs verify <output-dir> --project <project-dir> [--strict]
+```
+
+Every claim in `claims.json` must be found in its cited source; with `--strict` (non-parody projects), uncited numbers and superlatives on screen fail too. See `truth-and-proof.md`.
+
 ## Text audit (before the draft render)
 
 `check` does not know how long a line must stay on screen or how big text looks on a phone. Measure both:
