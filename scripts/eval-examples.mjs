@@ -5,11 +5,13 @@
  * verify_render.mjs (poster checked against examples/<slug>/brag.jpg, or
  * docs/examples/<slug>/brag.jpg for gallery examples).
  *
- *   node scripts/eval-examples.mjs [--update-baseline]
+ *   node scripts/eval-examples.mjs [--update-baseline] [--update-golden]
  *
  * Known issues live in tests/eval-baseline.json. CI fails only on issues that
  * are not in the baseline, and reports baseline entries that have been fixed so
- * the baseline only ever shrinks. Writes a markdown summary to stdout and to
+ * the baseline only ever shrinks. Examples with tests/golden/<slug>/ are also compared frame by
+ * frame (diffs land in tests/golden-diffs/); --update-golden re-captures them after an intended
+ * change. Writes a markdown summary to stdout and to
  * $GITHUB_STEP_SUMMARY when set.
  */
 
@@ -19,6 +21,7 @@ import { fileURLToPath } from "node:url";
 
 import { detectProject } from "../skills/brag/scripts/detect_project.mjs";
 import { verifyRender } from "../skills/brag/scripts/verify_render.mjs";
+import { captureGolden, compareGolden } from "../skills/brag/scripts/golden.mjs";
 
 const REQUIRED_FILES = ["index.html", "styles.css", "PRODUCT.md"];
 
@@ -42,6 +45,11 @@ export function evalExample(root, slug) {
     const report = verifyRender(video, { format: "landscape", posterPath: poster });
     issues.push(...report.errorCodes.map((code) => `render:${code}`), ...report.warningCodes.map((code) => `render:${code}`));
     render = { duration: report.facts.duration, lufs: report.facts.integratedLufs, errors: report.errors, warnings: report.warnings };
+    const goldenDir = path.join(root, "tests", "golden", slug);
+    if (existsSync(path.join(goldenDir, "golden.json"))) {
+      const golden = compareGolden(video, { goldenDir, diffDir: path.join(root, "tests", "golden-diffs", slug) });
+      issues.push(...golden.failures.map((f) => `golden:${f.file ?? "duration"}`));
+    }
   }
 
   return { slug, type: detection.type, render, issues };
@@ -92,6 +100,15 @@ function main(argv) {
   const slugs = readdirSync(path.join(root, "examples"))
     .filter((name) => statSync(path.join(root, "examples", name)).isDirectory())
     .sort();
+
+  if (argv.includes("--update-golden")) {
+    for (const slug of slugs) {
+      const video = path.join(root, "examples", slug, "brag.mp4");
+      if (existsSync(video)) captureGolden(video, { outDir: path.join(root, "tests", "golden", slug), frames: 8 });
+    }
+    console.log(`Captured golden frames for ${slugs.length} example(s) in tests/golden/.`);
+    return;
+  }
 
   const results = slugs.map((slug) => evalExample(root, slug));
   const baseline = existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, "utf8")) : {};

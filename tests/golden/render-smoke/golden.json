@@ -1,0 +1,23 @@
+{
+  "duration": 3,
+  "width": 270,
+  "minSsim": 0.85,
+  "frames": [
+    {
+      "time": 0.375,
+      "file": "frame-01.jpg"
+    },
+    {
+      "time": 1.125,
+      "file": "frame-02.jpg"
+    },
+    {
+      "time": 1.875,
+      "file": "frame-03.jpg"
+    },
+    {
+      "time": 2.625,
+      "file": "frame-04.jpg"
+    }
+  ]
+}

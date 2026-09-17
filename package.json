@@ -10,7 +10,8 @@
     "check:docs": "node scripts/check-docs.mjs",
     "doctor": "node skills/brag/scripts/brag_doctor.mjs",
     "validate": "node scripts/validate-repo.mjs",
-    "eval": "node scripts/eval-examples.mjs"
+    "eval": "node scripts/eval-examples.mjs",
+    "render-smoke": "node scripts/render-smoke.mjs"
   },
   "devDependencies": {
     "jsqr": "1.4.0"

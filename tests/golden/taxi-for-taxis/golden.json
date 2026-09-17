@@ -1,0 +1,39 @@
+{
+  "duration": 21.1,
+  "width": 270,
+  "minSsim": 0.95,
+  "frames": [
+    {
+      "time": 1.319,
+      "file": "frame-01.jpg"
+    },
+    {
+      "time": 3.956,
+      "file": "frame-02.jpg"
+    },
+    {
+      "time": 6.594,
+      "file": "frame-03.jpg"
+    },
+    {
+      "time": 9.231,
+      "file": "frame-04.jpg"
+    },
+    {
+      "time": 11.869,
+      "file": "frame-05.jpg"
+    },
+    {
+      "time": 14.506,
+      "file": "frame-06.jpg"
+    },
+    {
+      "time": 17.144,
+      "file": "frame-07.jpg"
+    },
+    {
+      "time": 19.781,
+      "file": "frame-08.jpg"
+    }
+  ]
+}

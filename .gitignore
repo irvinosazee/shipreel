@@ -26,3 +26,5 @@ skills-lock.json
 .codex-plugin/
 CODEX_PLUGIN_FOLLOWUPS.md
 node_modules/
+tests/golden-diffs/
+render-smoke-output/

@@ -1,0 +1,34 @@
+name: Nightly render
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: Render smoke test (latest Hyperframes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dev dependencies
+        run: npm ci
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Render and verify
+        run: node scripts/render-smoke.mjs --out render-smoke-output
+      - name: Upload render
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-smoke
+          path: render-smoke-output/
+          if-no-files-found: ignore
+          retention-days: 7
