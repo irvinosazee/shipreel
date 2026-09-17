@@ -53,6 +53,7 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 | `--resume` | flag — continue an interrupted run | off |
+| `--lang` | comma-separated language codes (`es,ja,pt`) | none |
 | `--footage` | path to a screen recording — cut its best moments into the video | none |
 | `--capture` | flag — run the project and capture real screens | off |
 | `--explainer` | flag — 45–60s demo with chapters | off |
@@ -125,6 +126,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+For `--lang`, read [references/localization.md](references/localization.md).
 
 For `--footage` or `--capture`, read [references/footage-and-capture.md](references/footage-and-capture.md).
 

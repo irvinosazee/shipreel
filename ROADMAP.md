@@ -34,7 +34,7 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 - [x] **B8 · Truth and proof.** Truth mode claims ledger (every on-screen claim cites a source file and quote, verified); live proof metrics (GitHub stars, npm downloads) as sourced numbers; git-powered stories (`--since`, `--week`, build-story stats).
 - [x] **B9 · Scene kits.** Type-native building blocks (terminal, HTTP request/response card, code editor, phone frame with swipe, browser/laptop device frames, cursor choreography, game HUD); hook tournament; monorepo story mode; explainer mode (45–60s with chapters).
 - [x] **B10 · Real footage.** `--footage` scene detection and best-moment selection from a screen recording; `--capture` real UI by booting the dev server and capturing it.
-- [ ] **B11 · Localization.** `--lang` string extraction and per-language composition variants, share copy, and Kokoro voice mapping.
+- [x] **B11 · Localization.** `--lang` string extraction and per-language composition variants, share copy, and Kokoro voice mapping.
 - [ ] **B12 · Quality gates.** Golden-frame regression for examples; rendered eval in CI (nightly render of a committed fixture composition, then `verify_render.mjs`).
 - [ ] **B13 · Distribution.** Launch kit bundle; embed-into-your-site patch; GitHub Action for release videos; PR preview video workflow; standalone `npx brag` CLI. Built and tested locally, never published.
 
