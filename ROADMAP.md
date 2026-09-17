@@ -10,7 +10,8 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - [x] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
 - [x] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
 
-- [ ] **Fix the gallery assets.** `verify_render.mjs` found that Fish Flight School and Horse Tinder do not have their poster baked into frame 0, Psychologists for Chatbots opens on a flat frame, and every example mixes at -24 to -28.5 LUFS. Re-master to -14 LUFS and bake posters.
+- [x] **Fix the gallery assets.** Posters baked into frame 0 (Fish Flight School, Horse Tinder, Taxi for Taxis, Psychologists for Chatbots, and the hero), loudness mastered to about -14 LUFS at 48 kHz for all examples and the hero. `tests/eval-baseline.json` is now empty.
+- [ ] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Needs a `/brag --for vertical` re-run on this repo; the original composition is not in git.
 
 ## Next — end-to-end ideas
 
