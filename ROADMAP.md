@@ -11,7 +11,7 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - [x] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
 
 - [x] **Fix the gallery assets.** Posters baked into frame 0 (Fish Flight School, Horse Tinder, Taxi for Taxis, Psychologists for Chatbots, and the hero), loudness mastered to about -14 LUFS at 48 kHz for all examples and the hero. `tests/eval-baseline.json` is now empty.
-- [ ] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Needs a `/brag --for vertical` re-run on this repo; the original composition is not in git.
+- [x] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Remade with `/brag --for vertical`: the terminal card and recording frame now sit inside the TikTok/Reels/Shorts safe rectangle, terminal type is 42px, and the install command matches the current repo.
 
 ## Next — end-to-end ideas
 
