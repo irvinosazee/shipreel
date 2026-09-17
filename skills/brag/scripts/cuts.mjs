@@ -6,6 +6,7 @@
  *   node <skill-root>/scripts/cuts.mjs stories <brag.mp4> --scenes scenes.json --out stories/ [--max 15]
  *   node <skill-root>/scripts/cuts.mjs carousel <brag.mp4> --scenes scenes.json --out carousel/
  *   node <skill-root>/scripts/cuts.mjs plan --scenes scenes.json --seconds 18   # which scenes a shorter cut keeps, no render
+ *   node <skill-root>/scripts/cuts.mjs chapters --scenes scenes.json            # YouTube chapter list for explainers
  *
  * scenes.json is written in Step 2 next to brag-plan.md:
  *   [{ "name": "Hook", "start": 0, "end": 3.55, "role": "hook", "settled": 1.6 }, ...]
@@ -146,6 +147,41 @@ export function renderSegments(video, segments, output, { posterAt } = {}) {
   return output;
 }
 
+const YOUTUBE_MIN_CHAPTER = 10;
+const YOUTUBE_MIN_CHAPTERS = 3;
+const mmss = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+
+/**
+ * YouTube chapter list for an explainer: starts at 00:00, every chapter at least 10s, at least 3.
+ * Scenes shorter than 10s merge into the next one (the last merges back).
+ */
+export function youtubeChapters(input) {
+  const scenes = loadScenes(input);
+  const chapters = [];
+  let pending = null;
+  for (const scene of scenes) {
+    const current = pending ? { names: [...pending.names, scene.name], start: pending.start, end: scene.end } : { names: [scene.name], start: scene.start, end: scene.end };
+    if (current.end - current.start >= YOUTUBE_MIN_CHAPTER) {
+      chapters.push(current);
+      pending = null;
+    } else {
+      pending = current;
+    }
+  }
+  if (pending && chapters.length) {
+    const last = chapters.at(-1);
+    last.names.push(...pending.names);
+    last.end = pending.end;
+  } else if (pending) {
+    chapters.push(pending);
+  }
+  if (chapters.length < YOUTUBE_MIN_CHAPTERS || chapters.some((c) => c.end - c.start < YOUTUBE_MIN_CHAPTER)) {
+    throw new Error(`YouTube needs at least ${YOUTUBE_MIN_CHAPTERS} chapters of ${YOUTUBE_MIN_CHAPTER}s or more; these scenes give ${chapters.length}.`);
+  }
+  chapters[0].start = 0;
+  return chapters.map((c) => `${mmss(c.start)} ${c.names.join(" & ")}`).join("\n");
+}
+
 /** Minimal PDF: one page per JPEG, each image filling its page. */
 export function buildPdf(images) {
   const chunks = [];
@@ -215,6 +251,11 @@ function parseArgs(argv) {
 }
 
 function main(argv) {
+  if (argv[0] === "chapters") {
+    const { options } = parseArgs(["chapters", "", ...argv.slice(1)]);
+    console.log(youtubeChapters(loadScenes(options.scenes)));
+    return;
+  }
   if (argv[0] === "plan") {
     const { options } = parseArgs(["plan", "", ...argv.slice(1)]);
     const segments = planCutdown(loadScenes(options.scenes), Number(options.seconds));

@@ -53,6 +53,8 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 | `--resume` | flag — continue an interrupted run | off |
+| `--explainer` | flag — 45–60s demo with chapters | off |
+| `--hooks` | flag — render hook variants side by side before building | off |
 | `--truth` | flag — strict claim checking (default for non-parody projects) | inferred |
 | `--metrics` | flag — fetch real GitHub/npm numbers | off |
 | `--since` | git tag or ref — release video of what changed | none |
@@ -121,6 +123,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+For terminals, API cards, code, phone or browser frames, cursors, and game HUDs, and for `--hooks` or `--explainer`, read [references/scene-kits.md](references/scene-kits.md).
 
 Every run keeps a claims ledger; read [references/truth-and-proof.md](references/truth-and-proof.md) in Step 2, and whenever `--truth`, `--metrics`, `--since`, or `--week` is used.
 
@@ -204,7 +208,7 @@ Always allow a freeform creative direction to refine or override the preset.
 
 These apply to every brag video regardless of tone.
 
-**Short.** 15–25 seconds. Not one second more without a reason.
+**Short.** 15–25 seconds. Not one second more without a reason (`--explainer` is the reason: 45–60s with chapters).
 
 **Readable.** Keep the pace high through motion and cuts, never by flashing text. Every line a viewer must read holds long enough to read it (short label ~0.8s settled; a sentence ~0.3s per word). Fast-in, then hold — never fast-in, then gone.
 
