@@ -12,7 +12,9 @@
  *   text-too-small   (error)   rendered size < 28px per 1080px of the frame's short side
  *   body-text-small  (warning) 4+ words rendered < 40px per 1080px of the short side
  *
- * Mark text that is meant to tick past (timers, counters, typing) with data-read-exempt.
+ * Mark text that is meant to tick past (timers, counters) with data-read-exempt, or with
+ * data-read-exempt="time" to skip only the reading-time rule and still check its size
+ * (per-word caption states, whose line is timed as a whole).
  * Needs Chrome or Chromium: set CHROME_PATH, or install Google Chrome.
  */
 
@@ -59,7 +61,8 @@ export function analyzeSamples({ frame, step, elements }) {
   const measured = [];
 
   for (const element of elements) {
-    if (element.exempt) continue;
+    // data-read-exempt skips the element entirely; data-read-exempt="time" skips only the reading-time rule.
+    if (element.exempt === true) continue;
     const words = wordCount(element.text);
     if (words === 0) continue;
     const seen = element.readable.some(Boolean);
@@ -69,7 +72,7 @@ export function analyzeSamples({ frame, step, elements }) {
     measured.push({ id: element.id, text: element.text, words, longest: Number(longest.toFixed(2)), need, fontPx });
     if (!seen) continue;
 
-    if (longest + step / 2 < need) {
+    if (element.exempt !== "time" && longest + step / 2 < need) {
       errors.push({
         code: "reading-time",
         id: element.id,
@@ -130,7 +133,11 @@ function pageSampler(step, readableOpacity) {
     const samples = textElements.map((el) => ({
       id: describe(el),
       text: ownText(el),
-      exempt: Boolean(el.closest("[data-read-exempt]")),
+      exempt: (() => {
+        const holder = el.closest("[data-read-exempt]");
+        if (!holder) return false;
+        return holder.getAttribute("data-read-exempt") === "time" ? "time" : true;
+      })(),
       readable: [],
       fontPx: [],
     }));

@@ -11,9 +11,21 @@
  *
  * Prints any readability problems (overlaps, empty cues, cues shorter than
  * ~0.3s per word) to stderr and exits 1 when there are some.
+ *
+ * Burned-in caption styles:
+ *
+ *   node <skill-root>/scripts/captions.mjs inject <composition-dir> --cues captions.json \
+ *     --style lower-third|word-pop|karaoke --theme caption-theme.json
+ *
+ * Writes a timed caption block into the composition between brag:captions markers
+ * (re-running replaces it). Captions are plain data-start/data-duration markup styled
+ * with CSS — no timeline code — so Hyperframes owns their visibility and the text audit
+ * can measure them. caption-theme.json: { "font", "fg", "bg", "accent",
+ * "band": { "x", "y", "width", "height" } } with the band inside the safe rectangle.
  */
 
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SECONDS_PER_WORD = 0.3;
@@ -90,7 +102,129 @@ export function lintCues(cues) {
   return problems;
 }
 
+export const CAPTION_STYLES = {
+  "lower-third": { description: "The whole line in a solid bar, like a broadcast lower third. Calm, works for any tone." },
+  "word-pop": { description: "Words appear one at a time and stay for the rest of the line, big and bold. Energetic, social-native." },
+  karaoke: { description: "The whole line shows at once and each word lights up in the accent color as it is said." },
+};
+
+const CUE_TRACK = 90;
+// Captions are 52px+ bold, which WCAG treats as large text: 3:1 minimum against their plate.
+const MIN_CAPTION_CONTRAST = 3;
+
+function luminance(hex) {
+  const value = hex.replace("#", "");
+  const full = value.length === 3 ? [...value].map((c) => c + c).join("") : value.slice(0, 6);
+  const channels = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255);
+  const [r, g, b] = channels.map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function contrastRatio(a, b) {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+const round3 = (n) => Math.round(n * 1000) / 1000;
+const escapeHtml = (text) => String(text).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+/** Word timings for a cue: its own `words` when present, otherwise spread evenly across the cue. */
+export function cueWords(cue) {
+  if (Array.isArray(cue.words) && cue.words.length) return cue.words.map((w) => ({ text: w.text.trim(), start: w.start }));
+  const tokens = cue.text.trim().split(/\s+/).filter(Boolean);
+  const slot = (cue.end - cue.start) / tokens.length;
+  return tokens.map((text, i) => ({ text, start: round3(cue.start + i * slot) }));
+}
+
+export function buildCaptionBlock(cues, { style, theme }) {
+  if (!CAPTION_STYLES[style]) throw new Error(`Unknown caption style "${style}". Use one of: ${Object.keys(CAPTION_STYLES).join(", ")}.`);
+  const { band } = theme;
+  // Captions sit over every scene, so they carry their own plate; the text must contrast with that plate.
+  for (const key of style === "karaoke" ? ["fg", "accent"] : ["fg"]) {
+    const ratio = contrastRatio(theme[key], theme.bg);
+    if (ratio < MIN_CAPTION_CONTRAST) {
+      throw new Error(`Caption ${key} ${theme[key]} on plate ${theme.bg} has contrast ${ratio.toFixed(1)}:1; captions need at least ${MIN_CAPTION_CONTRAST}:1.`);
+    }
+  }
+  let track = CUE_TRACK + 1;
+  const timing = (id, start, duration) => `id="${id}" data-start="${round3(start)}" data-duration="${round3(duration)}" data-track-index="${track++}"`;
+
+  const lines = cues.map((cue, c) => {
+    const start = round3(cue.start);
+    const duration = round3(cue.end - cue.start);
+    const open = `<div id="cap-${c}" class="clip brag-cap" data-start="${start}" data-duration="${duration}" data-track-index="${CUE_TRACK}">`;
+    if (style === "lower-third") return `${open}<span class="brag-line">${escapeHtml(cue.text.trim())}</span></div>`;
+
+    const words = cueWords(cue).map((word, w) => {
+      const text = escapeHtml(word.text);
+      if (style === "word-pop") {
+        return `<span ${timing(`cap-${c}-w${w}`, word.start, cue.end - word.start).replace(" data-start", ' class="clip brag-word" data-start')}>${text}</span>`;
+      }
+      // Karaoke: the base word shows until the word is said, then the lit copy takes over in the same grid cell.
+      const baseDuration = word.start - cue.start;
+      const base = baseDuration > 0.001
+        ? `<span ${timing(`cap-${c}-w${w}-base`, cue.start, baseDuration).replace(" data-start", ' class="clip brag-base" data-start')}>${text}</span>`
+        : `<span class="brag-base brag-hold">${text}</span>`;
+      const lit = `<span ${timing(`cap-${c}-w${w}`, word.start, cue.end - word.start).replace(" data-start", ' class="clip brag-lit" data-start')}>${text}</span>`;
+      return `<span class="brag-kw">${base}${lit}</span>`;
+    });
+    return `${open}<span class="brag-line" data-read-exempt="time">${words.join(" ")}</span></div>`;
+  });
+
+  const css = [
+    `.brag-captions { position: absolute; inset: 0; z-index: 50; pointer-events: none; }`,
+    // Captions are clips; undo any composition-wide `.clip { position: absolute; inset: 0 }`.
+    `.brag-captions .clip.brag-cap { right: auto; bottom: auto; }`,
+    `.brag-captions .clip.brag-word { position: static; inset: auto; display: inline; }`,
+    `.brag-captions .clip.brag-base, .brag-captions .clip.brag-lit { position: static; inset: auto; grid-area: 1 / 1; }`,
+    `.brag-cap { position: absolute; left: ${band.x}px; top: ${band.y}px; width: ${band.width}px; height: ${band.height}px; display: flex; align-items: center; justify-content: center; text-align: center; font-family: "${theme.font}", sans-serif; }`,
+    `.brag-line { background: ${theme.bg}; color: ${theme.fg}; line-height: 1.2; padding: 14px 26px; border-radius: 16px; font-weight: ${style === "lower-third" ? 700 : 900}; font-size: ${{ "lower-third": 52, "word-pop": 72, karaoke: 58 }[style]}px; letter-spacing: -0.01em; }`,
+    `.brag-kw { display: inline-grid; }`,
+    `.brag-base { grid-area: 1 / 1; }`,
+    `.brag-hold { visibility: hidden; }`,
+    `.brag-lit { grid-area: 1 / 1; color: ${theme.accent}; }`,
+  ].join("\n      ");
+
+  return [
+    `<!-- brag:captions:start style=${style} -->`,
+    `<div class="brag-captions">`,
+    `  <style>\n      ${css}\n  </style>`,
+    ...lines.map((line) => `  ${line}`),
+    `</div>`,
+    `<!-- brag:captions:end -->`,
+  ].join("\n");
+}
+
+export function injectCaptions(html, block) {
+  const existing = /<!-- brag:captions:start[\s\S]*?<!-- brag:captions:end -->/;
+  if (existing.test(html)) return html.replace(existing, block);
+  const root = html.match(/<[a-z]+\b[^>]*\bdata-composition-id="[^"]*"[^>]*>/i);
+  if (!root) throw new Error("No element with data-composition-id found.");
+  return html.replace(root[0], `${root[0]}\n${block}`);
+}
+
+function injectCommand(argv) {
+  const [dir, ...rest] = argv;
+  const options = {};
+  for (let i = 0; i < rest.length; i += 2) options[rest[i].replace(/^--/, "")] = rest[i + 1];
+  if (!dir || !options.cues || !options.style || !options.theme) {
+    console.error("Usage: captions.mjs inject <composition-dir> --cues captions.json --style lower-third|word-pop|karaoke --theme caption-theme.json");
+    process.exitCode = 2;
+    return;
+  }
+  const cues = JSON.parse(readFileSync(options.cues, "utf8"));
+  const theme = JSON.parse(readFileSync(options.theme, "utf8"));
+  const index = path.join(dir, "index.html");
+  writeFileSync(index, injectCaptions(readFileSync(index, "utf8"), buildCaptionBlock(cues, { style: options.style, theme })));
+  const problems = lintCues(cues);
+  for (const problem of problems) console.error(`! ${problem}`);
+  console.log(JSON.stringify({ injected: index, style: options.style, cues: cues.length, problems }, null, 2));
+}
+
 function main(argv) {
+  if (argv[0] === "inject") {
+    injectCommand(argv.slice(1));
+    return;
+  }
   const options = { maxChars: 32 };
   let input = null;
   for (let i = 0; i < argv.length; i += 1) {

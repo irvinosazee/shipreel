@@ -33,6 +33,19 @@ test("analyzeSamples ignores symbol-only text such as a blinking dot or a prompt
   assert.equal(report.elements[0].words, 2, "the middle dot is not a word");
 });
 
+test('data-read-exempt="time" skips only the reading-time rule; size is still checked', () => {
+  const report = analyzeSamples({
+    frame: [1080, 1920],
+    step: 0.1,
+    elements: [
+      { id: "#word", text: "something", exempt: "time", readable: [true, true, false], fontPx: [60] },
+      { id: "#tinyword", text: "it.", exempt: "time", readable: [true], fontPx: [20] },
+    ],
+  });
+  assert.deepEqual(report.errors.map((e) => [e.code, e.id]), [["text-too-small", "#tinyword"]]);
+  assert.equal(report.checked, 2);
+});
+
 test("longestRun measures the longest continuous readable stretch", () => {
   const step = 0.1;
   assert.equal(longestRun([false, true, true, true, false, true], step).toFixed(1), "0.3");

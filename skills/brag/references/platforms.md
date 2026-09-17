@@ -59,7 +59,20 @@ Put the render plan in `composition-brief.md`: sizes, `safeZonePx` for each, cap
 
   It stamps the source with its own `data-format` and writes `composition-<format>/` beside it with the root size, viewport, `data-resolution`, and `data-format` set and the assets copied. The timeline is shared, so scene timing and beat locks are identical. After any edit to the source, re-stamp.
 - Anything that names the frame (a "9:16" label, an aspect callout) must switch per format too.
-- When captions are `burned`, the caption lines are composition elements styled in the project's fonts and colors, placed in the reserved band, and timed to the settled on-screen copy (or voiceover words). They are not a generic subtitle track.
+- When captions are `burned`, inject a caption style into the source composition (before stamping other formats):
+
+  ```bash
+  node <skill-root>/scripts/captions.mjs inject <output-dir>/composition \
+    --cues captions.json --style karaoke --theme caption-theme.json
+  ```
+
+  | Style | Looks like | Use for |
+  |---|---|---|
+  | `lower-third` | The whole line on a solid bar | Calm tones: `polished`, `deadpan`, `app-store` |
+  | `word-pop` | Words appear one at a time, big and bold | `chaotic`, `default` on TikTok/Reels |
+  | `karaoke` | The whole line, each word lighting up in the accent as it is said | Voiceover videos (`--voice`) |
+
+  `caption-theme.json` is `{ "font", "fg", "bg", "accent", "band": { "x", "y", "width", "height" } }` in the project's own font and palette, with `band` inside the reserved caption band of the safe rectangle. Every style sits on a solid `bg` plate so it reads over any scene; `fg` (and `accent` for karaoke) must reach 3:1 contrast with `bg` or the script refuses. Captions are plain timed markup — Hyperframes owns their visibility, `check` catches collisions with scene content, and `text_audit.mjs` checks their size (per-word states are exempt from reading time; `captions.mjs` lints each cue as a line). Re-running `inject` replaces the previous block. Without word timings (no voiceover), words are spread evenly across each cue.
 - Run `npx hyperframes check` in every composition directory, and `npx hyperframes snapshot --at <settled times>` in each generated one to eyeball the restacked layouts before rendering.
 
 ## Captions files (Step 4)
