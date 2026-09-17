@@ -5,6 +5,7 @@
  *   node <skill-root>/scripts/cuts.mjs cutdown <brag.mp4> --scenes scenes.json --seconds 6 --out brag-cut6.mp4
  *   node <skill-root>/scripts/cuts.mjs stories <brag.mp4> --scenes scenes.json --out stories/ [--max 15]
  *   node <skill-root>/scripts/cuts.mjs carousel <brag.mp4> --scenes scenes.json --out carousel/
+ *   node <skill-root>/scripts/cuts.mjs plan --scenes scenes.json --seconds 18   # which scenes a shorter cut keeps, no render
  *
  * scenes.json is written in Step 2 next to brag-plan.md:
  *   [{ "name": "Hook", "start": 0, "end": 3.55, "role": "hook", "settled": 1.6 }, ...]
@@ -214,6 +215,12 @@ function parseArgs(argv) {
 }
 
 function main(argv) {
+  if (argv[0] === "plan") {
+    const { options } = parseArgs(["plan", "", ...argv.slice(1)]);
+    const segments = planCutdown(loadScenes(options.scenes), Number(options.seconds));
+    console.log(JSON.stringify({ seconds: Number(options.seconds), keep: segments }, null, 2));
+    return;
+  }
   const { command, video, options } = parseArgs(argv);
   if (!["cutdown", "stories", "carousel"].includes(command) || !video || !options.scenes || !options.out) {
     console.error("Usage: cuts.mjs cutdown|stories|carousel <brag.mp4> --scenes scenes.json --out <path> [--seconds 6|15] [--max 15]");

@@ -52,6 +52,10 @@ Parse these options:
 | `--no-sfx` | flag | sfx on |
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
+| `--resume` | flag — continue an interrupted run | off |
+| `--reroll` | scene name or number | none |
+| `--retone` | tone preset | none |
+| `--shorter` | flag — about 20% shorter | off |
 
 Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes. Kokoro is
 the only supported narration provider; do not add provider-selection logic.
@@ -109,6 +113,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+Initialize run state right after choosing the output directory, and mark each step at its gate. For `--resume`, `--reroll`, `--retone`, `--shorter`, or feedback from Brag Studio, read [references/iterate.md](references/iterate.md) first.
 
 ---
 
