@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <style>
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #111; color: #fff; font-family: sans-serif; }
+      #root { position: relative; width: 100%; height: 100%; }
+      .clip { position: absolute; inset: 0; }
+      p { position: absolute; left: 100px; margin: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-width="1080" data-height="1920" data-duration="6">
+      <section class="clip" data-start="0" data-duration="3">
+        <p id="hook" style="top: 300px; font-size: 120px;">let's brag</p>
+        <p id="flash" style="top: 600px; font-size: 60px; opacity: 0;">this sentence flashes by far too fast</p>
+        <p id="tiny" style="top: 900px; font-size: 18px;">tiny footnote</p>
+      </section>
+      <section class="clip" data-start="3" data-duration="3">
+        <p id="scaled" style="top: 300px; font-size: 100px; transform: scale(0.25); transform-origin: 0 0;">shrunk by a transform</p>
+        <p id="timer" data-read-exempt style="top: 900px; font-size: 40px;">00:17 / 00:20</p>
+      </section>
+    </div>
+    <script>
+      // A deterministic stand-in for a GSAP timeline: #flash is fully visible only from 1.0s to 1.4s.
+      // Like a real composition, it relies on the Hyperframes runtime having created window.__timelines.
+      window.__timelines.main = {
+        seek(t) {
+          document.getElementById("flash").style.opacity = t >= 1.0 && t < 1.4 ? "1" : "0";
+          return this;
+        },
+      };
+    </script>
+  </body>
+</html>

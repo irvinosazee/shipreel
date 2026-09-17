@@ -25,6 +25,16 @@ Tell the user the preview is running and give them the localhost URL. Invite the
 
 If the user approves or asks to render, render a draft first, review it, then render the final.
 
+## Text audit (before the draft render)
+
+`check` does not know how long a line must stay on screen or how big text looks on a phone. Measure both:
+
+```bash
+node <skill-root>/scripts/text_audit.mjs <output-dir>/composition
+```
+
+It steps the timeline in headless Chrome and reports every text element that is readable (clip active, opacity ≥ 0.9, in frame) for less than max(0.8s, 0.3s per word) — `reading-time` — or renders smaller than 28px per 1080px of the frame's short side — `text-too-small` (errors) — and body copy of 4+ words under 40px (`body-text-small`, warning). Transforms count toward rendered size. Symbol-only text (●, $, ·) is ignored. Mark text that is designed to tick past — timers, counters, type-on intermediate states — with `data-read-exempt`, and nothing else. Fix every error before rendering; with `--for`, run it in each `composition-<format>/` too. Needs Chrome or Chromium (`CHROME_PATH` to override).
+
 ## Draft render
 
 ```bash
@@ -49,7 +59,8 @@ A draft that passes `check` can still fail the creative laws: text that is on sc
    | Criterion | What a 5 looks like |
    |---|---|
    | Hook | By 1.5s the first line is on screen, legible, and specific to this project. |
-   | Readability | Every settled frame's text reads at phone size: big enough, high contrast, not over busy imagery, not clipped. |
+   | Readability | Every settled frame's text reads at phone size: big enough, high contrast, not over busy imagery, not clipped. `text_audit.mjs` reports no errors. |
+   | Sound-off | With audio muted, every beat still makes sense: nothing depends on narration, music, or a sound cue alone. |
    | Shows the thing | Real UI, copy, or visuals from the project appear, not abstract filler. |
    | No dead frames | No blank or mid-transition frame lands on a settled moment. |
    | Specificity | Nothing on screen could belong to a different project. |

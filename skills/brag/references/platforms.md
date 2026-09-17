@@ -41,7 +41,7 @@ Copy the plan into `brag-plan.md` under `## Delivery`.
 Plan one story and one timeline; each format gets its own layout.
 
 - **Reflow, never crop or letterbox.** A landscape scene with a headline beside a product card becomes a vertical scene with the headline above the card. Write a one-line layout note per scene for each extra format ("vertical: headline top third, phone mockup fills middle").
-- **Vertical needs bigger type.** Phones are watched at arm's length: headlines at least ~90px and body copy at least ~48px on a 1080-wide frame.
+- **Vertical needs bigger type.** Phones are watched at arm's length: headlines at least ~90px and body copy at least ~48px on a 1080-wide frame. `text_audit.mjs` enforces the floor (28px any text, 40px body copy per 1080px of short side) on the rendered, transformed size.
 - **Hook inside the safe rectangle** and, for Reels, inside the center 1080x1350 the profile grid shows.
 - **Captions are part of the design** when they are burned in: reserve a caption band inside the safe rectangle (lower third, above the bottom inset) in every scene, and keep other text out of it.
 - **Sound-off check:** every scene must make sense muted. If a beat depends on narration, put its words on screen.
