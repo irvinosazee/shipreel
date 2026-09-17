@@ -259,8 +259,18 @@ export async function auditComposition(compositionDir, { step = 0.1, chromePath 
       session.close();
     }
   } finally {
+    // Chrome keeps writing to its profile until it has exited; remove the profile only after that,
+    // and never let cleanup fail an audit that already produced a report.
+    const exited = chrome.exitCode !== null || chrome.signalCode !== null
+      ? Promise.resolve()
+      : new Promise((resolve) => chrome.once("exit", resolve));
     chrome.kill("SIGKILL");
-    rmSync(profile, { recursive: true, force: true });
+    await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 5000))]);
+    try {
+      rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    } catch {
+      // A leftover temp profile is harmless; the OS cleans its temp directory.
+    }
   }
 }
 
