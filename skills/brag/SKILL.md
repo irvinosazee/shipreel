@@ -45,6 +45,9 @@ Parse these options:
 | `--for` | platforms or groups: `tiktok`, `reels`, `shorts`, `x`, `linkedin`, `youtube`, `producthunt`, `readme`, `discord`, `vertical`, `social`, `all` | none (single `--format` render) |
 | `--captions` | `auto`, `burned`, `sidecar`, `off` | `auto` (from `--for`; sidecar `.srt` otherwise) |
 | `--duration` | seconds | auto (15-25s) |
+| `--cutdown` | `6`, `15` (comma-separated for both) | none |
+| `--stories` | flag — ≤15s story segments | off |
+| `--carousel` | flag — 1080x1350 slides + LinkedIn PDF | off |
 | `--no-music` | flag | music on |
 | `--no-sfx` | flag | sfx on |
 | `--title` | string | inferred from project |

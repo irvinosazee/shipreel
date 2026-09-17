@@ -57,14 +57,18 @@ function coverFilter(mode, [tw, th]) {
   ].join(";");
 }
 
+/** Fit one still image to an exact size without stretching; returns the mode used. */
+export function fitImage(input, output, size) {
+  const mode = coverMode(imageSize(input), size);
+  run("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", input, "-filter_complex", coverFilter(mode, size), "-frames:v", "1", "-q:v", "2", output]);
+  return mode;
+}
+
 export function makeCovers(poster, { outDir }) {
   mkdirSync(outDir, { recursive: true });
-  const source = imageSize(poster);
   return Object.entries(COVER_TARGETS).map(([id, target]) => {
-    const mode = coverMode(source, target.size);
     const out = path.join(outDir, `${id}.jpg`);
-    run("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", poster, "-filter_complex", coverFilter(mode, target.size), "-frames:v", "1", "-q:v", "2", out]);
-    return { id, label: target.label, mode, path: out };
+    return { id, label: target.label, mode: fitImage(poster, out, target.size), path: out };
   });
 }
 

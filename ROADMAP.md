@@ -25,7 +25,7 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 
 ### Batches
 - [x] **B1 · Delivery finishing.** Seamless loop check (last frame vs first frame, with a fix recipe); README `brag-loop.webp` alongside the GIF; platform cover frames (YouTube 1280x720, OG 1200x630, Reels grid 1080x1350 crop check); upload checklist page `exports/index.html`.
-- [ ] **B2 · Cutdowns, stories, carousels.** `--cutdown 6|15` from scene timings keeping hook and payoff; stories splitter into ≤15s segments that end on settled frames; carousel export (Instagram 1080x1350 stills and a LinkedIn document PDF).
+- [x] **B2 · Cutdowns, stories, carousels.** `--cutdown 6|15` from scene timings keeping hook and payoff; stories splitter into ≤15s segments that end on settled frames; carousel export (Instagram 1080x1350 stills and a LinkedIn document PDF).
 - [ ] **B3 · One composition, every format.** Hyperframes format variables / resolution-aware layout so one composition restacks for 16:9, 9:16, 1:1, 4:5 instead of copied `composition-<format>/` directories (vertical-first reflow, never crop).
 - [ ] **B4 · Readability gates.** Reading-time check from scene/text timings (0.3s per word); phone-legible type check (minimum rendered text size per format); sound-off criterion in the review pass.
 - [ ] **B5 · Caption styles.** Named burned-caption styles (word-pop, karaoke highlight, lower-third) as composition snippets themed from the project palette, lint-checked.

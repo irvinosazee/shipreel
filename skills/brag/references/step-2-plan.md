@@ -102,6 +102,23 @@ Transition mood: [mood] → Scene 3
 **Audio summary:** [one sentence describing the full audio arc]
 ```
 
+## scenes.json
+
+Next to `brag-plan.md`, write `<output-dir>/scenes.json` — the storyboard's timing in machine-readable form. Cutdowns, stories, carousels, and the review pass read it.
+
+```json
+[
+  { "name": "Hook", "start": 0, "end": 3.55, "role": "hook", "settled": 1.6, "still": 3.2 },
+  { "name": "Reveal", "start": 3.55, "end": 7.11, "role": "reveal", "settled": 6.6 },
+  { "name": "Punchline", "start": 18.55, "end": 22.5, "role": "payoff", "settled": 21.5 }
+]
+```
+
+- `role`: `hook` (first scene), `reveal`, `highlight`, or `payoff` (last scene).
+- `settled`: when the scene's text is first fully readable.
+- `still` (optional): the scene's most complete frame, after every build (a highlight flip, a status change). Defaults to `settled`.
+- Scenes are in order and do not overlap. Update the times after composition if Hyperframes moved them.
+
 ## Planning the scenes
 
 The default pattern is:

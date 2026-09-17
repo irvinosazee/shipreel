@@ -119,6 +119,24 @@ Fix every error before telling the user the video is ready. Fix warnings when th
 
 The poster (`brag.jpg`) matches the video's dimensions because it was pulled from the same render, so the overlay lines up exactly. Keep `brag.jpg` alongside — it's the custom-thumbnail asset for platforms that accept an upload (Instagram, TikTok, YouTube, Facebook, and the LinkedIn post editor) and the `poster="brag.jpg"` image for any `<video>` that embeds the brag (a gallery card, the user's site).
 
+## Cutdowns, stories, and carousels (when asked)
+
+Only when the user passes `--cutdown`, `--stories`, or `--carousel` (or `--for` includes a platform that needs them). All three read `scenes.json` and the final, poster-baked `brag.mp4`.
+
+```bash
+# 6-second bumper and 15-second cut: always the hook and the payoff, then whole middle scenes (reveal first) that fit
+node <skill-root>/scripts/cuts.mjs cutdown brag.mp4 --scenes scenes.json --seconds 6 --out cuts/brag-cut6.mp4
+node <skill-root>/scripts/cuts.mjs cutdown brag.mp4 --scenes scenes.json --seconds 15 --out cuts/brag-cut15.mp4
+
+# Instagram/WhatsApp stories: whole scenes packed into segments of at most 15s; later segments get their first scene's still baked into frame 0
+node <skill-root>/scripts/cuts.mjs stories brag.mp4 --scenes scenes.json --out cuts/stories
+
+# Carousel: one 1080x1350 slide per scene at its still frame, plus carousel.pdf for a LinkedIn document post
+node <skill-root>/scripts/cuts.mjs carousel brag.mp4 --scenes scenes.json --out cuts/carousel
+```
+
+When a cutdown is too short for the whole hook and payoff, it keeps the hook's opening and the payoff's landing. Cuts are hard cuts with a 30 ms audio fade at each edge, so the music jumps at the cut; say so in the delivery message. Run `verify_render.mjs` on each output with `--min`/`--max` set to its length, and look at the carousel slides before sharing.
+
 ## Write share copy
 
 Write `brag-output/share-copy.txt`.
