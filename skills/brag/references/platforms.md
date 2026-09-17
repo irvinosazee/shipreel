@@ -50,10 +50,17 @@ Plan one story and one timeline; each format gets its own layout.
 
 Put the render plan in `composition-brief.md`: sizes, `safeZonePx` for each, caption mode, and the per-scene layout notes.
 
-- Build the primary format in `<output-dir>/composition/`.
-- For each additional format, create `<output-dir>/composition-<format>/` with the same timeline, audio, and scene timing, and a restacked layout for that frame size. Keep beat-locked moments on the same timestamps.
+- Build **one** source composition in `<output-dir>/composition/` at the primary format's size. Write every other format's layout into the same file as `[data-format="<format>"]` rules (`landscape`, `vertical`, `square`, `feed`): container boxes sized to that format's safe rectangle, type sizes, and anything that restacks. Size content from containers, not from hardcoded page dimensions. Scripts that must differ by format read `document.querySelector("[data-composition-id]").dataset.format`.
+- Generate the other formats — never copy or hand-edit them:
+
+  ```bash
+  node <skill-root>/scripts/formats.mjs stamp <output-dir>/composition --formats vertical,landscape,feed
+  ```
+
+  It stamps the source with its own `data-format` and writes `composition-<format>/` beside it with the root size, viewport, `data-resolution`, and `data-format` set and the assets copied. The timeline is shared, so scene timing and beat locks are identical. After any edit to the source, re-stamp.
+- Anything that names the frame (a "9:16" label, an aspect callout) must switch per format too.
 - When captions are `burned`, the caption lines are composition elements styled in the project's fonts and colors, placed in the reserved band, and timed to the settled on-screen copy (or voiceover words). They are not a generic subtitle track.
-- Run `npx hyperframes check` in every composition directory.
+- Run `npx hyperframes check` in every composition directory, and `npx hyperframes snapshot --at <settled times>` in each generated one to eyeball the restacked layouts before rendering.
 
 ## Captions files (Step 4)
 
