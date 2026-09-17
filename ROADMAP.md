@@ -36,7 +36,7 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 - [x] **B10 · Real footage.** `--footage` scene detection and best-moment selection from a screen recording; `--capture` real UI by booting the dev server and capturing it.
 - [x] **B11 · Localization.** `--lang` string extraction and per-language composition variants, share copy, and Kokoro voice mapping.
 - [x] **B12 · Quality gates.** Golden-frame regression for examples; rendered eval in CI (nightly render of a committed fixture composition, then `verify_render.mjs`).
-- [ ] **B13 · Distribution.** Launch kit bundle; embed-into-your-site patch; GitHub Action for release videos; PR preview video workflow; standalone `npx brag` CLI. Built and tested locally, never published.
+- [x] **B13 · Distribution.** Launch kit bundle (`launch_kit.mjs`); embed-into-your-site patch (`embed.mjs`); GitHub Action for release videos and PR preview videos (`action.yml` plus workflow templates, `release_video.mjs`, `pr_preview.mjs`); standalone CLI (`brag_cli.mjs`, packaged as `brag-video` because `brag` is taken on npm), all on a shared card template (`template_video.mjs`) and scripted delivery (`deliver.mjs`). Built and tested locally, never published. The action renders a template video rather than running an agent headless, so it needs no API key. **Still for the owner:** `npm publish dist/brag-video` after `npm run pack-cli`; make the repository public so `uses: irvinosazee/brag@main` and `npx github:irvinosazee/brag` resolve for other repos; set `BRAG_PRODUCTION_URL` in each repository that uses the PR preview workflow.
 
 ## Idea notes
 

@@ -1,0 +1,160 @@
+name: brag video
+description: Release videos and pull-request before/after previews, made with /brag and Hyperframes. No model calls, no secrets beyond the workflow token.
+author: Irvin Osazee
+branding:
+  icon: film
+  color: orange
+
+inputs:
+  mode:
+    description: "release: a card video for a git tag. pr-preview: a before/after clip of the pages a pull request changes."
+    required: true
+  tag:
+    description: "release: the tag to make a video for (default: the release event's tag)."
+    required: false
+    default: ""
+  since:
+    description: "release: compare against this ref instead of the previous tag."
+    required: false
+    default: ""
+  notes:
+    description: "release: release notes markdown to take highlights from (default: the release event's body, then commit subjects)."
+    required: false
+    default: ""
+  format:
+    description: "release: landscape, vertical, or square."
+    required: false
+    default: landscape
+  render:
+    description: "release: 'false' writes the composition only, without rendering."
+    required: false
+    default: "true"
+  upload:
+    description: "release: attach release.mp4 and release.jpg to the GitHub release."
+    required: false
+    default: "true"
+  base-url:
+    description: "pr-preview: the production site (before)."
+    required: false
+    default: ""
+  head-url:
+    description: "pr-preview: the pull request's preview deployment (after). It must load without a login."
+    required: false
+    default: ""
+  changed-files:
+    description: "pr-preview: a file listing the pull request's changed paths, one per line (routes are derived from it)."
+    required: false
+    default: ""
+  routes:
+    description: "pr-preview: comma-separated routes to compare instead of deriving them, e.g. /,/pricing."
+    required: false
+    default: ""
+  pr-number:
+    description: "pr-preview: the pull request to comment on. Empty skips the comment."
+    required: false
+    default: ""
+  out:
+    description: Output directory.
+    required: false
+    default: brag-video
+  github-token:
+    description: Token for release uploads and comments.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  video:
+    description: Path to the rendered video.
+    value: ${{ steps.release.outputs.video || steps.preview.outputs.video }}
+  comment:
+    description: "pr-preview: path to the comment markdown."
+    value: ${{ steps.preview.outputs.comment }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Install FFmpeg
+      shell: bash
+      run: command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+
+    - name: Release video
+      id: release
+      if: inputs.mode == 'release'
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        SINCE: ${{ inputs.since }}
+        NOTES: ${{ inputs.notes || github.event.release.body }}
+        FORMAT: ${{ inputs.format }}
+        RENDER: ${{ inputs.render }}
+        OUT: ${{ inputs.out }}
+      run: |
+        args=(--out "$OUT" --format "$FORMAT")
+        [ -n "$TAG" ] && args+=(--tag "$TAG")
+        [ -n "$SINCE" ] && args+=(--since "$SINCE")
+        if [ -n "$NOTES" ]; then
+          mkdir -p "$OUT" && printf '%s\n' "$NOTES" > "$OUT/notes.md"
+          args+=(--notes "$OUT/notes.md")
+        fi
+        [ "$RENDER" = "true" ] || args+=(--content-only)
+        node "$GITHUB_ACTION_PATH/skills/brag/scripts/release_video.mjs" "$GITHUB_WORKSPACE" "${args[@]}"
+        if [ "$RENDER" = "true" ]; then echo "video=$OUT/release.mp4" >> "$GITHUB_OUTPUT"; fi
+
+    - name: Attach the video to the release
+      if: inputs.mode == 'release' && inputs.render == 'true' && inputs.upload == 'true' && (inputs.tag != '' || github.event.release.tag_name != '')
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        OUT: ${{ inputs.out }}
+      run: gh release upload "$TAG" "$OUT/release.mp4" "$OUT/release.jpg" --clobber --repo "$GITHUB_REPOSITORY"
+
+    - name: Pull request preview
+      id: preview
+      if: inputs.mode == 'pr-preview'
+      shell: bash
+      env:
+        BASE: ${{ inputs.base-url }}
+        HEAD: ${{ inputs.head-url }}
+        CHANGED: ${{ inputs.changed-files }}
+        ROUTES: ${{ inputs.routes }}
+        OUT: ${{ inputs.out }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        if [ -z "$BASE" ] || [ -z "$HEAD" ]; then echo "::error::pr-preview needs base-url and head-url"; exit 1; fi
+        args=(--base "$BASE" --head "$HEAD" --out "$OUT" --video-url "$RUN_URL")
+        if [ -n "$ROUTES" ]; then args+=(--routes "$ROUTES"); elif [ -n "$CHANGED" ]; then args+=(--changed-files "$CHANGED"); fi
+        node "$GITHUB_ACTION_PATH/skills/brag/scripts/pr_preview.mjs" "${args[@]}"
+        if [ -f "$OUT/comment.md" ]; then
+          echo "video=$OUT/preview.mp4" >> "$GITHUB_OUTPUT"
+          echo "comment=$OUT/comment.md" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Upload the preview
+      if: inputs.mode == 'pr-preview' && steps.preview.outputs.video != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: brag-pr-preview
+        path: |
+          ${{ inputs.out }}/preview.mp4
+          ${{ inputs.out }}/preview.gif
+          ${{ inputs.out }}/routes.json
+
+    - name: Comment on the pull request
+      if: inputs.mode == 'pr-preview' && inputs.pr-number != '' && steps.preview.outputs.comment != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR: ${{ inputs.pr-number }}
+        BODY_FILE: ${{ steps.preview.outputs.comment }}
+      run: |
+        existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- brag:pr-preview -->")) | .id' | head -n 1)
+        if [ -n "$existing" ]; then
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F "body=@$BODY_FILE" > /dev/null
+        else
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F "body=@$BODY_FILE" > /dev/null
+        fi

@@ -2,6 +2,9 @@
   "name": "brag-repo",
   "private": true,
   "type": "module",
+  "bin": {
+    "brag-video": "skills/brag/scripts/brag_cli.mjs"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -11,7 +14,8 @@
     "doctor": "node skills/brag/scripts/brag_doctor.mjs",
     "validate": "node scripts/validate-repo.mjs",
     "eval": "node scripts/eval-examples.mjs",
-    "render-smoke": "node scripts/render-smoke.mjs"
+    "render-smoke": "node scripts/render-smoke.mjs",
+    "pack-cli": "node scripts/pack-cli.mjs --pack"
   },
   "devDependencies": {
     "jsqr": "1.4.0"

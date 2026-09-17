@@ -69,6 +69,8 @@ Parse these options:
 | `--reroll` | scene name or number | none |
 | `--retone` | tone preset | none |
 | `--shorter` | flag — about 20% shorter | off |
+| `--kit` | flag — bundle videos, covers, Product Hunt gallery, X thread, LinkedIn post, embeds, and credits into `launch-kit/` | off |
+| `--embed` | flag — a patch that adds the video to the project's own landing page or README | off |
 
 Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes. Kokoro is
 the only supported narration provider; do not add provider-selection logic.
@@ -137,6 +139,8 @@ Every run keeps a claims ledger; read [references/truth-and-proof.md](references
 
 If the project has `.brag/config.json`, or the user asks for an end card, watermark, reduced-motion variant, or audio descriptions, read [references/brand-and-polish.md](references/brand-and-polish.md).
 
+For `--kit` or `--embed`, or when the user wants release videos, PR preview videos, a GitHub workflow, or to run without an agent, read [references/distribution.md](references/distribution.md).
+
 Initialize run state right after choosing the output directory, and mark each step at its gate. For `--resume`, `--reroll`, `--retone`, `--shorter`, or feedback from Brag Studio, read [references/iterate.md](references/iterate.md) first.
 
 ---
@@ -186,6 +190,8 @@ Write the composition brief and use Hyperframes to create the video implementati
 Validate, run the text audit, preview, render a draft, review its settled frames against the creative laws and fix what fails, render the final to `<output-dir>/brag.mp4`, master loudness, pick the best poster frame into `<output-dir>/brag.jpg`, bake it as frame 0, verify the render, and write `<output-dir>/share-copy.txt`.
 
 With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, run `platforms.mjs export`, make covers with `covers.mjs`, and write the upload checklist with `upload_page.mjs`.
+
+With `--kit`, finish with `launch_kit.mjs`; with `--embed`, write the site patch with `embed.mjs` and apply it only when the user asks.
 
 **Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/brag.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
 

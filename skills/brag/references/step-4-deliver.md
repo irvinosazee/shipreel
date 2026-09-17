@@ -125,6 +125,16 @@ ffmpeg -y -i brag.mp4 -i brag.jpg \
   && mv brag.poster.mp4 brag.mp4
 ```
 
+### Or in one command
+
+`deliver.mjs finish` runs the mastering, poster extraction, poster baking, and verification above in order:
+
+```bash
+node <skill-root>/scripts/deliver.mjs finish brag.mp4 --poster-at 3.2 --poster brag.jpg --format <landscape|vertical|square>
+```
+
+Still choose `--poster-at` yourself, from the storyboard's settled beat.
+
 ## Verify the render
 
 ```bash

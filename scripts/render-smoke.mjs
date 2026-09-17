@@ -44,7 +44,7 @@ async function main(argv) {
   record("generate audio", tone.ok, tone.ok ? "tone.wav" : tone.output.slice(-400));
 
   const version = run("npx", ["-y", "hyperframes", "--version"], { cwd: composition });
-  record("hyperframes available", version.ok, version.output.trim().split("\n").at(-1));
+  record("hyperframes available", version.ok, version.output.trim().split("\n").filter((line) => !/^npm (warn|notice)/i.test(line)).at(-1) ?? "");
 
   const render = run("npx", ["-y", "hyperframes", "render", "--quality", "draft", "--output", video], { cwd: composition, timeout: 15 * 60 * 1000 });
   const rendered = render.ok && existsSync(video);

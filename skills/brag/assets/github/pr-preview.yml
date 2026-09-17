@@ -1,0 +1,46 @@
+# /brag PR preview: when a preview deployment succeeds (Vercel, Netlify, or anything that reports
+# GitHub deployment statuses), captures the pages the pull request changes on production and on
+# the preview, and comments a before/after summary with a link to the clip.
+#
+# Setup:
+#   1. Settings → Secrets and variables → Actions → Variables: set BRAG_PRODUCTION_URL to the live
+#      site, e.g. https://myapp.com.
+#   2. The preview deployment must load without a login (turn off deployment protection for
+#      previews, or the capture shows the login page).
+# The comment is updated in place on every new deployment instead of adding a new one.
+name: brag PR preview
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  deployments: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: github.event.deployment_status.state == 'success' && !contains(github.event.deployment.environment, 'roduction') && vars.BRAG_PRODUCTION_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Find the pull request and its changed files
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.deployment.sha }}
+        run: |
+          number=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SHA/pulls" --jq '.[0].number // empty')
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          if [ -n "$number" ]; then
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$number/files" --paginate --jq '.[].filename' > "$RUNNER_TEMP/changed.txt"
+          fi
+
+      - uses: irvinosazee/brag@main
+        if: steps.pr.outputs.number != ''
+        with:
+          mode: pr-preview
+          base-url: ${{ vars.BRAG_PRODUCTION_URL }}
+          head-url: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+          changed-files: ${{ runner.temp }}/changed.txt
+          pr-number: ${{ steps.pr.outputs.number }}

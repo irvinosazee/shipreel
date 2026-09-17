@@ -80,6 +80,34 @@ Narration uses Kokoro through Hyperframes when enabled.
 
 You get a `brag-output/` folder with the plan, a composition brief, a self-review, share copy, and the rendered `brag.mp4` (plus `exports/` and captions when you use `--for`).
 
+### Ship it
+
+```text
+/brag --for tiktok,reels,x --kit --embed
+```
+
+`--kit` bundles every video, the covers, Product Hunt gallery images, an X thread, a LinkedIn post, README and HTML embed snippets, and credits into `brag-output/launch-kit/` (and a zip). `--embed` writes a patch that puts the video, with its poster, under the first headline of your landing page (Next.js, Astro, SvelteKit, Vite, Vue, plain HTML, or the README). Nothing is posted anywhere.
+
+### Without an agent
+
+`brag-video` is the same toolkit as a plain CLI. It fills a clean card template from your package metadata, README, git history, and a capture of the running site; it does not write a bespoke video the way the skill does.
+
+```bash
+node skills/brag/scripts/brag_cli.mjs make ~/code/my-app --format vertical
+node skills/brag/scripts/brag_cli.mjs release ~/code/my-app --tag v1.2.0 --out brag-release
+node skills/brag/scripts/brag_cli.mjs --help
+```
+
+### In GitHub Actions
+
+Release videos attached to every GitHub release, and before/after preview clips commented on pull requests:
+
+```bash
+node skills/brag/scripts/brag_cli.mjs github install release      # or: pr-preview
+```
+
+Both use the composite action in `action.yml` (`uses: irvinosazee/brag@main`) and only the workflow token. The PR preview needs a `BRAG_PRODUCTION_URL` repository variable. See [distribution.md](skills/brag/references/distribution.md).
+
 ## How it works
 
 `/brag` owns the story — the product angle, tone, and which moments to show. It hands a focused brief to [Hyperframes](https://hyperframes.heygen.com/), which builds, times, and renders the video.
@@ -105,7 +133,8 @@ node skills/brag/scripts/brag_doctor.mjs
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
 - `tests/` — Node test suite (`npm test`) and the examples eval baseline
-- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`
+- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `brag-video` npm package into `dist/`, without publishing)
+- `action.yml` — composite GitHub Action for release videos and PR previews
 - `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
 - `ROADMAP.md` — backlog and feature ideas

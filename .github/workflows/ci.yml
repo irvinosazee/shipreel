@@ -39,6 +39,47 @@ jobs:
         if: matrix.node == 24
         run: npm run eval
 
+  action:
+    name: Action self-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Release mode, composition only
+        uses: ./
+        with:
+          mode: release
+          since: HEAD~5
+          render: "false"
+          upload: "false"
+          out: action-release
+      - name: Release content was written
+        run: |
+          test -s action-release/content.json
+          test -s action-release/composition/index.html
+          test -s action-release/composition/assets/music.wav
+          cat action-release/content.json
+      - name: Serve two versions of the docs site
+        run: |
+          git worktree add ../docs-base HEAD~5
+          nohup python3 -m http.server 8101 --bind 127.0.0.1 --directory ../docs-base/docs > /dev/null 2>&1 &
+          nohup python3 -m http.server 8102 --bind 127.0.0.1 --directory docs > /dev/null 2>&1 &
+          sleep 2
+      - name: PR preview mode
+        uses: ./
+        with:
+          mode: pr-preview
+          base-url: http://127.0.0.1:8101/
+          head-url: http://127.0.0.1:8102/
+          routes: /
+          out: action-preview
+      - name: Preview was written
+        run: |
+          test -s action-preview/preview.mp4
+          test -s action-preview/preview.gif
+          cat action-preview/comment.md
+
   python:
     name: Beat analysis lockfile
     runs-on: ubuntu-latest

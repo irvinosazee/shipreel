@@ -74,7 +74,12 @@ function cloudPlaceholders(dir) {
     }
   };
   walk(dir, 0);
-  if (!files.length) return [];
+  return placeholderFiles(files);
+}
+
+/** The files in `files` that are iCloud placeholders not yet downloaded (macOS only); reading one can hang. */
+export function placeholderFiles(files) {
+  if (process.platform !== "darwin" || !files.length) return [];
   const result = spawnSync("stat", ["-f", "%Sf %N", ...files], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   return parseStatFlags(result.stdout);
 }
