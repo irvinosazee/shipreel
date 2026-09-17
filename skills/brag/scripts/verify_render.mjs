@@ -11,6 +11,7 @@
  *   --poster brag.jpg                         check that the poster is baked into frame 0
  *   --no-audio                                the plan intentionally has no audio
  *   --max-mb N                                file size budget
+ *   --loop                                    the video should loop seamlessly (warn on a visible seam)
  *   --json                                    machine-readable report
  *
  * Errors (exit 1) break the /brag contract: wrong duration or size, missing or
@@ -34,6 +35,8 @@ export const FORMAT_SIZES = {
 const LUFS_RANGE = [-18, -10];
 const SILENT_MAX_DB = -50;
 const DURATION_TOLERANCE = 0.25;
+// Last frame vs frame 1 (frame 0 is the baked poster). Below this the jump back to the start is visible when a feed loops.
+const LOOP_MIN_PSNR = 25;
 // Frame 0 vs brag.jpg: baked posters measure 44–52 dB, unbaked 10–22 dB. SSIM could not separate a flat
 // light intro frame from a light poster with little text (0.95–0.97), so PSNR is used.
 const POSTER_MIN_PSNR = 35;
@@ -142,6 +145,7 @@ export function probeVideo(file, { posterPath } = {}) {
     integratedLufs: null,
     frame0: null,
     posterPsnr: null,
+    loopPsnr: null,
   };
 
   if (audio) {
@@ -151,6 +155,15 @@ export function probeVideo(file, { posterPath } = {}) {
   if (video) {
     facts.frame0 = parseSignalstats(
       ffmpegStderr(["-i", file, "-an", "-vf", "select=eq(n\\,0),signalstats,metadata=print", "-frames:v", "1"]),
+    );
+  }
+  if (video) {
+    facts.loopPsnr = parsePsnr(
+      ffmpegStderr([
+        "-i", file, "-sseof", "-0.5", "-i", file, "-an",
+        "-filter_complex", "[0:v]select=eq(n\\,1),setpts=0[first];[1:v]reverse,select=eq(n\\,0),setpts=0[last];[first][last]psnr",
+        "-frames:v", "1",
+      ]),
     );
   }
   if (video && posterPath && existsSync(posterPath)) {
@@ -219,6 +232,12 @@ export function evaluate(facts, expect = {}) {
       `Audio is ${facts.audioSampleRate / 1000} kHz; resample to 48 kHz (-ar 48000) — loudnorm upsamples, and some players and uploaders reject high rates.`,
     );
   }
+  if (expect.loop && facts.loopPsnr != null && facts.loopPsnr < LOOP_MIN_PSNR) {
+    warn(
+      "loop-seam",
+      `The last frame and the first frame differ (${facts.loopPsnr.toFixed(1)} dB PSNR), so autoplaying feeds show a jump when the video loops; end on the opening frame's background and layout.`,
+    );
+  }
   if (facts.faststart === false) {
     warn("no-faststart", "The moov atom is at the end of the file; re-mux with -movflags +faststart so web players start instantly.");
   }
@@ -250,6 +269,7 @@ function parseArgs(argv) {
     const next = () => argv[++i];
     if (arg === "--json") json = true;
     else if (arg === "--no-audio") expect.audio = false;
+    else if (arg === "--loop") expect.loop = true;
     else if (arg === "--format") expect.format = next();
     else if (arg === "--size") [expect.width, expect.height] = next().split("x").map(Number);
     else if (arg === "--min") expect.minDuration = Number(next());

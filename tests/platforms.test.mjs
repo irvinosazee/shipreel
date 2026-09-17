@@ -109,6 +109,9 @@ test("exportForPlatforms copies renders that fit and re-encodes ones over budget
     assert.equal(readme.action, "copied", "640px source is narrower than the 1280px export width");
     assert.ok(existsSync(readme.gif));
     assert.match(readme.gif, /brag-readme\.gif$/);
+    // Animated WebP needs an ffmpeg built with libwebp; without it the export says why it was skipped.
+    if (readme.webp) assert.ok(existsSync(readme.webp));
+    else assert.match(readme.webpSkipped, /libwebp/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

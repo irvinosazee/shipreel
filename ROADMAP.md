@@ -13,7 +13,32 @@ Working backlog. Items are implemented one at a time, each with tests, and ticke
 - [x] **Fix the gallery assets.** Posters baked into frame 0 (Fish Flight School, Horse Tinder, Taxi for Taxis, Psychologists for Chatbots, and the hero), loudness mastered to about -14 LUFS at 48 kHz for all examples and the hero. `tests/eval-baseline.json` is now empty.
 - [x] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Remade with `/brag --for vertical`: the terminal card and recording frame now sit inside the TikTok/Reels/Shorts safe rectangle, terminal type is 42px, and the install command matches the current repo.
 
-## Next — end-to-end ideas
+## Next — batches
+
+Worked in order, one batch per iteration, each with tests and a green CI run.
+
+### Already delivered by the core backlog
+- [x] **4:5 feed format** — `--format feed`, LinkedIn preset.
+- [x] **Size-budget encoding** — `platforms.mjs export` two-pass re-encodes over-budget renders.
+- [x] **Loudness mastering** — step 4 masters to -14 LUFS (true peak -1.5 dB) at 48 kHz; `verify_render.mjs` checks it.
+- [x] **Platform safe zones overlay** — `platforms.mjs zones` shades unsafe margins on review frames.
+
+### Batches
+- [x] **B1 · Delivery finishing.** Seamless loop check (last frame vs first frame, with a fix recipe); README `brag-loop.webp` alongside the GIF; platform cover frames (YouTube 1280x720, OG 1200x630, Reels grid 1080x1350 crop check); upload checklist page `exports/index.html`.
+- [ ] **B2 · Cutdowns, stories, carousels.** `--cutdown 6|15` from scene timings keeping hook and payoff; stories splitter into ≤15s segments that end on settled frames; carousel export (Instagram 1080x1350 stills and a LinkedIn document PDF).
+- [ ] **B3 · One composition, every format.** Hyperframes format variables / resolution-aware layout so one composition restacks for 16:9, 9:16, 1:1, 4:5 instead of copied `composition-<format>/` directories (vertical-first reflow, never crop).
+- [ ] **B4 · Readability gates.** Reading-time check from scene/text timings (0.3s per word); phone-legible type check (minimum rendered text size per format); sound-off criterion in the review pass.
+- [ ] **B5 · Caption styles.** Named burned-caption styles (word-pop, karaoke highlight, lower-third) as composition snippets themed from the project palette, lint-checked.
+- [ ] **B6 · Review and iteration.** Resumable runs (`.brag-state.json`); versioned renders with a comparison contact sheet; scene re-roll / retone / shorter; Brag Studio review page with formats side by side, synced storyboard, share copy, and per-scene notes saved to `feedback.json`.
+- [ ] **B7 · Brand and polish.** Brand kit (`.brag/config.json`) validated and merged into plans; end card with QR code, handle, and avatar; optional "made with /brag" watermark; reduced-motion and audio-description variants.
+- [ ] **B8 · Truth and proof.** Truth mode claims ledger (every on-screen claim cites a source file and quote, verified); live proof metrics (GitHub stars, npm downloads) as sourced numbers; git-powered stories (`--since`, `--week`, build-story stats).
+- [ ] **B9 · Scene kits.** Type-native building blocks (terminal, HTTP request/response card, code editor, phone frame with swipe, browser/laptop device frames, cursor choreography, game HUD); hook tournament; monorepo story mode; explainer mode (45–60s with chapters).
+- [ ] **B10 · Real footage.** `--footage` scene detection and best-moment selection from a screen recording; `--capture` real UI by booting the dev server and capturing it.
+- [ ] **B11 · Localization.** `--lang` string extraction and per-language composition variants, share copy, and Kokoro voice mapping.
+- [ ] **B12 · Quality gates.** Golden-frame regression for examples; rendered eval in CI (nightly render of a committed fixture composition, then `verify_render.mjs`).
+- [ ] **B13 · Distribution.** Launch kit bundle; embed-into-your-site patch; GitHub Action for release videos; PR preview video workflow; standalone `npx brag` CLI. Built and tested locally, never published.
+
+## Idea notes
 
 ### Formats and platforms
 - **Hyperframes format variables.** One composition that reads the frame size and restacks itself, instead of a copied `composition-<format>/` per format, so layout fixes land everywhere at once.

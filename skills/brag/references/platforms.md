@@ -92,7 +92,33 @@ node <skill-root>/scripts/platforms.mjs export --for tiktok,reels,x,discord \
   --render vertical=brag-vertical.mp4 --render landscape=brag.mp4 --out exports
 ```
 
-`export` copies a render when it already fits, re-encodes it with a two-pass bitrate when it is over a platform's size budget, scales it for `readme`, and writes the README GIF. Each render needs its own best-beat poster baked into frame 0 (`brag-<format>.jpg`) before export.
+`export` copies a render when it already fits, re-encodes it with a two-pass bitrate when it is over a platform's size budget, scales it for `readme`, and writes the README GIF plus an animated `brag-readme.webp` (smaller, full color) when ffmpeg has libwebp. Each render needs its own best-beat poster baked into frame 0 (`brag-<format>.jpg`) before export.
+
+## Covers
+
+```bash
+node <skill-root>/scripts/covers.mjs brag.jpg --out covers
+```
+
+Writes `youtube.jpg` (1280x720), `og.jpg` (1200x630 link preview), and `reels-grid.jpg` (the 1080x1350 center Instagram's grid shows). Mismatched shapes are fitted over a blurred fill, never stretched. For a vertical poster it also reports `gridCrop.risky` when there is detail in the rows the grid crops away — move the hook inside the center 1080x1350 if so.
+
+## Seamless loops
+
+TikTok, Reels, Shorts, and X loop videos in the feed. When the plan wants a seamless loop, end on the opening scene's background and layout, and check the seam:
+
+```bash
+node <skill-root>/scripts/verify_render.mjs brag-vertical.mp4 --format vertical --loop
+```
+
+`--loop` warns (`loop-seam`) when the last frame and frame 1 differ by less than 25 dB PSNR (frame 0 is the baked poster, so it is skipped).
+
+## Upload checklist
+
+```bash
+node <skill-root>/scripts/upload_page.mjs <output-dir>
+```
+
+Writes `exports/index.html`: one card per platform with the file, the caption from `share-copy-variants.md` (falling back to `share-copy.txt`) with a copy button, the cover to use, and the platform's notes, plus the generated covers. Keep `Cover:` lines in `share-copy-variants.md` on their own line — they are shown as the cover note and never copied into the caption.
 
 ## Output
 
@@ -103,9 +129,11 @@ brag-output/
   brag-feed.mp4
   brag.jpg, brag-vertical.jpg, ...
   brag.srt, brag.vtt       — captions
+  covers/                  — youtube.jpg, og.jpg, reels-grid.jpg
   exports/
     brag-tiktok.mp4 ...    — one file per --for platform, ready to upload
-    brag-readme.gif
+    brag-readme.gif, brag-readme.webp
+    index.html             — upload checklist
   share-copy.txt
   share-copy-variants.md   — one caption per platform, plus the cover/thumbnail note from platforms.json
 ```

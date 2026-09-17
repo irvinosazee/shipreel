@@ -126,6 +126,18 @@ function encode({ source, target, videoKbps, width }) {
   }
 }
 
+function hasEncoder(name) {
+  const result = spawnSync("ffmpeg", ["-hide_banner", "-encoders"], { encoding: "utf8" });
+  return new RegExp(`\\s${name}\\s`).test(result.stdout ?? "");
+}
+
+function makeWebp(source, target, width = 640) {
+  run("ffmpeg", [
+    "-hide_banner", "-loglevel", "error", "-y", "-i", source,
+    "-vf", `fps=15,scale=${width}:-2:flags=lanczos`, "-c:v", "libwebp", "-loop", "0", "-quality", "75", "-an", target,
+  ]);
+}
+
 function makeGif(source, target, width = 640) {
   const filters = `fps=12,scale=${width}:-2:flags=lanczos`;
   run("ffmpeg", [
@@ -176,6 +188,13 @@ export function exportForPlatforms({ renders, platformIds, outDir, overrides = {
     if (platform.gif) {
       result.gif = path.join(outDir, `brag-${id}.gif`);
       makeGif(target, result.gif);
+      // Animated WebP is smaller than GIF with full color; it needs an ffmpeg built with libwebp.
+      if (hasEncoder("libwebp")) {
+        result.webp = path.join(outDir, `brag-${id}.webp`);
+        makeWebp(target, result.webp);
+      } else {
+        result.webpSkipped = "ffmpeg has no libwebp encoder; install an ffmpeg build with libwebp for brag-readme.webp";
+      }
     }
     results.push(result);
   }

@@ -153,7 +153,7 @@ Write the composition brief and use Hyperframes to create the video implementati
 
 Validate, preview, render a draft, review its settled frames against the creative laws and fix what fails, render the final to `<output-dir>/brag.mp4`, master loudness, pick the best poster frame into `<output-dir>/brag.jpg`, bake it as frame 0, verify the render, and write `<output-dir>/share-copy.txt`.
 
-With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, and run `platforms.mjs export`.
+With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, run `platforms.mjs export`, make covers with `covers.mjs`, and write the upload checklist with `upload_page.mjs`.
 
 **Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/brag.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
 

@@ -110,6 +110,33 @@ test("evaluate warns about audio sample rates above 48 kHz", () => {
   assert.deepEqual(evaluate({ ...goodFacts, audioSampleRate: 48000 }, {}).warningCodes, []);
 });
 
+test("evaluate warns about a visible loop seam only when a loop is expected", () => {
+  assert.deepEqual(evaluate({ ...goodFacts, loopPsnr: 12 }, {}).warningCodes, []);
+  const { warnings, warningCodes } = evaluate({ ...goodFacts, loopPsnr: 12 }, { loop: true });
+  assert.deepEqual(warningCodes, ["loop-seam"]);
+  assert.match(warnings[0], /12\.0 dB/);
+  assert.deepEqual(evaluate({ ...goodFacts, loopPsnr: 34 }, { loop: true }).warningCodes, []);
+});
+
+test("probeVideo measures the loop seam between the last frame and frame 1", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "brag-loop-"));
+  const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
+  try {
+    const seamless = path.join(dir, "seamless.mp4");
+    ff("-f", "lavfi", "-i", "color=0xe0380f:size=320x180:rate=30:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", seamless);
+    const jump = path.join(dir, "jump.mp4");
+    ff(
+      "-f", "lavfi", "-i", "color=red:size=320x180:rate=30:duration=1",
+      "-f", "lavfi", "-i", "color=blue:size=320x180:rate=30:duration=1",
+      "-filter_complex", "[0:v][1:v]concat=n=2:v=1[v]", "-map", "[v]", "-c:v", "libx264", "-pix_fmt", "yuv420p", jump,
+    );
+    assert.ok(probeVideo(seamless).loopPsnr > 40, String(probeVideo(seamless).loopPsnr));
+    assert.ok(probeVideo(jump).loopPsnr < 20, String(probeVideo(jump).loopPsnr));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("evaluate returns one stable code per message", () => {
   const result = evaluate({ ...goodFacts, duration: 40, integratedLufs: -30, faststart: false }, {});
   assert.deepEqual(result.errorCodes, ["duration"]);
