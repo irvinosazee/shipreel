@@ -117,6 +117,7 @@ Next to `brag-plan.md`, write `<output-dir>/scenes.json` — the storyboard's ti
 - `role`: `hook` (first scene), `reveal`, `highlight`, or `payoff` (last scene).
 - `settled`: when the scene's text is first fully readable.
 - `still` (optional): the scene's most complete frame, after every build (a highlight flip, a status change). Defaults to `settled`.
+- `description` (required with `--describe`): what a viewer who cannot see the screen needs from this scene, in one or two short sentences.
 - Scenes are in order and do not overlap. Update the times after composition if Hyperframes moved them.
 
 ## Planning the scenes

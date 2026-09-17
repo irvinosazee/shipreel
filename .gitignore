@@ -25,3 +25,4 @@ skills-lock.json
 # Codex packaging — excluded from the Claude-only initial release
 .codex-plugin/
 CODEX_PLUGIN_FOLLOWUPS.md
+node_modules/

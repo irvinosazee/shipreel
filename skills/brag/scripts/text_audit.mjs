@@ -18,11 +18,13 @@
  * Needs Chrome or Chromium: set CHROME_PATH, or install Google Chrome.
  */
 
-import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { findChrome, withPage } from "./chrome.mjs";
+
+export { findChrome };
 
 const READABLE_OPACITY = 0.9;
 const SECONDS_PER_WORD = 0.3;
@@ -96,21 +98,6 @@ export function analyzeSamples({ frame, step, elements }) {
   return { frame, step, limits, checked: measured.length, elements: measured, errors, warnings };
 }
 
-export function findChrome() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    "/Applications/Chromium.app/Contents/MacOS/Chromium",
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-  ].filter(Boolean);
-  for (const candidate of candidates) if (existsSync(candidate)) return candidate;
-  for (const name of ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"]) {
-    const found = spawnSync("which", [name], { encoding: "utf8" });
-    if (found.status === 0 && found.stdout.trim()) return found.stdout.trim();
-  }
-  return null;
-}
-
 /** In-page sampler, serialized into Runtime.evaluate. Returns { frame, step, elements }. */
 function pageSampler(step, readableOpacity) {
   return async () => {
@@ -175,103 +162,14 @@ function pageSampler(step, readableOpacity) {
   };
 }
 
-/** Minimal Chrome DevTools Protocol session over Node's built-in WebSocket. */
-async function connect(wsUrl) {
-  const socket = new WebSocket(wsUrl);
-  await new Promise((resolve, reject) => {
-    socket.addEventListener("open", resolve, { once: true });
-    socket.addEventListener("error", reject, { once: true });
-  });
-  let nextId = 0;
-  const pending = new Map();
-  const listeners = new Map();
-  socket.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data);
-    if (message.id != null && pending.has(message.id)) {
-      const { resolve, reject } = pending.get(message.id);
-      pending.delete(message.id);
-      if (message.error) reject(new Error(message.error.message));
-      else resolve(message.result);
-    } else if (message.method && listeners.has(message.method)) {
-      for (const listener of listeners.get(message.method)) listener(message.params);
-    }
-  });
-  const send = (method, params = {}) =>
-    new Promise((resolve, reject) => {
-      nextId += 1;
-      pending.set(nextId, { resolve, reject });
-      socket.send(JSON.stringify({ id: nextId, method, params }));
-    });
-  const once = (method) => new Promise((resolve) => listeners.set(method, [...(listeners.get(method) ?? []), resolve]));
-  const evaluate = async (expression) => {
-    const { result, exceptionDetails } = await send("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
-    if (exceptionDetails) throw new Error(exceptionDetails.exception?.description ?? exceptionDetails.text);
-    return result.value;
-  };
-  return { send, once, evaluate, close: () => socket.close() };
-}
-
-export async function auditComposition(compositionDir, { step = 0.1, chromePath = findChrome(), timeoutMs = 120_000 } = {}) {
-  if (!chromePath) throw new Error("Chrome or Chromium not found; set CHROME_PATH.");
+export async function auditComposition(compositionDir, { step = 0.1, chromePath = findChrome() } = {}) {
   const indexUrl = pathToFileURL(path.join(path.resolve(compositionDir), "index.html")).href;
-  const profile = mkdtempSync(path.join(tmpdir(), "brag-chrome-"));
-  const chrome = spawn(chromePath, [
-    "--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--hide-scrollbars",
-    "--allow-file-access-from-files", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--window-size=4000,4000",
-    ...(process.getuid?.() === 0 ? ["--no-sandbox"] : []),
-    "about:blank",
-  ], { stdio: ["ignore", "ignore", "pipe"] });
-
-  try {
-    const port = await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("Chrome did not start")), timeoutMs);
-      let buffer = "";
-      chrome.stderr.on("data", (chunk) => {
-        buffer += chunk;
-        const match = buffer.match(/DevTools listening on ws:\/\/[^:]+:(\d+)\//);
-        if (match) {
-          clearTimeout(timer);
-          resolve(Number(match[1]));
-        }
-      });
-      chrome.on("exit", (code) => reject(new Error(`Chrome exited (${code})`)));
-    });
-
-    let page;
-    for (let attempt = 0; attempt < 50 && !page; attempt += 1) {
-      const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-      page = targets.find((t) => t.type === "page");
-      if (!page) await new Promise((r) => setTimeout(r, 100));
-    }
-    if (!page) throw new Error("Chrome opened no page.");
-
-    const session = await connect(page.webSocketDebuggerUrl);
-    try {
-      await session.send("Page.enable");
-      // The Hyperframes runtime creates the timeline registry before composition scripts run; do the same.
-      await session.send("Page.addScriptToEvaluateOnNewDocument", { source: "window.__timelines = window.__timelines || {};" });
-      const loaded = session.once("Page.loadEventFired");
-      await session.send("Page.navigate", { url: indexUrl });
-      await loaded;
-      const samples = await session.evaluate(`(${pageSampler.toString()})(${step}, ${READABLE_OPACITY})()`);
-      return analyzeSamples(samples);
-    } finally {
-      session.close();
-    }
-  } finally {
-    // Chrome keeps writing to its profile until it has exited; remove the profile only after that,
-    // and never let cleanup fail an audit that already produced a report.
-    const exited = chrome.exitCode !== null || chrome.signalCode !== null
-      ? Promise.resolve()
-      : new Promise((resolve) => chrome.once("exit", resolve));
-    chrome.kill("SIGKILL");
-    await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 5000))]);
-    try {
-      rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
-    } catch {
-      // A leftover temp profile is harmless; the OS cleans its temp directory.
-    }
-  }
+  // The Hyperframes runtime creates the timeline registry before composition scripts run; do the same.
+  return withPage(
+    indexUrl,
+    async (session) => analyzeSamples(await session.evaluate(`(${pageSampler.toString()})(${step}, ${READABLE_OPACITY})()`)),
+    { beforeLoad: ["window.__timelines = window.__timelines || {};"], chromePath },
+  );
 }
 
 if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {

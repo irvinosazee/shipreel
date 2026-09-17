@@ -53,6 +53,10 @@ Parse these options:
 | `--title` | string | inferred from project |
 | `--voice` | flag | narration off |
 | `--resume` | flag — continue an interrupted run | off |
+| `--endcard` | flag — QR end card (default on when `.brag/config.json` has a `url`) | off |
+| `--watermark` | flag — small "made with /brag" label | off |
+| `--reduced-motion` | flag — also render a no-movement variant | off |
+| `--describe` | flag — audio-description WebVTT track | off |
 | `--reroll` | scene name or number | none |
 | `--retone` | tone preset | none |
 | `--shorter` | flag — about 20% shorter | off |
@@ -113,6 +117,8 @@ Use a timestamp when:
 - A `brag-output/` directory already exists in the project
 
 Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+If the project has `.brag/config.json`, or the user asks for an end card, watermark, reduced-motion variant, or audio descriptions, read [references/brand-and-polish.md](references/brand-and-polish.md).
 
 Initialize run state right after choosing the output directory, and mark each step at its gate. For `--resume`, `--reroll`, `--retone`, `--shorter`, or feedback from Brag Studio, read [references/iterate.md](references/iterate.md) first.
 
