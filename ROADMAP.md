@@ -1,17 +1,17 @@
-# /brag roadmap
+# /shipreel roadmap
 
 Working backlog. Items are implemented one at a time, each with tests, and ticked off when merged to `main`.
 
 ## Now — core backlog
 
-- [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/brag_doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
+- [x] **1. Skill-root resolution + preflight doctor.** Resolve assets relative to the installed skill (plugin cache, `npx skills`, manual copy, repo) instead of a hardcoded `~/.claude/skills` path. `scripts/doctor.mjs` reports Node, FFmpeg/ffprobe, Hyperframes version, `uv`, and bundled assets, and tells the run what it can and cannot do (music, SFX, beat sync source, voice).
 - [x] **2. Project-type detection.** `scripts/detect_project.mjs` classifies the project (landing page, web app, CLI, library, API, mobile, game, data/ML) and step 1 picks a matching inspection and storytelling strategy.
 - [x] **3. Render verification + self-critique pass.** `scripts/verify_render.mjs` probes the final MP4 (duration, audio stream, resolution, fps, size, black poster) against the plan. Step 4 snapshots settled frames and scores them against the creative laws before the final render.
 - [x] **4. Platform presets + multi-format export + captions.** `--for tiktok|reels|shorts|x|linkedin|youtube|producthunt|readme|discord` sets aspect, safe zones, duration and size budgets. One plan reflows to several formats. Captions ship as `.srt` and optional burned-in word-by-word style.
 - [x] **5. CI + test harness over examples.** GitHub Actions for unit tests, docs checks, manifest/symlink validation, and a static eval over `examples/`.
 
 - [x] **Fix the gallery assets.** Posters baked into frame 0 (Fish Flight School, Horse Tinder, Taxi for Taxis, Psychologists for Chatbots, and the hero), loudness mastered to about -14 LUFS at 48 kHz for all examples and the hero. `tests/eval-baseline.json` is now empty.
-- [x] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Remade with `/brag --for vertical`: the terminal card and recording frame now sit inside the TikTok/Reels/Shorts safe rectangle, terminal type is 42px, and the install command matches the current repo.
+- [x] **Re-render the hero for vertical platforms.** The install terminal card extends into the right rail that TikTok, Reels, and Shorts cover. Remade with `/shipreel --for vertical`: the terminal card and recording frame now sit inside the TikTok/Reels/Shorts safe rectangle, terminal type is 42px, and the install command matches the current repo.
 
 ## Next — batches
 
@@ -24,19 +24,30 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 - [x] **Platform safe zones overlay** — `platforms.mjs zones` shades unsafe margins on review frames.
 
 ### Batches
-- [x] **B1 · Delivery finishing.** Seamless loop check (last frame vs first frame, with a fix recipe); README `brag-loop.webp` alongside the GIF; platform cover frames (YouTube 1280x720, OG 1200x630, Reels grid 1080x1350 crop check); upload checklist page `exports/index.html`.
+- [x] **B1 · Delivery finishing.** Seamless loop check (last frame vs first frame, with a fix recipe); README `shipreel-loop.webp` alongside the GIF; platform cover frames (YouTube 1280x720, OG 1200x630, Reels grid 1080x1350 crop check); upload checklist page `exports/index.html`.
 - [x] **B2 · Cutdowns, stories, carousels.** `--cutdown 6|15` from scene timings keeping hook and payoff; stories splitter into ≤15s segments that end on settled frames; carousel export (Instagram 1080x1350 stills and a LinkedIn document PDF).
 - [x] **B3 · One composition, every format.** Hyperframes format variables / resolution-aware layout so one composition restacks for 16:9, 9:16, 1:1, 4:5 instead of copied `composition-<format>/` directories (vertical-first reflow, never crop).
 - [x] **B4 · Readability gates.** Reading-time check from scene/text timings (0.3s per word); phone-legible type check (minimum rendered text size per format); sound-off criterion in the review pass.
 - [x] **B5 · Caption styles.** Named burned-caption styles (word-pop, karaoke highlight, lower-third) as composition snippets themed from the project palette, lint-checked.
-- [x] **B6 · Review and iteration.** Resumable runs (`.brag-state.json`); versioned renders with a comparison contact sheet; scene re-roll / retone / shorter; Brag Studio review page with formats side by side, synced storyboard, share copy, and per-scene notes saved to `feedback.json`.
-- [x] **B7 · Brand and polish.** Brand kit (`.brag/config.json`) validated and merged into plans; end card with QR code, handle, and avatar; optional "made with /brag" watermark; reduced-motion and audio-description variants.
+- [x] **B6 · Review and iteration.** Resumable runs (`.shipreel-state.json`); versioned renders with a comparison contact sheet; scene re-roll / retone / shorter; Shipreel Studio review page with formats side by side, synced storyboard, share copy, and per-scene notes saved to `feedback.json`.
+- [x] **B7 · Brand and polish.** Brand kit (`.shipreel/config.json`) validated and merged into plans; end card with QR code, handle, and avatar; optional "made with /shipreel" watermark; reduced-motion and audio-description variants.
 - [x] **B8 · Truth and proof.** Truth mode claims ledger (every on-screen claim cites a source file and quote, verified); live proof metrics (GitHub stars, npm downloads) as sourced numbers; git-powered stories (`--since`, `--week`, build-story stats).
 - [x] **B9 · Scene kits.** Type-native building blocks (terminal, HTTP request/response card, code editor, phone frame with swipe, browser/laptop device frames, cursor choreography, game HUD); hook tournament; monorepo story mode; explainer mode (45–60s with chapters).
 - [x] **B10 · Real footage.** `--footage` scene detection and best-moment selection from a screen recording; `--capture` real UI by booting the dev server and capturing it.
 - [x] **B11 · Localization.** `--lang` string extraction and per-language composition variants, share copy, and Kokoro voice mapping.
 - [x] **B12 · Quality gates.** Golden-frame regression for examples; rendered eval in CI (nightly render of a committed fixture composition, then `verify_render.mjs`).
-- [x] **B13 · Distribution.** Launch kit bundle (`launch_kit.mjs`); embed-into-your-site patch (`embed.mjs`); GitHub Action for release videos and PR preview videos (`action.yml` plus workflow templates, `release_video.mjs`, `pr_preview.mjs`); standalone CLI (`brag_cli.mjs`, packaged as `brag-video` because `brag` is taken on npm), all on a shared card template (`template_video.mjs`) and scripted delivery (`deliver.mjs`). Built and tested locally, never published. The action renders a template video rather than running an agent headless, so it needs no API key. **Still for the owner:** `npm publish dist/brag-video` after `npm run pack-cli`; make the repository public so `uses: irvinosazee/brag@main` and `npx github:irvinosazee/brag` resolve for other repos; set `BRAG_PRODUCTION_URL` in each repository that uses the PR preview workflow.
+- [x] **B13 · Distribution.** Launch kit bundle (`launch_kit.mjs`); embed-into-your-site patch (`embed.mjs`); GitHub Action for release videos and PR preview videos (`action.yml` plus workflow templates, `release_video.mjs`, `pr_preview.mjs`); standalone CLI (`cli.mjs`, published as `shipreel`), all on a shared card template (`template_video.mjs`) and scripted delivery (`deliver.mjs`). Built and tested locally, never published. The action renders a template video rather than running an agent headless, so it needs no API key. **Still for the owner:** `npm publish dist/shipreel` after `npm run pack-cli`; make the repository public so `uses: irvinosazee/shipreel@main` and `npx github:irvinosazee/shipreel` resolve for other repos; set `SHIPREEL_PRODUCTION_URL` in each repository that uses the PR preview workflow.
+
+## Rename and launch — batches
+
+Worked in order, one batch per iteration, each with tests and a green CI run.
+
+- [x] **R1 · Rename to shipreel + credit the original.** `/brag` → `/shipreel` across the command, skill directory and symlinks, plugin and marketplace manifests, npm package, output directory and artifact names, script filenames, composition markers, docs and tests. Prominent credit to [/brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi in the README (with a what-changed table), SKILL.md, and the site colophon; her copyright stays in the LICENSE.
+- [ ] **R2 · Wider platform coverage.** Beyond the current nine: Instagram feed and Stories, Facebook feed and Reels, Threads, Bluesky, Mastodon, Reddit, Snapchat Spotlight, Pinterest, WhatsApp status, Telegram, Slack, Vimeo, dev.to, App Store and Google Play previews. New frame formats (2:3) and groups, each spec sourced from current platform documentation.
+- [ ] **R3 · New hero video.** Re-render the site hero and poster with the new name and install command; update the site copy around it.
+- [ ] **R4 · PUBLISHING.md.** Making the repository public, the Claude Code plugin marketplace listing, GitHub Pages, the optional npm publish, and the launch-kit-driven portfolio and social copy.
+- [ ] **R5 · Portfolio entry.** Draft the project record on irvinosazee.me through its MCP endpoint (draft only; the owner publishes by hand).
+- [ ] **R6 · Example gallery re-renders.** The four demo videos, re-rendered with the new name.
 
 ## Idea notes
 
@@ -47,7 +58,7 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 - **Platform safe zones** drawn as a debug overlay in preview (TikTok right rail and caption area, Reels bottom sheet, Shorts subscribe bar).
 - **Size-budget encoding.** Two-pass encode to hit hard limits (Discord 10 MB, X 512 MB, Slack inline preview).
 - **Seamless loop ending.** The last frame matches the first, so autoplaying feeds loop without a visible jump.
-- **README-ready loop.** `brag.gif` / `brag-loop.webp` sized for GitHub READMEs, where MP4s do not autoplay.
+- **README-ready loop.** `shipreel.gif` / `shipreel-loop.webp` sized for GitHub READMEs, where MP4s do not autoplay.
 - **Cutdowns.** `--cutdown 6` produces a 6-second bumper and a 15-second TikTok cut from the same plan, keeping the hook and payoff.
 - **Stories splitter.** Split into 15-second Instagram/WhatsApp story segments, each ending on a readable frame.
 - **Carousel export.** Storyboard frames as a LinkedIn document carousel (PDF) and an Instagram carousel (1080x1350 stills).
@@ -73,25 +84,25 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 ### Review and iteration
 - **Automatic readability metrics.** Measure text height and contrast in each settled review frame (OCR bounding boxes plus local contrast) so "readable at phone size" becomes a number, not a judgment.
 - **Reading-time check from the composition.** Compare each text element's visible duration against 0.3s per word before rendering, straight from the Hyperframes timeline.
-- **Brag Studio review page.** `brag-output/index.html` shows every format side by side, the storyboard synced to playback, share copy with copy buttons, and per-scene "re-roll" notes saved to `feedback.json` for the next run.
+- **Shipreel Studio review page.** `shipreel-output/index.html` shows every format side by side, the storyboard synced to playback, share copy with copy buttons, and per-scene "re-roll" notes saved to `feedback.json` for the next run.
 - **Scene re-roll.** `--reroll 3`, `--retone deadpan`, `--shorter`, reusing the existing plan and composition.
-- **Resumable runs.** `.brag-state.json` records completed steps and inputs so an interrupted run continues.
+- **Resumable runs.** `.shipreel-state.json` records completed steps and inputs so an interrupted run continues.
 - **Versioned renders** with a contact-sheet comparison between `v1`, `v2`, ...
 
 ### Brand and polish
-- **Brand kit (`.brag/config.json`).** Tone, palette, fonts, logo, handle, CTA URL, banned words, and intro/outro cards reused across runs.
+- **Brand kit (`.shipreel/config.json`).** Tone, palette, fonts, logo, handle, CTA URL, banned words, and intro/outro cards reused across runs.
 - **End card with QR code** to the product URL, plus handle and GitHub avatar.
 - **Loudness mastering** to -14 LUFS with a limiter and a clean tail.
-- **Optional "made with /brag" watermark** (off by default) as a growth loop.
+- **Optional "made with /shipreel" watermark** (off by default) as a growth loop.
 - **Reduced-motion and audio-description variants** for accessibility.
 
 ### Quality gates
-- **Rendered eval in CI.** A nightly job that runs a real `/brag` over one example headless and checks the output with `verify_render.mjs`, so Hyperframes upgrades that break the pipeline are caught within a day.
+- **Rendered eval in CI.** A nightly job that runs a real `/shipreel` over one example headless and checks the output with `verify_render.mjs`, so Hyperframes upgrades that break the pipeline are caught within a day.
 - **Golden-frame regression.** Store review contact sheets for each example and compare new renders with SSIM to flag unintended visual changes.
 
 ### Distribution
 - **Launch kit bundle.** Video in all formats, OG image, X thread, LinkedIn post, Product Hunt gallery images, README embed snippet, and `credits.txt` in one folder.
-- **Embed into the user's site.** Offer a patch that adds the brag video (with poster) to the project's own landing page.
-- **GitHub Action.** On release, run `/brag` headless against the diff and attach `brag.mp4` and share copy to the release.
+- **Embed into the user's site.** Offer a patch that adds the launch video (with poster) to the project's own landing page.
+- **GitHub Action.** On release, run `/shipreel` headless against the diff and attach `shipreel.mp4` and share copy to the release.
 - **PR preview videos.** A 10-second clip of UI changes posted on the pull request from the preview deploy.
-- **Standalone `npx brag` CLI** for people who do not use a coding agent.
+- **Standalone `npx shipreel` CLI** for people who do not use a coding agent.

@@ -87,4 +87,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - name: Lockfile matches pyproject
-        run: uv lock --check --project skills/brag/scripts
+        run: uv lock --check --project skills/shipreel/scripts

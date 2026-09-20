@@ -8,14 +8,14 @@ import { fileURLToPath } from "node:url";
 
 import http from "node:http";
 
-import { detectDevCommand, parseServerUrl, startProject, capturePages, scrollVideo, parseStatFlags } from "../skills/brag/scripts/capture.mjs";
-import { findChrome } from "../skills/brag/scripts/chrome.mjs";
+import { detectDevCommand, parseServerUrl, startProject, capturePages, scrollVideo, parseStatFlags } from "../skills/shipreel/scripts/capture.mjs";
+import { findChrome } from "../skills/shipreel/scripts/chrome.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ESC = String.fromCharCode(27);
 
 function project(files) {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-capture-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-capture-"));
   for (const [name, content] of Object.entries(files)) writeFileSync(path.join(dir, name), typeof content === "string" ? content : JSON.stringify(content));
   return dir;
 }
@@ -54,7 +54,7 @@ test("capturePages gives up on a page that never finishes loading", { skip: !fin
     response.write("<h1>still loading");
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const out = mkdtempSync(path.join(tmpdir(), "brag-hang-"));
+  const out = mkdtempSync(path.join(tmpdir(), "shipreel-hang-"));
   const started = Date.now();
   try {
     await assert.rejects(
@@ -71,7 +71,7 @@ test("capturePages gives up on a page that never finishes loading", { skip: !fin
 
 test("scroll frames land exactly where requested even when the site uses smooth scrolling", { skip: !findChrome() && "Chrome not found" }, async () => {
   const dir = project({ "index.html": '<!doctype html><html style="scroll-behavior:smooth"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0"><div style="height:5000px;background:linear-gradient(#000,#fff)"></div></body></html>' });
-  const out = mkdtempSync(path.join(tmpdir(), "brag-smooth-"));
+  const out = mkdtempSync(path.join(tmpdir(), "shipreel-smooth-"));
   const server = await startProject(dir);
   try {
     const [shot] = await capturePages(server.url, { routes: ["/"], viewport: [800, 1000], outDir: out, scrollFrames: 5 });
@@ -88,7 +88,7 @@ test("scroll frames land exactly where requested even when the site uses smooth 
 test("a page without a viewport meta tag is captured whole, not cropped to a clip", { skip: !findChrome() && "Chrome not found" }, async () => {
   // Mobile emulation lays such a page out 980px wide and scales it down, like a phone does.
   const dir = project({ "index.html": '<!doctype html><body style="margin:0"><div style="height:3000px;background:linear-gradient(90deg,#f00 0,#f00 50%,#00f 50%,#00f 100%)"></div></body>' });
-  const out = mkdtempSync(path.join(tmpdir(), "brag-novp-"));
+  const out = mkdtempSync(path.join(tmpdir(), "shipreel-novp-"));
   const server = await startProject(dir);
   try {
     const [shot] = await capturePages(server.url, { routes: ["/"], viewport: [400, 800], outDir: out });
@@ -125,7 +125,7 @@ test("startProject runs an npm dev script and waits until its URL answers", asyn
 });
 
 test("capturePages screenshots a real site at the video's viewport and records a scroll", { skip: !findChrome() && "Chrome not found" }, async () => {
-  const out = mkdtempSync(path.join(tmpdir(), "brag-shots-"));
+  const out = mkdtempSync(path.join(tmpdir(), "shipreel-shots-"));
   const server = await startProject(path.join(repoRoot, "examples", "horse-tinder"));
   try {
     const shots = await capturePages(server.url, { routes: ["/"], viewport: [1080, 1920], outDir: out, scrollFrames: 12 });

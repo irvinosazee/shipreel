@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { goldenTimes, captureGolden, compareGolden } from "../skills/brag/scripts/golden.mjs";
+import { goldenTimes, captureGolden, compareGolden } from "../skills/shipreel/scripts/golden.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -22,10 +22,10 @@ test("goldenTimes samples the middle of evenly split spans, avoiding the baked p
 });
 
 test("compareGolden passes an identical render and flags a visual change with a diff image", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-golden-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-golden-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
-    const original = path.join(dir, "brag.mp4");
+    const original = path.join(dir, "shipreel.mp4");
     ff("-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=4", "-c:v", "libx264", "-pix_fmt", "yuv420p", original);
     const golden = path.join(dir, "golden");
     const manifest = captureGolden(original, { outDir: golden, frames: 4 });
@@ -49,7 +49,7 @@ test("compareGolden passes an identical render and flags a visual change with a 
 });
 
 test("compareGolden explains a missing golden set and a different duration", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-golden-dur-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-golden-dur-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
     const a = path.join(dir, "a.mp4");

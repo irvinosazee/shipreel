@@ -9,7 +9,7 @@
 
     const syncPlaybackControl = () => {
       const mode = heroVid.paused ? 'play' : 'pause';
-      const label = `${mode} brag video`;
+      const label = `${mode} launch video`;
       heroPlayback.dataset.mode = mode;
       heroPlayback.setAttribute('aria-label', label);
       heroPlayback.setAttribute('title', label);
@@ -17,7 +17,7 @@
 
     const syncMuteControl = () => {
       heroMute.setAttribute('aria-pressed', heroVid.muted ? 'true' : 'false');
-      heroMute.setAttribute('aria-label', heroVid.muted ? 'unmute brag video' : 'mute brag video');
+      heroMute.setAttribute('aria-label', heroVid.muted ? 'unmute launch video' : 'mute launch video');
       if (heroMuteLabel) heroMuteLabel.textContent = 'tap for sound';
     };
 

@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { DEFAULT_BANNED, validateBrand, loadBrand, compositionText, bannedHits, captionTheme } from "../skills/brag/scripts/brand.mjs";
+import { DEFAULT_BANNED, validateBrand, loadBrand, compositionText, bannedHits, captionTheme } from "../skills/shipreel/scripts/brand.mjs";
 
 const good = {
   name: "Horse Tinder",
@@ -45,16 +45,16 @@ test("validateBrand reports every bad field with its path", () => {
   assert.match(text, /logo assets\/missing-logo\.svg does not exist/);
 });
 
-test("loadBrand returns null without .brag/config.json and validates it when present", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-brand-"));
+test("loadBrand returns null without .shipreel/config.json and validates it when present", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-brand-"));
   try {
     assert.equal(loadBrand(dir), null);
-    mkdirSync(path.join(dir, ".brag"));
-    writeFileSync(path.join(dir, ".brag", "config.json"), JSON.stringify(good));
+    mkdirSync(path.join(dir, ".shipreel"));
+    writeFileSync(path.join(dir, ".shipreel", "config.json"), JSON.stringify(good));
     const loaded = loadBrand(dir);
     assert.equal(loaded.brand.name, "Horse Tinder");
     assert.deepEqual(loaded.problems, []);
-    writeFileSync(path.join(dir, ".brag", "config.json"), "{ nope");
+    writeFileSync(path.join(dir, ".shipreel", "config.json"), "{ nope");
     assert.match(loadBrand(dir).problems[0], /not valid JSON/);
   } finally {
     rmSync(dir, { recursive: true, force: true });

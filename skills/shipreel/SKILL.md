@@ -1,0 +1,245 @@
+---
+name: shipreel
+description: Turn the current project — website, web app, CLI, library, API, mobile app, game, or ML project — into a short, polished, shareable launch video using Hyperframes. Use when someone says "/shipreel", "let's brag about this", "make a launch video", "turn this into a video", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed.
+---
+
+# /shipreel
+
+You built it. Now let's show it.
+
+Forked from [/brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), and extended well past it.
+
+## Invocation dispatch (must happen first)
+
+Before inspecting the project, parse the complete `/shipreel` invocation. If the
+invocation contains `--voice`, set `voice.enabled = true` for this run only.
+Narration is added on top of the normal workflow; it never replaces any step.
+Never enable narration without the flag or an explicit request.
+
+`/shipreel` turns the current project website or app into a short, polished, shareable launch video using Hyperframes. It is narrow, opinionated, and fun.
+
+## What this skill does
+
+1. Detects the kind of project and reads its code to understand it.
+2. Plans a short video concept specific to this project.
+3. Scripts and storyboards the video.
+4. Hands a focused composition brief to Hyperframes.
+5. Validates, renders, and writes share copy.
+
+## Parsing the invocation
+
+The user may invoke with natural language or flags:
+
+```
+/shipreel
+/shipreel --tone chaotic
+/shipreel --tone polished --format vertical
+/shipreel --for tiktok,reels,x
+/shipreel this. Make it feel like a ridiculous startup launch.
+```
+
+Parse these options:
+
+| Option | Values | Default |
+|---|---|---|
+| `--tone` | preset or freeform description | inferred |
+| `--format` | `landscape`, `vertical`, `square`, `feed` (4:5) | `landscape` |
+| `--for` | platforms or groups: `tiktok`, `reels`, `shorts`, `x`, `linkedin`, `youtube`, `producthunt`, `readme`, `discord`, `vertical`, `social`, `all` | none (single `--format` render) |
+| `--captions` | `auto`, `burned`, `sidecar`, `off` | `auto` (from `--for`; sidecar `.srt` otherwise) |
+| `--duration` | seconds | auto (15-25s) |
+| `--cutdown` | `6`, `15` (comma-separated for both) | none |
+| `--stories` | flag — ≤15s story segments | off |
+| `--carousel` | flag — 1080x1350 slides + LinkedIn PDF | off |
+| `--no-music` | flag | music on |
+| `--no-sfx` | flag | sfx on |
+| `--title` | string | inferred from project |
+| `--voice` | flag | narration off |
+| `--resume` | flag — continue an interrupted run | off |
+| `--lang` | comma-separated language codes (`es,ja,pt`) | none |
+| `--footage` | path to a screen recording — cut its best moments into the video | none |
+| `--capture` | flag — run the project and capture real screens | off |
+| `--explainer` | flag — 45–60s demo with chapters | off |
+| `--hooks` | flag — render hook variants side by side before building | off |
+| `--truth` | flag — strict claim checking (default for non-parody projects) | inferred |
+| `--metrics` | flag — fetch real GitHub/npm numbers | off |
+| `--since` | git tag or ref — release video of what changed | none |
+| `--week` | flag — build-in-public recap of the last 7 days | off |
+| `--endcard` | flag — QR end card (default on when `.shipreel/config.json` has a `url`) | off |
+| `--watermark` | flag — small "made with /shipreel" label | off |
+| `--reduced-motion` | flag — also render a no-movement variant | off |
+| `--describe` | flag — audio-description WebVTT track | off |
+| `--reroll` | scene name or number | none |
+| `--retone` | tone preset | none |
+| `--shorter` | flag — about 20% shorter | off |
+| `--kit` | flag — bundle videos, covers, Product Hunt gallery, X thread, LinkedIn post, embeds, and credits into `launch-kit/` | off |
+| `--embed` | flag — a patch that adds the video to the project's own landing page or README | off |
+
+Voice is opt-in. If `--voice` is present, use Kokoro via Hyperframes. Kokoro is
+the only supported narration provider; do not add provider-selection logic.
+
+`--for` plans one render per frame size, with each platform's safe zones, caption mode, and size budget, then exports a ready-to-upload file per platform. Read [references/platforms.md](references/platforms.md) whenever `--for`, `--captions`, or a non-landscape `--format` is used.
+
+Tone can be a preset (`default`, `polished`, `yc-parody`, `chaotic`, `deadpan`, `cinematic`, `app-store`) or a creative direction such as "fake Series A launch from 2016", "museum exhibit", or "overproduced mobile game ad".
+
+When the user gives freeform tone direction, map it to the nearest preset for pacing and structure, but preserve the user's direction in the plan and composition brief.
+
+## Narration guidance
+
+When `--voice` is enabled, write narration that complements the visuals, does
+not simply read visible text, matches scene pacing, sounds natural and
+conversational, and moves smoothly between scenes. Keep the script concise and
+specific to the product so the voice feels like part of the edit rather than a
+separate narration track.
+
+---
+
+## Skill root and preflight
+
+`<skill-root>` is the directory that contains this `SKILL.md`. Resolve it from
+where this file was loaded — it differs between a plugin install (Claude Code
+plugin cache), `npx skills`, a manual copy, and this repo. Never assume
+`~/.claude/skills/shipreel`. Every bundled path in the references is relative to
+`<skill-root>`, e.g. `<skill-root>/assets/music/`.
+
+Run the doctor before Step 1, passing through the audio and voice flags:
+
+```bash
+node <skill-root>/scripts/doctor.mjs --json [--no-music] [--no-sfx] [--voice]
+```
+
+- Non-empty `blockers` (Node < 22, missing FFmpeg/ffprobe, no Hyperframes):
+  stop and tell the user exactly what to install. Do not start planning.
+- `capabilities.music` / `capabilities.sfx` false without the matching flag:
+  continue, and tell the user up front that the video will be missing that layer.
+- `capabilities.beatSync.bundled` / `.custom` name the cue source to use later
+  (`preset`, `analyze-script`, `hyperframes-beats`, or `unavailable`).
+- Use `assetsRoot` from the report as `<skill-assets>` everywhere.
+
+---
+
+## Output directory
+
+By default, output goes to `shipreel-output/`. To avoid overwriting previous runs, use a timestamped directory:
+
+```
+shipreel-output-2026-05-04-143022/
+```
+
+Use a timestamp when:
+- The user explicitly asks for a new run without overriding previous results
+- A `shipreel-output/` directory already exists in the project
+
+Generate the timestamp at the start of the run (`YYYY-MM-DD-HHmmss`) and use it consistently for all output paths in that run: plan, brief, composition, render, and share copy.
+
+For `--lang`, read [references/localization.md](references/localization.md).
+
+For `--footage` or `--capture`, read [references/footage-and-capture.md](references/footage-and-capture.md).
+
+For terminals, API cards, code, phone or browser frames, cursors, and game HUDs, and for `--hooks` or `--explainer`, read [references/scene-kits.md](references/scene-kits.md).
+
+Every run keeps a claims ledger; read [references/truth-and-proof.md](references/truth-and-proof.md) in Step 2, and whenever `--truth`, `--metrics`, `--since`, or `--week` is used.
+
+If the project has `.shipreel/config.json`, or the user asks for an end card, watermark, reduced-motion variant, or audio descriptions, read [references/brand-and-polish.md](references/brand-and-polish.md).
+
+For `--kit` or `--embed`, or when the user wants release videos, PR preview videos, a GitHub workflow, or to run without an agent, read [references/distribution.md](references/distribution.md).
+
+Initialize run state right after choosing the output directory, and mark each step at its gate. For `--resume`, `--reroll`, `--retone`, `--shorter`, or feedback from Shipreel Studio, read [references/iterate.md](references/iterate.md) first.
+
+---
+
+## Step 1: Inspect the project
+
+**Read:** [references/step-1-inspect.md](references/step-1-inspect.md) and [references/project-types.md](references/project-types.md)
+
+Run `detect_project.mjs`, follow the strategy for the detected project type, and extract the information needed to plan the launch video.
+
+**Gate:** You can answer all 9 questions in the planning rubric.
+
+---
+
+## Step 2: Plan and storyboard
+
+**Read:** [references/step-2-plan.md](references/step-2-plan.md)
+
+Write `<output-dir>/shipreel-plan.md` (where `<output-dir>` is `shipreel-output/` or the timestamped variant chosen above). Answer the planning rubric. Commit to a creative angle. Write the beat-by-beat storyboard including scenes, text, timing, transitions, and SFX cues.
+
+When music is selected, include a compact `Music cue guidance` section: read the bundled track's cue preset from `assets/music/cues/` if present, otherwise note cues will be detected at composition time (any track now supports beat sync — see `references/audio.md`). Cue metadata is optional timing guidance only: story, readability, pacing, and product clarity stay primary.
+
+With `--for`, run `platforms.mjs plan`, add a `## Delivery` section with the renders, and write a layout note per scene for every extra format (see `references/platforms.md`).
+
+**Gate:** `<output-dir>/shipreel-plan.md` exists with a full storyboard. Scene durations sum to 15–25 seconds. Every planned format has layout notes and its safe rectangle.
+
+---
+
+## Step 3: Hand off to Hyperframes
+
+**Read:** The Hyperframes domain skills — `hyperframes-core`, `hyperframes-animation`, `hyperframes-creative`, `hyperframes-keyframes`, `hyperframes-cli`. /shipreel is its own workflow: do not enter the `hyperframes` entry-point intent interview or route into its generic promo / launch-video workflow.
+**Read:** [references/step-3-compose.md](references/step-3-compose.md)
+**Read:** [references/audio.md](references/audio.md)
+
+Write the composition brief and use Hyperframes to create the video implementation in `<output-dir>/composition/`.
+
+`/shipreel` owns the product angle, source material, storyboard, tone, format, audio selection, music cue guidance, and delivery expectations. Hyperframes owns the concrete composition structure, exact animation timing, animation mechanics, runtime choices, linting rules, and render workflow.
+
+**Gate:** `npx hyperframes check` passes with zero errors inside `<output-dir>/composition/` (the single browser gate before render — see hyperframes-cli for what it audits).
+
+---
+
+## Step 4: Validate, render, and deliver
+
+**Read:** [references/step-4-deliver.md](references/step-4-deliver.md)
+
+Validate, run the text audit, preview, render a draft, review its settled frames against the creative laws and fix what fails, render the final to `<output-dir>/shipreel.mp4`, master loudness, pick the best poster frame into `<output-dir>/shipreel.jpg`, bake it as frame 0, verify the render, and write `<output-dir>/share-copy.txt`.
+
+With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, run `platforms.mjs export`, make covers with `covers.mjs`, and write the upload checklist with `upload_page.mjs`.
+
+With `--kit`, finish with `launch_kit.mjs`; with `--embed`, write the site patch with `embed.mjs` and apply it only when the user asks.
+
+**Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/shipreel.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
+
+---
+
+## Tone system
+
+Seven tone presets ship with `/shipreel`. Each changes scripting energy, pacing, typography personality, and transition style. Presets are defaults, not limits.
+
+Full definitions: [references/tones.md](references/tones.md)
+
+| Tone | Energy | One-liner |
+|---|---|---|
+| `default` | Playful, clean, postable | The good-vibes default |
+| `polished` | Serious, elegant | For projects that are not jokes |
+| `yc-parody` | Deadpan startup energy | Fake seriousness applied to absurd projects |
+| `chaotic` | Fast, loud, aggressive | Over-the-top and unhinged |
+| `deadpan` | Calm, dry, understated | The joke is that nothing is a joke |
+| `cinematic` | Dramatic, trailer-scale | Big motion, bigger claims |
+| `app-store` | Smooth, feature-card clean | Corporate but not boring |
+
+Always allow a freeform creative direction to refine or override the preset.
+
+---
+
+## Creative laws
+
+These apply to every launch video regardless of tone.
+
+**Short.** 15–25 seconds. Not one second more without a reason (`--explainer` is the reason: 45–60s with chapters).
+
+**Readable.** Keep the pace high through motion and cuts, never by flashing text. Every line a viewer must read holds long enough to read it (short label ~0.8s settled; a sentence ~0.3s per word). Fast-in, then hold — never fast-in, then gone.
+
+**Specific.** The video must feel like it was made for this exact project, not any project.
+
+**Show the thing.** At least one scene must display actual UI, copy, or a key visual from the product. No abstract filler.
+
+**No generic SaaS language.** "Streamline your workflow" is banned. Use the project's actual copy and claims.
+
+**The hook is everything.** The first 2 seconds determine whether someone keeps watching. Plan the hook before anything else.
+
+**Funny earns its place.** Humor should come from the project's absurdity, not from trying to be funny.
+
+**Pattern:**
+```
+Hook (2-3s) → Reveal (2-4s) → 2-3 sharp highlights (5-12s) → Punchline/outro (2-4s)
+```
+
+Adapt this. Not every project needs exactly 3 highlights. The pattern is a starting shape, not a template.

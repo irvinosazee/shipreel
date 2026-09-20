@@ -1,6 +1,6 @@
 {
-  "name": "brag",
-  "description": "You built it. Now brag. Turn the project you just shipped into a short, shareable launch video with one command.",
+  "name": "shipreel",
+  "description": "You shipped it. Now show it. Turn the project you just shipped into a short, shareable launch video with one command.",
   "owner": {
     "name": "Irvin Osazee",
     "email": "136273899+irvinosazee@users.noreply.github.com",
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "brag",
+      "name": "shipreel",
       "source": "./",
       "description": "Turn the current project website into a short, polished, shareable launch video using HyperFrames."
     }

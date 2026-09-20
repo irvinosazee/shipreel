@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 
-import { KITS, renderKit, highlightCode, browserBundle, installKits } from "../skills/brag/scripts/kits.mjs";
+import { KITS, renderKit, highlightCode, browserBundle, installKits } from "../skills/shipreel/scripts/kits.mjs";
 
 const theme = { bg: "#120b08", panel: "#1d1410", fg: "#f6eee8", muted: "#b9aaa0", accent: "#ff6a3d", font: "Geist", mono: "Geist Mono" };
 
@@ -61,22 +61,22 @@ test("renderKit escapes content and rejects unknown kits", () => {
 });
 
 test("terminal types each command with stepped width and shows output after it", () => {
-  const out = renderKit("terminal", { id: "term", at: 2, theme, props: { lines: [{ command: "npx brag", output: ["rendering…", "done in 20s"] }], charSeconds: 0.05 } });
+  const out = renderKit("terminal", { id: "term", at: 2, theme, props: { lines: [{ command: "npx shipreel", output: ["rendering…", "done in 20s"] }], charSeconds: 0.05 } });
   const { tl, calls } = recorder();
   out.build(tl);
   const typing = calls.find((c) => c[0] === "fromTo" && c[1] === "#term-cmd-0");
   assert.deepEqual(typing[2], { width: "0ch" });
-  assert.equal(typing[3].width, "8ch");
-  assert.equal(typing[3].ease, "steps(8)");
+  assert.equal(typing[3].width, "12ch");
+  assert.equal(typing[3].ease, "steps(12)");
   assert.equal(typing[4], 2.4, "typing starts after the window settles");
   const output = calls.find((c) => c[1] === "#term-out-0-0");
   assert.ok(output.at(-1) >= 2.4 + 8 * 0.05, "output appears after the command is typed");
 });
 
 test("http-card reveals the JSON response line by line and highlights the chosen key", () => {
-  const out = renderKit("http-card", { id: "api", at: 0, theme, props: { method: "POST", path: "/v1/brag", status: 201, response: { id: "brg_42", url: "https://x.dev/v/42" }, highlight: "url" } });
+  const out = renderKit("http-card", { id: "api", at: 0, theme, props: { method: "POST", path: "/v1/shipreel", status: 201, response: { id: "brg_42", url: "https://x.dev/v/42" }, highlight: "url" } });
   assert.match(out.html, /POST/);
-  assert.match(out.html, /\/v1\/brag/);
+  assert.match(out.html, /\/v1\/shipreel/);
   assert.match(out.html, /201/);
   assert.match(out.html, /class="kit-json-line kit-hl"[^>]*>[\s\S]*?&quot;url&quot;/);
   const { tl, calls } = recorder();
@@ -126,11 +126,11 @@ test("game-hud counts the score up with a seekable tween that writes whole numbe
   }
 });
 
-test("the installed browser bundle defines BragKits and mounts a kit into a slot", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-kits-"));
+test("the installed browser bundle defines ShipreelKits and mounts a kit into a slot", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-kits-"));
   try {
     const file = installKits(dir);
-    assert.equal(file, path.join(dir, "assets", "brag-kits.js"));
+    assert.equal(file, path.join(dir, "assets", "shipreel-kits.js"));
     const source = readFileSync(file, "utf8");
     assert.doesNotMatch(source, /^\s*(import|export)\b/m, "classic script, loadable from file://");
 
@@ -139,15 +139,15 @@ test("the installed browser bundle defines BragKits and mounts a kit into a slot
     const document = { head: { appendChild: (el) => appended.push(el) }, createElement: () => ({ textContent: "" }), getElementById: (id) => (id === "slot" ? slot : null) };
     const window = {};
     vm.runInNewContext(source, { window, document });
-    assert.deepEqual(Object.keys(window.BragKits).sort(), ["KITS", "highlightCode", "mount", "render"]);
+    assert.deepEqual(Object.keys(window.ShipreelKits).sort(), ["KITS", "highlightCode", "mount", "render"]);
 
     const { tl, calls } = recorder();
-    const out = window.BragKits.mount(tl, "slot", "terminal", { id: "t1", at: 1, theme, props: { lines: [{ command: "ls" }] } });
+    const out = window.ShipreelKits.mount(tl, "slot", "terminal", { id: "t1", at: 1, theme, props: { lines: [{ command: "ls" }] } });
     assert.match(slot.innerHTML, /id="t1"/);
     assert.match(appended[0].textContent, /#t1/);
     assert.ok(calls.length > 0);
     assert.ok(out.end > 1);
-    assert.throws(() => window.BragKits.mount(tl, "missing", "terminal", { id: "x", at: 0, theme, props: {} }), /No element with id "missing"/);
+    assert.throws(() => window.ShipreelKits.mount(tl, "missing", "terminal", { id: "x", at: 0, theme, props: {} }), /No element with id "missing"/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

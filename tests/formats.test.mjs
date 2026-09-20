@@ -4,7 +4,7 @@ import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, wr
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { FORMATS, stampHtml, stampFormats, detectFormat } from "../skills/brag/scripts/formats.mjs";
+import { FORMATS, stampHtml, stampFormats, detectFormat } from "../skills/shipreel/scripts/formats.mjs";
 
 const source = `<!doctype html>
 <html lang="en" data-resolution="portrait">
@@ -39,7 +39,7 @@ test("stampHtml sets the root size, viewport, resolution, and data-format for th
   assert.match(out, /<html lang="en" data-resolution="landscape">/);
   assert.match(out, /<meta name="viewport" content="width=1920, height=1080" \/>/);
   assert.match(out, /data-composition-id="main" data-start="0" data-width="1920" data-height="1080" data-duration="22.5" data-format="landscape"/);
-  assert.match(out, /<style id="brag-format">html, body \{ width: 1920px; height: 1080px; \}<\/style>\n  <\/head>/);
+  assert.match(out, /<style id="shipreel-format">html, body \{ width: 1920px; height: 1080px; \}<\/style>\n  <\/head>/);
   assert.match(out, /<section class="clip" data-start="0" data-duration="3" data-width="400">/, "only the root's size changes");
   assert.match(out, /\[data-format="landscape"\] \.content/, "the source's per-format rules are kept");
   assert.match(out, /html, body \{ width: 1920px; height: 1080px; \}\n      \[data-format/, "the source's own html/body size rule is rewritten, so lint sees the real frame");
@@ -47,7 +47,7 @@ test("stampHtml sets the root size, viewport, resolution, and data-format for th
 
 test("stampHtml is idempotent and replaces an earlier stamp", () => {
   const once = stampHtml(stampHtml(source, "feed"), "square");
-  assert.equal((once.match(/id="brag-format"/g) ?? []).length, 1);
+  assert.equal((once.match(/id="shipreel-format"/g) ?? []).length, 1);
   assert.equal((once.match(/data-format="square"/g) ?? []).length, 1, "one stamped attribute");
   assert.match(once, /data-width="1080" data-height="1080"/);
   assert.equal(stampHtml(once, "square"), once);
@@ -59,7 +59,7 @@ test("stampHtml rejects unknown formats and HTML without a composition root", ()
 });
 
 test("stampFormats writes composition-<format> directories that share the source assets", () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-formats-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-formats-"));
   try {
     const src = path.join(root, "composition");
     mkdirSync(path.join(src, "assets", "music"), { recursive: true });

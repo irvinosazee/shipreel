@@ -23,7 +23,7 @@ test("the repository itself validates cleanly", () => {
 });
 
 function withRepo(build, fn) {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-validate-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-validate-"));
   try {
     build(root);
     return fn(root);
@@ -40,14 +40,14 @@ const write = (root, rel, content) => {
 test("checkManifests catches a bad version and a marketplace name mismatch", () => {
   withRepo(
     (root) => {
-      write(root, ".claude-plugin/plugin.json", { name: "brag", version: "0.3", description: "x" });
-      write(root, ".claude-plugin/marketplace.json", { name: "brag", owner: { name: "a" }, plugins: [{ name: "bragg", source: "./" }] });
+      write(root, ".claude-plugin/plugin.json", { name: "shipreel", version: "0.3", description: "x" });
+      write(root, ".claude-plugin/marketplace.json", { name: "shipreel", owner: { name: "a" }, plugins: [{ name: "shipreelg", source: "./" }] });
     },
     (root) => {
       const problems = checkManifests(root);
       assert.equal(problems.length, 2);
       assert.match(problems.join("\n"), /version "0\.3"/);
-      assert.match(problems.join("\n"), /"bragg"/);
+      assert.match(problems.join("\n"), /"shipreelg"/);
     },
   );
 });
@@ -55,24 +55,24 @@ test("checkManifests catches a bad version and a marketplace name mismatch", () 
 test("checkSymlinks catches a missing or copied discovery path", () => {
   withRepo(
     (root) => {
-      mkdirSync(path.join(root, "skills/brag"), { recursive: true });
+      mkdirSync(path.join(root, "skills/shipreel"), { recursive: true });
       mkdirSync(path.join(root, ".claude/skills"), { recursive: true });
-      symlinkSync("../../skills/brag", path.join(root, ".claude/skills/brag"));
-      mkdirSync(path.join(root, ".agents/skills/brag"), { recursive: true });
+      symlinkSync("../../skills/shipreel", path.join(root, ".claude/skills/shipreel"));
+      mkdirSync(path.join(root, ".agents/skills/shipreel"), { recursive: true });
     },
     (root) => {
       const problems = checkSymlinks(root);
       assert.equal(problems.length, 2);
-      assert.match(problems.join("\n"), /\.agents\/skills\/brag is not a symlink/);
-      assert.match(problems.join("\n"), /\.opencode\/skills\/brag is missing/);
+      assert.match(problems.join("\n"), /\.agents\/skills\/shipreel is not a symlink/);
+      assert.match(problems.join("\n"), /\.opencode\/skills\/shipreel is missing/);
     },
   );
 });
 
 test("checkSkillFrontmatter requires name and description", () => {
   withRepo(
-    (root) => write(root, "skills/brag/SKILL.md", "---\nname: brag\n---\n# brag"),
-    (root) => assert.deepEqual(checkSkillFrontmatter(root), ["skills/brag/SKILL.md frontmatter is missing description"]),
+    (root) => write(root, "skills/shipreel/SKILL.md", "---\nname: shipreel\n---\n# shipreel"),
+    (root) => assert.deepEqual(checkSkillFrontmatter(root), ["skills/shipreel/SKILL.md frontmatter is missing description"]),
   );
 });
 
@@ -94,18 +94,18 @@ test("checkMarkdownLinks reports broken relative links and ignores URLs and anch
 test("checkReferencedScripts finds <skill-root>/scripts references that do not exist", () => {
   withRepo(
     (root) => {
-      write(root, "skills/brag/SKILL.md", "run `node <skill-root>/scripts/real.mjs` then `<skill-root>/scripts/ghost.mjs`");
-      write(root, "skills/brag/scripts/real.mjs", "");
+      write(root, "skills/shipreel/SKILL.md", "run `node <skill-root>/scripts/real.mjs` then `<skill-root>/scripts/ghost.mjs`");
+      write(root, "skills/shipreel/scripts/real.mjs", "");
     },
-    (root) => assert.deepEqual(checkReferencedScripts(root), ["skills/brag/SKILL.md references missing scripts/ghost.mjs"]),
+    (root) => assert.deepEqual(checkReferencedScripts(root), ["skills/shipreel/SKILL.md references missing scripts/ghost.mjs"]),
   );
 });
 
 test("checkMusicCues requires both cue files per track", () => {
   withRepo(
     (root) => {
-      write(root, "skills/brag/assets/music/a.mp3", "");
-      write(root, "skills/brag/assets/music/cues/a.music-cues.json", "{}");
+      write(root, "skills/shipreel/assets/music/a.mp3", "");
+      write(root, "skills/shipreel/assets/music/cues/a.music-cues.json", "{}");
     },
     (root) => assert.deepEqual(checkMusicCues(root), ["music track a.mp3 is missing cues/a.music-cues.md"]),
   );

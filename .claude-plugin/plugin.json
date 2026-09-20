@@ -1,5 +1,5 @@
 {
-  "name": "brag",
+  "name": "shipreel",
   "description": "Turn any project — site, app, CLI, library, API, mobile, game, or ML — into a short, polished, shareable launch video using HyperFrames.",
   "version": "0.2.2",
   "author": {
@@ -7,7 +7,7 @@
     "email": "136273899+irvinosazee@users.noreply.github.com"
   },
   "license": "MIT",
-  "homepage": "https://github.com/irvinosazee/brag",
-  "repository": "https://github.com/irvinosazee/brag",
+  "homepage": "https://github.com/irvinosazee/shipreel",
+  "repository": "https://github.com/irvinosazee/shipreel",
   "keywords": ["video", "launch", "hyperframes", "skill"]
 }

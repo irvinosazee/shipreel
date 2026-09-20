@@ -1,9 +1,9 @@
 {
-  "name": "brag-repo",
+  "name": "shipreel-repo",
   "private": true,
   "type": "module",
   "bin": {
-    "brag-video": "skills/brag/scripts/brag_cli.mjs"
+    "shipreel": "skills/shipreel/scripts/cli.mjs"
   },
   "engines": {
     "node": ">=22"
@@ -11,7 +11,7 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "check:docs": "node scripts/check-docs.mjs",
-    "doctor": "node skills/brag/scripts/brag_doctor.mjs",
+    "doctor": "node skills/shipreel/scripts/doctor.mjs",
     "validate": "node scripts/validate-repo.mjs",
     "eval": "node scripts/eval-examples.mjs",
     "render-smoke": "node scripts/render-smoke.mjs",

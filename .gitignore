@@ -17,7 +17,7 @@ skills-lock.json
 .claude/
 
 # HyperFrames render artifacts + heavy composition sources (never committed)
-**/brag-output*/
+**/shipreel-output*/
 **/renders/
 **/.thumbnails/
 **/.waveform-cache/

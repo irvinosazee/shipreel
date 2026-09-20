@@ -17,7 +17,7 @@ import {
   evaluate,
   probeVideo,
   verifyRender,
-} from "../skills/brag/scripts/verify_render.mjs";
+} from "../skills/shipreel/scripts/verify_render.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -97,7 +97,7 @@ test("evaluate flags duration, size, silence, and missing audio as errors", () =
 });
 
 test("evaluate: poster not baked into frame 0 is an error when a poster exists", () => {
-  // Measured on real brags: unbaked frame 0 vs poster scored 10.5–21.7 dB, baked 44.8–52.3 dB.
+  // Measured on real shipreels: unbaked frame 0 vs poster scored 10.5–21.7 dB, baked 44.8–52.3 dB.
   const { errors, errorCodes } = evaluate({ ...goodFacts, posterPsnr: 21.7 }, { poster: true });
   assert.match(errors.join("\n"), /frame 0/);
   assert.deepEqual(errorCodes, ["poster-not-baked"]);
@@ -119,7 +119,7 @@ test("evaluate warns about a visible loop seam only when a loop is expected", ()
 });
 
 test("probeVideo measures the loop seam between the last frame and frame 1", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-loop-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-loop-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
     const seamless = path.join(dir, "seamless.mp4");
@@ -174,7 +174,7 @@ test("format sizes cover landscape, vertical, square, and feed", () => {
 });
 
 test("verifyRender end to end on generated clips", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-verify-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-verify-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
     const good = path.join(dir, "good.mp4");
@@ -183,7 +183,7 @@ test("verifyRender end to end on generated clips", { skip: !hasFfmpeg && "ffmpeg
       "-f", "lavfi", "-i", "sine=frequency=440:duration=2",
       "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-movflags", "+faststart", good,
     );
-    const poster = path.join(dir, "brag.jpg");
+    const poster = path.join(dir, "shipreel.jpg");
     ff("-ss", "1", "-i", good, "-frames:v", "1", "-q:v", "2", poster);
 
     const expect = { minDuration: 1, maxDuration: 3, width: 320, height: 180 };
@@ -215,7 +215,7 @@ test("verifyRender end to end on generated clips", { skip: !hasFfmpeg && "ffmpeg
 });
 
 test("CLI writes a JSON report", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-verify-cli-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-verify-cli-"));
   try {
     const clip = path.join(dir, "clip.mp4");
     execFileSync("ffmpeg", [
@@ -223,7 +223,7 @@ test("CLI writes a JSON report", { skip: !hasFfmpeg && "ffmpeg not installed" },
       "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=30:duration=1",
       "-c:v", "libx264", "-pix_fmt", "yuv420p", clip,
     ]);
-    const script = fileURLToPath(new URL("../skills/brag/scripts/verify_render.mjs", import.meta.url));
+    const script = fileURLToPath(new URL("../skills/shipreel/scripts/verify_render.mjs", import.meta.url));
     let status = 0;
     let stdout = "";
     try {

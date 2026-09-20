@@ -4,10 +4,10 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { normalizeText, sourceText, findUncitedClaims, verifyClaims } from "../skills/brag/scripts/claims.mjs";
+import { normalizeText, sourceText, findUncitedClaims, verifyClaims } from "../skills/shipreel/scripts/claims.mjs";
 
 function project() {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-claims-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-claims-"));
   mkdirSync(path.join(dir, "site"));
   writeFileSync(path.join(dir, "site", "index.html"), `<section><h2>Available in <strong>12&nbsp;metros</strong></h2><p>99.1% fleet uptime</p></section>`);
   writeFileSync(path.join(dir, "README.md"), "Taxi for Taxis moves 8,400 cabs a day.");
@@ -15,7 +15,7 @@ function project() {
 }
 
 test("normalizeText collapses whitespace, entities, curly quotes, and case", () => {
-  assert.equal(normalizeText("Let’s  BRAG&nbsp;about\n it"), "let's brag about it");
+  assert.equal(normalizeText("Let’s  SHIP&nbsp;it\n now"), "let's ship it now");
 });
 
 test("sourceText reads visible text from HTML and raw text from everything else", () => {

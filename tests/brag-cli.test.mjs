@@ -6,10 +6,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { COMMANDS, readmeHighlights, scenesFromPlan, shareCopyFor, installWorkflow } from "../skills/brag/scripts/brag_cli.mjs";
-import { planCardVideo } from "../skills/brag/scripts/template_video.mjs";
+import { COMMANDS, readmeHighlights, scenesFromPlan, shareCopyFor, installWorkflow } from "../skills/shipreel/scripts/cli.mjs";
+import { planCardVideo } from "../skills/shipreel/scripts/template_video.mjs";
 
-const CLI = fileURLToPath(new URL("../skills/brag/scripts/brag_cli.mjs", import.meta.url));
+const CLI = fileURLToPath(new URL("../skills/shipreel/scripts/cli.mjs", import.meta.url));
 const cli = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8" });
 
 test("readmeHighlights prefers a features section, strips markdown, and skips install steps", () => {
@@ -65,11 +65,11 @@ test("the CLI prints help and version, maps script commands, and rejects unknown
 });
 
 test("installWorkflow copies a workflow template into .github/workflows and refuses to overwrite", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-gh-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-gh-"));
   try {
     const file = installWorkflow(dir, "release");
-    assert.equal(path.relative(dir, file), path.join(".github", "workflows", "brag-release-video.yml"));
-    assert.match(readFileSync(file, "utf8"), /uses: irvinosazee\/brag@main/);
+    assert.equal(path.relative(dir, file), path.join(".github", "workflows", "shipreel-release-video.yml"));
+    assert.match(readFileSync(file, "utf8"), /uses: irvinosazee\/shipreel@main/);
     assert.throws(() => installWorkflow(dir, "release"), /already exists/);
     assert.ok(existsSync(installWorkflow(dir, "pr-preview")));
     assert.throws(() => installWorkflow(dir, "nope"), /release, pr-preview/);

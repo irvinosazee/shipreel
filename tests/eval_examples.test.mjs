@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { compareToBaseline, evalExample, renderSummary } from "../scripts/eval-examples.mjs";
-import { captureGolden } from "../skills/brag/scripts/golden.mjs";
+import { captureGolden } from "../skills/shipreel/scripts/golden.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -41,7 +41,7 @@ test("renderSummary produces a markdown table with a verdict", () => {
 });
 
 test("evalExample reports structure, detection, and render issues with stable codes", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-eval-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-eval-"));
   try {
     const dir = path.join(root, "examples", "tiny");
     mkdirSync(dir, { recursive: true });
@@ -50,7 +50,7 @@ test("evalExample reports structure, detection, and render issues with stable co
     execFileSync("ffmpeg", [
       "-hide_banner", "-loglevel", "error", "-y",
       "-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=30:duration=2",
-      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path.join(dir, "brag.mp4"),
+      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path.join(dir, "shipreel.mp4"),
     ]);
 
     const result = evalExample(root, "tiny");
@@ -58,7 +58,7 @@ test("evalExample reports structure, detection, and render issues with stable co
     assert.deepEqual(result.issues, ["structure:missing-PRODUCT.md", "render:duration", "render:no-audio"]);
 
     // A poster next to the example (not in the docs gallery) is still checked against frame 0.
-    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-ss", "1", "-i", path.join(dir, "brag.mp4"), "-frames:v", "1", path.join(dir, "brag.jpg")]);
+    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-ss", "1", "-i", path.join(dir, "shipreel.mp4"), "-frames:v", "1", path.join(dir, "shipreel.jpg")]);
     assert.ok(evalExample(root, "tiny").issues.includes("render:poster-not-baked"));
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -66,13 +66,13 @@ test("evalExample reports structure, detection, and render issues with stable co
 });
 
 test("evalExample compares against golden frames when the example has them", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-eval-golden-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-eval-golden-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
     const dir = path.join(root, "examples", "g");
     mkdirSync(dir, { recursive: true });
     for (const file of ["index.html", "styles.css", "PRODUCT.md"]) writeFileSync(path.join(dir, file), file === "index.html" ? "<h1>G</h1>" : "x");
-    const video = path.join(dir, "brag.mp4");
+    const video = path.join(dir, "shipreel.mp4");
     ff("-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=30:duration=16", "-f", "lavfi", "-i", "sine=duration=16", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", "-movflags", "+faststart", video);
     captureGolden(video, { outDir: path.join(root, "tests", "golden", "g"), frames: 4 });
     assert.ok(!evalExample(root, "g").issues.some((i) => i.startsWith("golden:")), "unchanged render matches its goldens");

@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { splitPost, xThread, linkedinPost, productHuntCopy, embedSnippets, creditsFor, buildLaunchKit } from "../skills/brag/scripts/launch_kit.mjs";
+import { splitPost, xThread, linkedinPost, productHuntCopy, embedSnippets, creditsFor, buildLaunchKit } from "../skills/shipreel/scripts/launch_kit.mjs";
 
 test("splitPost keeps posts under the limit, breaking at sentences and then words", () => {
   assert.deepEqual(splitPost("short one.", 280), ["short one."]);
@@ -19,10 +19,10 @@ test("splitPost keeps posts under the limit, breaking at sentences and then word
 });
 
 test("xThread opens with the caption, lists highlights, and ends with the link", () => {
-  const thread = xThread({ caption: "We made a launch video tool. Then used it on itself.", highlights: ["vertical exports", "karaoke captions"], url: "https://brag.dev" });
+  const thread = xThread({ caption: "We made a launch video tool. Then used it on itself.", highlights: ["vertical exports", "karaoke captions"], url: "https://shipreel.dev" });
   assert.equal(thread[0], "We made a launch video tool. Then used it on itself.");
   assert.match(thread[1], /• vertical exports\n• karaoke captions/);
-  assert.match(thread.at(-1), /https:\/\/brag\.dev/);
+  assert.match(thread.at(-1), /https:\/\/shipreel\.dev/);
   for (const post of thread) assert.ok(post.length <= 280);
   assert.equal(xThread({ caption: "Just this." }).length, 1);
 });
@@ -30,18 +30,18 @@ test("xThread opens with the caption, lists highlights, and ends with the link",
 test("linkedinPost and productHuntCopy respect each platform's shape", () => {
   const post = linkedinPost({ caption: "We made a thing.", highlights: ["one", "two"], url: "https://x.dev" });
   assert.equal(post, "We made a thing.\n\n→ one\n→ two\n\nhttps://x.dev");
-  const ph = productHuntCopy({ title: "/brag", caption: "A skill that turns your project into a twenty-second launch video with music and captions. Then we used it on itself.", highlights: ["vertical exports"] });
-  assert.equal(ph.name, "/brag");
+  const ph = productHuntCopy({ title: "/shipreel", caption: "A skill that turns your project into a twenty-second launch video with music and captions. Then we used it on itself.", highlights: ["vertical exports"] });
+  assert.equal(ph.name, "/shipreel");
   assert.ok(ph.tagline.length <= 60, ph.tagline);
   assert.doesNotMatch(ph.tagline, /\s$/);
   assert.ok(ph.description.length <= 260);
 });
 
 test("embedSnippets writes a README image link and an autoplaying muted HTML video", () => {
-  const { markdown, html } = embedSnippets({ video: "docs/brag.mp4", poster: "docs/brag.jpg", title: "brag <demo>" });
-  assert.equal(markdown, "[![brag <demo>](docs/brag.jpg)](docs/brag.mp4)");
-  assert.match(html, /<video src="docs\/brag\.mp4" poster="docs\/brag\.jpg" autoplay muted loop playsinline controls preload="metadata"/);
-  assert.match(html, /aria-label="brag &lt;demo&gt;"/);
+  const { markdown, html } = embedSnippets({ video: "docs/shipreel.mp4", poster: "docs/shipreel.jpg", title: "shipreel <demo>" });
+  assert.equal(markdown, "[![shipreel <demo>](docs/shipreel.jpg)](docs/shipreel.mp4)");
+  assert.match(html, /<video src="docs\/shipreel\.mp4" poster="docs\/shipreel\.jpg" autoplay muted loop playsinline controls preload="metadata"/);
+  assert.match(html, /aria-label="shipreel &lt;demo&gt;"/);
 });
 
 test("creditsFor names bundled music and Kenney SFX once each", () => {
@@ -63,12 +63,12 @@ function makeVideo(file, { size = "1920x1080", seconds = 4 } = {}) {
 }
 
 test("buildLaunchKit assembles videos, images, copy, embeds, and credits into one folder", () => {
-  const out = mkdtempSync(path.join(tmpdir(), "brag-kit-"));
+  const out = mkdtempSync(path.join(tmpdir(), "shipreel-kit-"));
   try {
-    makeVideo(path.join(out, "brag.mp4"));
-    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-ss", "1", "-i", path.join(out, "brag.mp4"), "-frames:v", "1", path.join(out, "brag.jpg")]);
+    makeVideo(path.join(out, "shipreel.mp4"));
+    execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-ss", "1", "-i", path.join(out, "shipreel.mp4"), "-frames:v", "1", path.join(out, "shipreel.jpg")]);
     mkdirSync(path.join(out, "exports"));
-    makeVideo(path.join(out, "exports", "brag-tiktok.mp4"), { size: "1080x1920", seconds: 2 });
+    makeVideo(path.join(out, "exports", "shipreel-tiktok.mp4"), { size: "1080x1920", seconds: 2 });
     writeFileSync(path.join(out, "share-copy.txt"), "We built a thing. It makes videos.\n");
     writeFileSync(path.join(out, "share-copy-variants.md"), "# Variants\n\n## X\nthe x version of the caption\n");
     writeFileSync(path.join(out, "scenes.json"), JSON.stringify([{ name: "Hook", start: 0, end: 2, role: "hook", settled: 1 }, { name: "Payoff", start: 2, end: 4, role: "payoff", settled: 3 }]));
@@ -78,7 +78,7 @@ test("buildLaunchKit assembles videos, images, copy, embeds, and credits into on
     const manifest = buildLaunchKit(out, { title: "thing", url: "https://thing.dev", highlights: ["makes videos"], zip: true });
     const kit = path.join(out, "launch-kit");
     for (const file of [
-      "videos/brag.mp4", "videos/brag-tiktok.mp4", "images/poster.jpg", "images/og.jpg", "images/youtube.jpg",
+      "videos/shipreel.mp4", "videos/shipreel-tiktok.mp4", "images/poster.jpg", "images/og.jpg", "images/youtube.jpg",
       "images/producthunt-1.jpg", "images/producthunt-2.jpg", "copy/share-copy.txt", "copy/x-thread.txt",
       "copy/linkedin.txt", "copy/producthunt.txt", "embed/readme-snippet.md", "embed/video.html", "credits.txt", "README.md",
     ]) assert.ok(existsSync(path.join(kit, file)), file);

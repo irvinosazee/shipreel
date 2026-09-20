@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { parseSceneCuts, segmentsFromCuts, pickMoments, slidingWindows, analyzeFootage, trimClip } from "../skills/brag/scripts/footage.mjs";
+import { parseSceneCuts, segmentsFromCuts, pickMoments, slidingWindows, analyzeFootage, trimClip } from "../skills/shipreel/scripts/footage.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -55,7 +55,7 @@ test("slidingWindows covers a long uncut segment with moment-length windows scor
 });
 
 test("analyzeFootage finds the moving parts of a real recording", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-footage-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-footage-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   try {
     const video = path.join(dir, "demo.mp4");

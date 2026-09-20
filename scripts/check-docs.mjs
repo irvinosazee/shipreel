@@ -57,20 +57,20 @@ for (const match of html.matchAll(/\b(?:src|href|poster)=["']([^"']+)["']/g)) {
 }
 
 const galleryVideos = [
-  ...html.matchAll(/<video\b[^>]*class=["'][^"']*\bbrag-video\b[^"']*["'][\s\S]*?<\/video>/g),
+  ...html.matchAll(/<video\b[^>]*class=["'][^"']*\bshipreel\b[^"']*["'][\s\S]*?<\/video>/g),
 ];
 const galleryCount = galleryVideos.length;
 
-const galleryCopy = html.match(/>([^<>]*?)\s+real projects\s+.\s+([^<>]*?)\s+real brags</i);
+const galleryCopy = html.match(/>([^<>]*?)\s+real projects\s+.\s+([^<>]*?)\s+real reels</i);
 if (!galleryCopy) {
   failures.push("Could not find gallery count copy.");
 } else {
   const projectCount = parseCount(galleryCopy[1].trim());
-  const bragCount = parseCount(galleryCopy[2].trim());
+  const reelCount = parseCount(galleryCopy[2].trim());
 
-  if (projectCount !== galleryCount || bragCount !== galleryCount) {
+  if (projectCount !== galleryCount || reelCount !== galleryCount) {
     failures.push(
-      `Gallery copy says ${galleryCopy[1].trim()} projects and ${galleryCopy[2].trim()} brags, but ${galleryCount} brag videos are listed.`,
+      `Gallery copy says ${galleryCopy[1].trim()} projects and ${galleryCopy[2].trim()} reels, but ${galleryCount} shipreel videos are listed.`,
     );
   }
 }
@@ -84,7 +84,7 @@ for (const video of galleryVideos) {
   if (!poster) failures.push(`Gallery video ${src ?? "(unknown)"} is missing poster.`);
 
   if (!src) continue;
-  const siteThumb = src.replace(/brag\.mp4(?:[?#].*)?$/, "site.jpg");
+  const siteThumb = src.replace(/shipreel\.mp4(?:[?#].*)?$/, "site.jpg");
   if (siteThumb === src || !existsSync(localPathFor(siteThumb))) {
     failures.push(`Gallery video ${src} is missing matching site.jpg.`);
   }

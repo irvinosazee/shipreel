@@ -5,8 +5,8 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { changedRoutes, commentBody, compareHtml, buildPreview } from "../skills/brag/scripts/pr_preview.mjs";
-import { startProject } from "../skills/brag/scripts/capture.mjs";
+import { changedRoutes, commentBody, compareHtml, buildPreview } from "../skills/shipreel/scripts/pr_preview.mjs";
+import { startProject } from "../skills/shipreel/scripts/capture.mjs";
 
 test("changedRoutes maps changed files to the pages a reviewer should see", () => {
   assert.deepEqual(changedRoutes(["app/page.tsx", "app/pricing/page.tsx", "app/(marketing)/about/page.tsx"]), ["/", "/pricing", "/about"]);
@@ -25,7 +25,7 @@ test("commentBody summarizes each route's change and links the clip", () => {
     videoUrl: "https://example.com/run/artifacts",
     gifUrl: "https://raw.example.com/preview.gif",
   });
-  assert.match(body, /<!-- brag:pr-preview -->/);
+  assert.match(body, /<!-- shipreel:pr-preview -->/);
   assert.match(body, /!\[before and after\]\(https:\/\/raw\.example\.com\/preview\.gif\)/);
   assert.match(body, /\| `\/` \| changed \| 0\.910 \|/);
   assert.match(body, /\| `\/about` \| no visible change \| 0\.999 \|/);
@@ -41,7 +41,7 @@ test("compareHtml labels both sides and escapes the route", () => {
 });
 
 test("buildPreview captures base and head, scores the change, and writes a clip under 10s and a GIF", async () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-pr-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-pr-"));
   const site = (dir, color, title) => {
     mkdirSync(dir, { recursive: true });
     writeFileSync(path.join(dir, "index.html"), `<!doctype html><html><body style="margin:0;background:${color};font:64px sans-serif"><h1 style="margin:80px">${title}</h1></body></html>`);

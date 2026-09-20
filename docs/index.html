@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>brag — you built it. now brag.</title>
+<title>shipreel — you shipped it. now show it.</title>
 <meta name="description" content="A Claude Code skill that turns the project you created into a twenty-second launch video. One command. Postable everywhere." />
 <meta name="theme-color" content="#e26a3a" />
-<meta property="og:title" content="brag — you built it. now brag." />
+<meta property="og:title" content="shipreel — you shipped it. now show it." />
 <meta property="og:description" content="A Claude Code skill that turns the project you created into a short, postable launch video." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,24 +19,24 @@
 
 <header class="hero">
   <div class="topbar">
-    <span class="mark">/brag</span>
+    <span class="mark">/shipreel</span>
     <nav aria-label="primary">
       <a href="#examples">examples</a>
       <a href="#install">install</a>
-      <a href="https://github.com/irvinosazee/brag" target="_blank" rel="noopener">github</a>
+      <a href="https://github.com/irvinosazee/shipreel" target="_blank" rel="noopener">github</a>
     </nav>
   </div>
 
   <div class="hero-main">
     <div class="hero-body">
-      <h1 class="hero-headline">you built it.<br/>now <span class="emph">brag.</span></h1>
+      <h1 class="hero-headline">you shipped it.<br/>now <span class="emph">show it.</span></h1>
       <p class="hero-sub">A Claude Code skill that turns the project you created into a <strong>twenty-second launch video</strong>. One command. Music, motion, share copy included.</p>
     </div>
-    <aside class="hero-video" aria-label="the brag-about-brag video">
+    <aside class="hero-video" aria-label="the video shipreel made about itself">
       <video
         id="hero-vid"
         class="hero-video-media"
-        src="assets/brag-about-brag.mp4"
+        src="assets/hero.mp4"
         poster="assets/hero-poster.jpg"
         muted
         loop
@@ -44,7 +44,7 @@
         preload="auto"
       ></video>
       <div class="hero-controls">
-        <button id="hero-playback" class="hero-control hero-playback" type="button" aria-label="play brag video" title="play brag video" data-mode="play">
+        <button id="hero-playback" class="hero-control hero-playback" type="button" aria-label="play launch video" title="play launch video" data-mode="play">
           <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M8 5v14l11-7z"/>
           </svg>
@@ -52,7 +52,7 @@
             <path d="M6 5h4v14H6zm8 0h4v14h-4z"/>
           </svg>
         </button>
-        <button id="hero-mute" class="hero-control hero-mute" type="button" aria-label="unmute brag video" aria-pressed="true">
+        <button id="hero-mute" class="hero-control hero-mute" type="button" aria-label="unmute launch video" aria-pressed="true">
           <svg class="icon-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M3 9v6h4l5 4V5L7 9H3zm13.59 3l2.7-2.7-1.41-1.42L15.17 10.6 12.46 7.88l-1.41 1.41 2.71 2.71-2.71 2.71 1.41 1.41 2.71-2.7 2.71 2.7 1.41-1.41-2.7-2.7z"/>
           </svg>
@@ -66,8 +66,8 @@
   </div>
 
   <div class="hero-foot" id="install">
-    <div class="install-stack"><span class="install-label">claude code</span><pre class="install" aria-label="Claude Code install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="/plugin marketplace add irvinosazee/brag&#10;/plugin install brag@brag">copy</button></span><code><span class="prompt">$</span> /plugin marketplace add irvinosazee/brag
-<span class="prompt">$</span> /plugin install brag@brag</code></pre><span class="install-label">any other agent</span><pre class="install" aria-label="any-agent install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="npx skills add https://github.com/irvinosazee/brag --skill brag">copy</button></span><code><span class="prompt">$</span> npx skills add https://github.com/irvinosazee/brag --skill brag</code></pre></div>
+    <div class="install-stack"><span class="install-label">claude code</span><pre class="install" aria-label="Claude Code install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="/plugin marketplace add irvinosazee/shipreel&#10;/plugin install shipreel@shipreel">copy</button></span><code><span class="prompt">$</span> /plugin marketplace add irvinosazee/shipreel
+<span class="prompt">$</span> /plugin install shipreel@shipreel</code></pre><span class="install-label">any other agent</span><pre class="install" aria-label="any-agent install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="npx skills add https://github.com/irvinosazee/shipreel --skill shipreel">copy</button></span><code><span class="prompt">$</span> npx skills add https://github.com/irvinosazee/shipreel --skill shipreel</code></pre></div>
     <div class="hero-meta"><span class="dot" aria-hidden="true"></span>plays well with all agents · made by <a href="https://github.com/irvinosazee" style="color:inherit;">@irvinosazee</a></div>
   </div>
 </header>
@@ -76,8 +76,8 @@
   <section class="gallery" aria-labelledby="gallery-title">
     <div class="gallery-head">
       <div>
-        <p class="gallery-eyebrow">three real projects · three real brags</p>
-        <h2 class="gallery-title" id="gallery-title">what twenty<br/>seconds of <em>brag</em><br/>looks like.</h2>
+        <p class="gallery-eyebrow">three real projects · three real reels</p>
+        <h2 class="gallery-title" id="gallery-title">what twenty<br/>seconds of <em>proof</em><br/>looks like.</h2>
       </div>
       <p class="gallery-note">Tap play to watch with sound. The thumbnail opens the live site.</p>
     </div>
@@ -87,13 +87,13 @@
       <article class="card" data-place="feature">
         <div class="card-media">
           <video
-            class="brag-video"
-            src="examples/horse-tinder/brag.mp4"
-            poster="examples/horse-tinder/brag.jpg"
+            class="shipreel"
+            src="examples/horse-tinder/shipreel.mp4"
+            poster="examples/horse-tinder/shipreel.jpg"
             preload="metadata"
             playsinline
             controls
-            aria-label="horse tinder brag video"
+            aria-label="horse tinder launch video"
           ></video>
         </div>
         <div class="card-cap">
@@ -105,13 +105,13 @@
       <article class="card" data-place="tall">
         <div class="card-media">
           <video
-            class="brag-video"
-            src="examples/fish-flight-school/brag.mp4"
-            poster="examples/fish-flight-school/brag.jpg"
+            class="shipreel"
+            src="examples/fish-flight-school/shipreel.mp4"
+            poster="examples/fish-flight-school/shipreel.jpg"
             preload="metadata"
             playsinline
             controls
-            aria-label="fish flight school brag video"
+            aria-label="fish flight school launch video"
           ></video>
         </div>
         <div class="card-cap">
@@ -123,13 +123,13 @@
       <article class="card" data-place="right">
         <div class="card-media">
           <video
-            class="brag-video"
-            src="examples/taxi-for-taxis/brag.mp4"
-            poster="examples/taxi-for-taxis/brag.jpg"
+            class="shipreel"
+            src="examples/taxi-for-taxis/shipreel.mp4"
+            poster="examples/taxi-for-taxis/shipreel.jpg"
             preload="metadata"
             playsinline
             controls
-            aria-label="taxi for taxis brag video"
+            aria-label="taxi for taxis launch video"
           ></video>
         </div>
         <div class="card-cap">
@@ -140,10 +140,10 @@
 
       <article class="card is-cta" data-place="half">
         <div class="card-media">
-          <span class="cta-word">your<br/>brag<br/>here</span>
+          <span class="cta-word">your<br/>reel<br/>here</span>
         </div>
         <div class="card-cap">
-          <a class="site-link" href="#install" aria-label="install /brag"><span>your<br/>site</span></a>
+          <a class="site-link" href="#install" aria-label="install /shipreel"><span>your<br/>site</span></a>
           <span class="cap-text"><span class="num">04</span><span class="card-name">your project</span><span class="cap-cat">install</span></span>
         </div>
       </article>
@@ -153,16 +153,16 @@
 
   <section class="outro" aria-labelledby="outro-title">
     <div class="outro-inner">
-      <h2 class="outro-headline" id="outro-title">now go <em>brag</em>.</h2>
+      <h2 class="outro-headline" id="outro-title">now go <em>ship</em>.</h2>
       <div class="outro-grid">
-        <p class="outro-meta">we used <code>/brag</code> to brag about <code>/brag</code>. the twenty-second video looping in the top-right corner of this page was made by the skill itself, on this very project. that's the demo.</p>
+        <p class="outro-meta">we used <code>/shipreel</code> on <code>/shipreel</code>. the twenty-second video looping in the top-right corner of this page was made by the skill itself, on this very project. that's the demo.</p>
         <div class="outro-actions">
-          <div class="install-stack"><span class="install-label">claude code</span><pre class="install" aria-label="Claude Code install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="/plugin marketplace add irvinosazee/brag&#10;/plugin install brag@brag">copy</button></span><code><span class="prompt">$</span> /plugin marketplace add irvinosazee/brag
-<span class="prompt">$</span> /plugin install brag@brag</code></pre><span class="install-label">any other agent</span><pre class="install" aria-label="any-agent install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="npx skills add https://github.com/irvinosazee/brag --skill brag">copy</button></span><code><span class="prompt">$</span> npx skills add https://github.com/irvinosazee/brag --skill brag</code></pre></div>
+          <div class="install-stack"><span class="install-label">claude code</span><pre class="install" aria-label="Claude Code install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="/plugin marketplace add irvinosazee/shipreel&#10;/plugin install shipreel@shipreel">copy</button></span><code><span class="prompt">$</span> /plugin marketplace add irvinosazee/shipreel
+<span class="prompt">$</span> /plugin install shipreel@shipreel</code></pre><span class="install-label">any other agent</span><pre class="install" aria-label="any-agent install command"><span class="copy-wrap"><button class="copy" type="button" data-copy="npx skills add https://github.com/irvinosazee/shipreel --skill shipreel">copy</button></span><code><span class="prompt">$</span> npx skills add https://github.com/irvinosazee/shipreel --skill shipreel</code></pre></div>
         </div>
       </div>
       <div class="colophon">
-        <span>made with <a href="https://github.com/irvinosazee/brag" style="color:inherit;">/brag</a> and <a href="https://hyperframes.dev" target="_blank" rel="noopener" style="color:inherit;">hyperframes</a></span>
+        <span>made with <a href="https://github.com/irvinosazee/shipreel" style="color:inherit;">/shipreel</a> and <a href="https://hyperframes.heygen.com/" target="_blank" rel="noopener" style="color:inherit;">hyperframes</a> · forked from <a href="https://github.com/latent-spaces/brag" target="_blank" rel="noopener" style="color:inherit;">/brag</a> by <a href="https://github.com/shunithaviv" target="_blank" rel="noopener" style="color:inherit;">shunit haviv hakimi</a></span>
       </div>
     </div>
   </section>

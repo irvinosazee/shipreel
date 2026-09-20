@@ -12,11 +12,11 @@ import {
   checkAssets,
   detectTools,
   summarize,
-} from "../skills/brag/scripts/brag_doctor.mjs";
+} from "../skills/shipreel/scripts/doctor.mjs";
 
 const repoSkillRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../skills/brag",
+  "../skills/shipreel",
 );
 
 test("parseVersion extracts semver from noisy CLI output", () => {
@@ -33,7 +33,7 @@ test("compareVersions orders versions numerically", () => {
 });
 
 test("resolveSkillRoot is the directory above scripts/", () => {
-  const scriptUrl = new URL("../skills/brag/scripts/brag_doctor.mjs", import.meta.url).href;
+  const scriptUrl = new URL("../skills/shipreel/scripts/doctor.mjs", import.meta.url).href;
   assert.equal(resolveSkillRoot(scriptUrl), repoSkillRoot);
 });
 
@@ -47,7 +47,7 @@ test("checkAssets finds the bundled library in the repo copy", () => {
 });
 
 test("checkAssets reports a stripped install without throwing", () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-doctor-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-doctor-"));
   try {
     mkdirSync(path.join(root, "assets/music"), { recursive: true });
     writeFileSync(path.join(root, "assets/music/track.mp3"), "");

@@ -1,5 +1,5 @@
-name: brag video
-description: Release videos and pull-request before/after previews, made with /brag and Hyperframes. No model calls, no secrets beyond the workflow token.
+name: shipreel video
+description: Release videos and pull-request before/after previews, made with /shipreel and Hyperframes. No model calls, no secrets beyond the workflow token.
 author: Irvin Osazee
 branding:
   icon: film
@@ -56,7 +56,7 @@ inputs:
   out:
     description: Output directory.
     required: false
-    default: brag-video
+    default: shipreel
   github-token:
     description: Token for release uploads and comments.
     required: false
@@ -101,7 +101,7 @@ runs:
           args+=(--notes "$OUT/notes.md")
         fi
         [ "$RENDER" = "true" ] || args+=(--content-only)
-        node "$GITHUB_ACTION_PATH/skills/brag/scripts/release_video.mjs" "$GITHUB_WORKSPACE" "${args[@]}"
+        node "$GITHUB_ACTION_PATH/skills/shipreel/scripts/release_video.mjs" "$GITHUB_WORKSPACE" "${args[@]}"
         if [ "$RENDER" = "true" ]; then echo "video=$OUT/release.mp4" >> "$GITHUB_OUTPUT"; fi
 
     - name: Attach the video to the release
@@ -128,7 +128,7 @@ runs:
         if [ -z "$BASE" ] || [ -z "$HEAD" ]; then echo "::error::pr-preview needs base-url and head-url"; exit 1; fi
         args=(--base "$BASE" --head "$HEAD" --out "$OUT" --video-url "$RUN_URL")
         if [ -n "$ROUTES" ]; then args+=(--routes "$ROUTES"); elif [ -n "$CHANGED" ]; then args+=(--changed-files "$CHANGED"); fi
-        node "$GITHUB_ACTION_PATH/skills/brag/scripts/pr_preview.mjs" "${args[@]}"
+        node "$GITHUB_ACTION_PATH/skills/shipreel/scripts/pr_preview.mjs" "${args[@]}"
         if [ -f "$OUT/comment.md" ]; then
           echo "video=$OUT/preview.mp4" >> "$GITHUB_OUTPUT"
           echo "comment=$OUT/comment.md" >> "$GITHUB_OUTPUT"
@@ -138,7 +138,7 @@ runs:
       if: inputs.mode == 'pr-preview' && steps.preview.outputs.video != ''
       uses: actions/upload-artifact@v4
       with:
-        name: brag-pr-preview
+        name: shipreel-pr-preview
         path: |
           ${{ inputs.out }}/preview.mp4
           ${{ inputs.out }}/preview.gif
@@ -152,7 +152,7 @@ runs:
         PR: ${{ inputs.pr-number }}
         BODY_FILE: ${{ steps.preview.outputs.comment }}
       run: |
-        existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- brag:pr-preview -->")) | .id' | head -n 1)
+        existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | startswith("<!-- shipreel:pr-preview -->")) | .id' | head -n 1)
         if [ -n "$existing" ]; then
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F "body=@$BODY_FILE" > /dev/null
         else

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { compactNumber, parseGitHubRemote, githubMetrics, npmMetrics, metricClaims } from "../skills/brag/scripts/metrics.mjs";
+import { compactNumber, parseGitHubRemote, githubMetrics, npmMetrics, metricClaims } from "../skills/shipreel/scripts/metrics.mjs";
 
 test("compactNumber reads like a social post", () => {
   assert.equal(compactNumber(7), "7");
@@ -11,7 +11,7 @@ test("compactNumber reads like a social post", () => {
 });
 
 test("parseGitHubRemote handles https and ssh remotes", () => {
-  assert.deepEqual(parseGitHubRemote("https://github.com/irvinosazee/brag.git"), { owner: "irvinosazee", repo: "brag" });
+  assert.deepEqual(parseGitHubRemote("https://github.com/irvinosazee/shipreel.git"), { owner: "irvinosazee", repo: "shipreel" });
   assert.deepEqual(parseGitHubRemote("git@github.com:heygen-com/hyperframes.git"), { owner: "heygen-com", repo: "hyperframes" });
   assert.equal(parseGitHubRemote("https://gitlab.com/a/b.git"), null);
 });
@@ -48,7 +48,7 @@ test("npmMetrics returns last-week downloads", async () => {
   ]);
 });
 
-test("metricClaims leaves out zero values, which are true but nothing to brag about", () => {
+test("metricClaims leaves out zero values, which are true but nothing to shipreel about", () => {
   const claims = metricClaims([
     { id: "github-stars", label: "GitHub stars", value: 0, source: "https://api.github.com/repos/a/b", fetchedAt: "2026-09-17T04:00:00Z" },
     { id: "npm-weekly-downloads", label: "npm downloads last week", value: 211000, source: "https://api.npmjs.org/downloads/point/last-week/x", fetchedAt: "2026-09-17T04:00:00Z" },

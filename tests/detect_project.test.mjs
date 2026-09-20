@@ -5,12 +5,12 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { detectProject, PROJECT_TYPES } from "../skills/brag/scripts/detect_project.mjs";
+import { detectProject, PROJECT_TYPES } from "../skills/shipreel/scripts/detect_project.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function fixture(files) {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-detect-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-detect-"));
   for (const [rel, content] of Object.entries(files)) {
     const full = path.join(root, rel);
     mkdirSync(path.dirname(full), { recursive: true });

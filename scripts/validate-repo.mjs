@@ -11,8 +11,8 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync, statSyn
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SKILL_DIR = "skills/brag";
-const DISCOVERY_LINKS = [".claude/skills/brag", ".agents/skills/brag", ".opencode/skills/brag"];
+const SKILL_DIR = "skills/shipreel";
+const DISCOVERY_LINKS = [".claude/skills/shipreel", ".agents/skills/shipreel", ".opencode/skills/shipreel"];
 const SEMVER = /^\d+\.\d+\.\d+(-[\w.]+)?$/;
 
 function readJson(root, rel, problems) {

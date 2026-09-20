@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { parsePsnr } from "../skills/brag/scripts/verify_render.mjs";
+import { parsePsnr } from "../skills/shipreel/scripts/verify_render.mjs";
 import {
   loadScenes,
   planCutdown,
@@ -15,7 +15,7 @@ import {
   renderSegments,
   makeCarousel,
   buildPdf,
-} from "../skills/brag/scripts/cuts.mjs";
+} from "../skills/shipreel/scripts/cuts.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -100,19 +100,19 @@ test("buildPdf writes one page per JPEG with a correct xref table", () => {
 });
 
 test("renderSegments and makeCarousel work on a real clip", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-cuts-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-cuts-"));
   const ff = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args]);
   const duration = (file) =>
     Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file], { encoding: "utf8" }));
   try {
-    const clip = path.join(dir, "brag.mp4");
+    const clip = path.join(dir, "shipreel.mp4");
     ff(
       "-f", "lavfi", "-i", "testsrc2=size=540x960:rate=30:duration=22.5",
       "-f", "lavfi", "-i", "sine=frequency=330:duration=22.5",
       "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", clip,
     );
 
-    const cut = path.join(dir, "nested", "missing", "brag-cut6.mp4");
+    const cut = path.join(dir, "nested", "missing", "shipreel-cut6.mp4");
     renderSegments(clip, planCutdown(scenes, 6), cut);
     assert.ok(Math.abs(duration(cut) - 6) < 0.2, String(duration(cut)));
 

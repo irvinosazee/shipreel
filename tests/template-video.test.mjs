@@ -1,21 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { fitFontPx, planCardVideo, buildCardComposition, contentBox, CARD_THEME } from "../skills/brag/scripts/template_video.mjs";
-import { contrastRatio } from "../skills/brag/scripts/captions.mjs";
+import { fitFontPx, planCardVideo, buildCardComposition, contentBox, CARD_THEME } from "../skills/shipreel/scripts/template_video.mjs";
+import { contrastRatio } from "../skills/shipreel/scripts/captions.mjs";
 
 const content = {
   kicker: "v2.4.0",
-  title: "brag",
+  title: "shipreel",
   subtitle: "turn any project into a launch video",
   stats: [{ value: "142", label: "commits" }, { value: "3", label: "contributors" }],
   screenshots: [{ file: "shot.png", width: 1080, height: 3000, caption: "the landing page" }],
   highlights: { heading: "what's new", items: ["vertical exports for tiktok and reels", "burned-in karaoke captions", "golden-frame regression tests"] },
-  outro: { line: "try it", detail: "npx brag-video make" },
+  outro: { line: "try it", detail: "npx shipreel make" },
 };
 
 test("fitFontPx picks the largest size whose wrapped lines fit, and truncates only when the minimum cannot", () => {
-  assert.equal(fitFontPx("brag", { width: 1600, maxPx: 160, minPx: 60, maxLines: 2 }).px, 160);
+  assert.equal(fitFontPx("shipreel", { width: 1600, maxPx: 160, minPx: 60, maxLines: 2 }).px, 160);
   const long = fitFontPx("a much longer title that needs to wrap onto more than one line", { width: 810, maxPx: 120, minPx: 56, maxLines: 3 });
   assert.ok(long.px < 120 && long.px >= 56);
   assert.equal(long.text, "a much longer title that needs to wrap onto more than one line");
@@ -79,7 +79,7 @@ test("buildCardComposition emits a lint-shaped Hyperframes root with one paused 
   assert.doesNotMatch(html, /oklch\(/, "hex colors keep the contrast audit working");
   assert.equal((html.match(/class="clip scene/g) || []).length, plan.scenes.length);
   assert.match(html, /<img id="shot-0-img" src="assets\/shot-0\.png"/);
-  assert.match(html, /npx brag-video make/);
+  assert.match(html, /npx shipreel make/);
   assert.doesNotMatch(buildCardComposition({ title: "<script>" }, { format: "square" }).html, /<h1[^>]*><script>/, "text is escaped");
 });
 

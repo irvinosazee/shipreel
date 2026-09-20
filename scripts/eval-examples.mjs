@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Static eval over examples/: each demo project must have its source files,
- * be detected as a landing page, and ship a brag.mp4 that passes
- * verify_render.mjs (poster checked against examples/<slug>/brag.jpg, or
- * docs/examples/<slug>/brag.jpg for gallery examples).
+ * be detected as a landing page, and ship a shipreel.mp4 that passes
+ * verify_render.mjs (poster checked against examples/<slug>/shipreel.jpg, or
+ * docs/examples/<slug>/shipreel.jpg for gallery examples).
  *
  *   node scripts/eval-examples.mjs [--update-baseline] [--update-golden]
  *
@@ -19,9 +19,9 @@ import { appendFileSync, existsSync, readdirSync, readFileSync, realpathSync, st
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { detectProject } from "../skills/brag/scripts/detect_project.mjs";
-import { verifyRender } from "../skills/brag/scripts/verify_render.mjs";
-import { captureGolden, compareGolden } from "../skills/brag/scripts/golden.mjs";
+import { detectProject } from "../skills/shipreel/scripts/detect_project.mjs";
+import { verifyRender } from "../skills/shipreel/scripts/verify_render.mjs";
+import { captureGolden, compareGolden } from "../skills/shipreel/scripts/golden.mjs";
 
 const REQUIRED_FILES = ["index.html", "styles.css", "PRODUCT.md"];
 
@@ -37,11 +37,11 @@ export function evalExample(root, slug) {
   if (detection.type !== "landing-page") issues.push(`detect:${detection.type}`);
 
   let render = null;
-  const video = path.join(dir, "brag.mp4");
+  const video = path.join(dir, "shipreel.mp4");
   if (!existsSync(video)) {
-    issues.push("render:missing-brag.mp4");
+    issues.push("render:missing-shipreel.mp4");
   } else {
-    const poster = [path.join(dir, "brag.jpg"), path.join(root, "docs", "examples", slug, "brag.jpg")].find((p) => existsSync(p));
+    const poster = [path.join(dir, "shipreel.jpg"), path.join(root, "docs", "examples", slug, "shipreel.jpg")].find((p) => existsSync(p));
     const report = verifyRender(video, { format: "landscape", posterPath: poster });
     issues.push(...report.errorCodes.map((code) => `render:${code}`), ...report.warningCodes.map((code) => `render:${code}`));
     render = { duration: report.facts.duration, lufs: report.facts.integratedLufs, errors: report.errors, warnings: report.warnings };
@@ -80,7 +80,7 @@ export function renderSummary(results, { newIssues, fixed }) {
     return `| ${slug} | ${type} | ${duration} | ${lufs} | ${issues.join(", ") || "✓"} |`;
   });
   const lines = [
-    "## /brag examples eval",
+    "## /shipreel examples eval",
     "",
     "| Example | Detected | Duration | Loudness | Issues |",
     "|---|---|---|---|---|",
@@ -103,7 +103,7 @@ function main(argv) {
 
   if (argv.includes("--update-golden")) {
     for (const slug of slugs) {
-      const video = path.join(root, "examples", slug, "brag.mp4");
+      const video = path.join(root, "examples", slug, "shipreel.mp4");
       if (existsSync(video)) captureGolden(video, { outDir: path.join(root, "tests", "golden", slug), frames: 8 });
     }
     console.log(`Captured golden frames for ${slugs.length} example(s) in tests/golden/.`);

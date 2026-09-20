@@ -1,4 +1,4 @@
-/* brag — launch site */
+/* shipreel — launch site */
 
 :root {
   --hue: 35;
@@ -229,7 +229,7 @@ button { font: inherit; cursor: pointer; }
   50% { opacity: 1; transform: scale(1.15); }
 }
 
-/* Hero video slot — the brag-about-brag video (made by /brag itself) */
+/* Hero video slot — the video shipreel made about itself (made by /shipreel itself) */
 .hero-video {
   position: relative;
   aspect-ratio: 9 / 16;

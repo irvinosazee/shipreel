@@ -5,10 +5,10 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { gitStory, storyLine } from "../skills/brag/scripts/git_story.mjs";
+import { gitStory, storyLine } from "../skills/shipreel/scripts/git_story.mjs";
 
 function repo() {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-git-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-git-"));
   const git = (args, env = {}) => execFileSync("git", args, { cwd: dir, env: { ...process.env, ...env }, encoding: "utf8" });
   git(["init", "-q", "-b", "main"]);
   const commit = (message, file, date, author = "Ada <ada@example.com>") => {
@@ -71,7 +71,7 @@ test("storyLine is the build-story card copy", () => {
 });
 
 test("gitStory explains a directory that is not a git repository", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-nogit-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-nogit-"));
   try {
     assert.throws(() => gitStory(dir), /not a git repository/);
   } finally {

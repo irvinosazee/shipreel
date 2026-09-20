@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { parseTimes, sheetGrid, reviewFrames } from "../skills/brag/scripts/review_frames.mjs";
+import { parseTimes, sheetGrid, reviewFrames } from "../skills/shipreel/scripts/review_frames.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -35,7 +35,7 @@ test("sheetGrid keeps sheets at most four columns wide", () => {
 });
 
 test("reviewFrames writes frames and a contact sheet", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-review-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-review-"));
   try {
     const clip = path.join(dir, "clip.mp4");
     execFileSync("ffmpeg", [

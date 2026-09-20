@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { REDUCED_MOTION_SHIM, stampReducedMotion, makeReducedMotionVariant, descriptionsVtt } from "../skills/brag/scripts/access.mjs";
+import { REDUCED_MOTION_SHIM, stampReducedMotion, makeReducedMotionVariant, descriptionsVtt } from "../skills/shipreel/scripts/access.mjs";
 
 function fakeGsap() {
   const calls = [];
@@ -33,14 +33,14 @@ test("the reduced-motion shim strips movement but keeps fades, color, and timing
 test("stampReducedMotion inserts the shim right after the GSAP script and marks the root", () => {
   const html = `<head><script src="assets/vendor/gsap.min.js"></script><style></style></head><body><div id="root" data-composition-id="main" data-width="1080"></div><script>const tl = gsap.timeline();</script></body>`;
   const out = stampReducedMotion(html);
-  assert.match(out, /gsap\.min\.js"><\/script>\n<script id="brag-reduced-motion">/);
+  assert.match(out, /gsap\.min\.js"><\/script>\n<script id="shipreel-reduced-motion">/);
   assert.match(out, /data-composition-id="main" data-width="1080" data-motion="reduced"/);
   assert.equal(stampReducedMotion(out), out, "idempotent");
   assert.throws(() => stampReducedMotion("<div data-composition-id='x'></div>"), /GSAP script/);
 });
 
 test("makeReducedMotionVariant writes composition-reduced-motion with assets", () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-rm-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-rm-"));
   try {
     const src = path.join(root, "composition");
     mkdirSync(path.join(src, "assets"), { recursive: true });
@@ -48,7 +48,7 @@ test("makeReducedMotionVariant writes composition-reduced-motion with assets", (
     writeFileSync(path.join(src, "index.html"), `<script src="assets/vendor/gsap.min.js"></script><div data-composition-id="main"></div>`);
     const dir = makeReducedMotionVariant(src);
     assert.equal(dir, path.join(root, "composition-reduced-motion"));
-    assert.match(readFileSync(path.join(dir, "index.html"), "utf8"), /brag-reduced-motion/);
+    assert.match(readFileSync(path.join(dir, "index.html"), "utf8"), /shipreel-reduced-motion/);
     assert.ok(existsSync(path.join(dir, "assets", "font.woff2")));
     assert.match(readFileSync(path.join(dir, "GENERATED.md"), "utf8"), /do not edit/i);
   } finally {
@@ -58,12 +58,12 @@ test("makeReducedMotionVariant writes composition-reduced-motion with assets", (
 
 test("descriptionsVtt writes a WebVTT description track and names scenes missing a description", () => {
   const scenes = [
-    { name: "Hook", start: 0, end: 3.553, description: "Orange screen. Headline: let's brag about it." },
+    { name: "Hook", start: 0, end: 3.553, description: "Orange screen. Headline: let's shipreel about it." },
     { name: "Install", start: 7.11, end: 11.471, description: "A terminal types the two install commands." },
   ];
   assert.equal(
     descriptionsVtt(scenes),
-    "WEBVTT - audio descriptions\n\n00:00:00.000 --> 00:00:03.553\nOrange screen. Headline: let's brag about it.\n\n00:00:07.110 --> 00:00:11.471\nA terminal types the two install commands.\n",
+    "WEBVTT - audio descriptions\n\n00:00:00.000 --> 00:00:03.553\nOrange screen. Headline: let's shipreel about it.\n\n00:00:07.110 --> 00:00:11.471\nA terminal types the two install commands.\n",
   );
   assert.throws(() => descriptionsVtt([{ name: "Claim", start: 0, end: 1 }]), /Claim has no description/);
 });

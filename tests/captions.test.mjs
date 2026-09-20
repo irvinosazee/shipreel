@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { formatTimestamp, groupWords, lintCues, toSrt, toVtt } from "../skills/brag/scripts/captions.mjs";
+import { formatTimestamp, groupWords, lintCues, toSrt, toVtt } from "../skills/shipreel/scripts/captions.mjs";
 
 test("formatTimestamp renders SRT and VTT clocks", () => {
   assert.equal(formatTimestamp(0, "srt"), "00:00:00,000");
@@ -65,7 +65,7 @@ test("lintCues flags overlaps, empty text, and cues too short to read", () => {
   assert.deepEqual(lintCues(cues), []);
 });
 
-import { CAPTION_STYLES, cueWords, buildCaptionBlock, injectCaptions, contrastRatio } from "../skills/brag/scripts/captions.mjs";
+import { CAPTION_STYLES, cueWords, buildCaptionBlock, injectCaptions, contrastRatio } from "../skills/shipreel/scripts/captions.mjs";
 
 const theme = {
   font: "Geist",
@@ -83,7 +83,7 @@ test("contrastRatio follows WCAG relative luminance", () => {
 test("every caption style sits on a solid plate, so it reads over any scene background", () => {
   for (const style of Object.keys(CAPTION_STYLES)) {
     const html = buildCaptionBlock([{ start: 0, end: 2, text: "hello there" }], { style, theme });
-    assert.match(html, /\.brag-line \{[^}]*background: #1a0f0b;/, style);
+    assert.match(html, /\.shipreel-line \{[^}]*background: #1a0f0b;/, style);
     assert.doesNotMatch(html, /text-stroke/, `${style} has no outline that could fill word gaps`);
   }
 });
@@ -113,41 +113,41 @@ test("cueWords spreads a cue's words evenly when no word timings exist", () => {
 
 test("lower-third renders one timed clip per cue inside the band", () => {
   const html = buildCaptionBlock([{ start: 0.4, end: 2.2, text: "Dating apps & <humans>" }], { style: "lower-third", theme });
-  assert.match(html, /<!-- brag:captions:start style=lower-third -->/);
-  assert.match(html, /<div id="cap-0" class="clip brag-cap" data-start="0.4" data-duration="1.8" data-track-index="90">/);
-  assert.match(html, /<span class="brag-line">Dating apps &amp; &lt;humans&gt;<\/span>/, "a lower-third line is measured like any text");
+  assert.match(html, /<!-- shipreel:captions:start style=lower-third -->/);
+  assert.match(html, /<div id="cap-0" class="clip shipreel-cap" data-start="0.4" data-duration="1.8" data-track-index="90">/);
+  assert.match(html, /<span class="shipreel-line">Dating apps &amp; &lt;humans&gt;<\/span>/, "a lower-third line is measured like any text");
   assert.match(html, /left: 96px; top: 1180px; width: 816px; height: 220px/);
   assert.doesNotMatch(html, /<script/, "caption styles are pure timed markup, no timeline code");
   assert.doesNotMatch(html, /<br/);
   // Timed captions carry class="clip" for Hyperframes, so they must undo a composition's `.clip { position: absolute; inset: 0 }`.
-  assert.match(html, /\.brag-captions \.clip\.brag-cap \{[^}]*right: auto; bottom: auto;/);
+  assert.match(html, /\.shipreel-captions \.clip\.shipreel-cap \{[^}]*right: auto; bottom: auto;/);
 });
 
 test("word-pop shows each word from its start until the cue ends", () => {
   const html = buildCaptionBlock([{ start: 1, end: 3, text: "twenty seconds" }], { style: "word-pop", theme });
-  assert.match(html, /<span id="cap-0-w0" class="clip brag-word" data-start="1" data-duration="2" data-track-index="91">twenty<\/span>/);
-  assert.match(html, /<span id="cap-0-w1" class="clip brag-word" data-start="2" data-duration="1" data-track-index="92">seconds<\/span>/);
-  assert.match(html, /\.brag-captions \.clip\.brag-word \{ position: static; inset: auto; display: inline; \}/);
-  assert.match(html, /<span class="brag-line" data-read-exempt="time">/);
+  assert.match(html, /<span id="cap-0-w0" class="clip shipreel-word" data-start="1" data-duration="2" data-track-index="91">twenty<\/span>/);
+  assert.match(html, /<span id="cap-0-w1" class="clip shipreel-word" data-start="2" data-duration="1" data-track-index="92">seconds<\/span>/);
+  assert.match(html, /\.shipreel-captions \.clip\.shipreel-word \{ position: static; inset: auto; display: inline; \}/);
+  assert.match(html, /<span class="shipreel-line" data-read-exempt="time">/);
 });
 
 test("karaoke swaps each word from base to lit in one grid cell, never showing both", () => {
   const html = buildCaptionBlock([{ start: 1, end: 3, text: "now go" }], { style: "karaoke", theme });
   // The first word lights up at the cue start, so it has no base phase; its base stays as an invisible width holder.
-  assert.match(html, /<span class="brag-kw"><span class="brag-base brag-hold">now<\/span><span id="cap-0-w0" class="clip brag-lit" data-start="1" data-duration="2" data-track-index="91">now<\/span><\/span>/);
-  assert.match(html, /<span class="brag-kw"><span id="cap-0-w1-base" class="clip brag-base" data-start="1" data-duration="1" data-track-index="92">go<\/span><span id="cap-0-w1" class="clip brag-lit" data-start="2" data-duration="1" data-track-index="93">go<\/span><\/span>/);
-  assert.match(html, /\.brag-lit \{[^}]*color: #ff5a2a/);
-  assert.match(html, /\.brag-kw \{ display: inline-grid; \}/);
-  assert.match(html, /<span class="brag-line" data-read-exempt="time">/, "per-word states are exempt from reading time; the cue is linted as a line");
-  assert.match(html, /\.brag-captions \.clip\.brag-base, \.brag-captions \.clip\.brag-lit \{ position: static; inset: auto; grid-area: 1 \/ 1; \}/);
+  assert.match(html, /<span class="shipreel-kw"><span class="shipreel-base shipreel-hold">now<\/span><span id="cap-0-w0" class="clip shipreel-lit" data-start="1" data-duration="2" data-track-index="91">now<\/span><\/span>/);
+  assert.match(html, /<span class="shipreel-kw"><span id="cap-0-w1-base" class="clip shipreel-base" data-start="1" data-duration="1" data-track-index="92">go<\/span><span id="cap-0-w1" class="clip shipreel-lit" data-start="2" data-duration="1" data-track-index="93">go<\/span><\/span>/);
+  assert.match(html, /\.shipreel-lit \{[^}]*color: #ff5a2a/);
+  assert.match(html, /\.shipreel-kw \{ display: inline-grid; \}/);
+  assert.match(html, /<span class="shipreel-line" data-read-exempt="time">/, "per-word states are exempt from reading time; the cue is linted as a line");
+  assert.match(html, /\.shipreel-captions \.clip\.shipreel-base, \.shipreel-captions \.clip\.shipreel-lit \{ position: static; inset: auto; grid-area: 1 \/ 1; \}/);
 });
 
 test("injectCaptions inserts after the composition root and replaces an earlier block", () => {
   const composition = `<html><body><div id="root" data-composition-id="main" data-width="1080" data-height="1920">\n<section class="clip"></section>\n</div></body></html>`;
   const once = injectCaptions(composition, buildCaptionBlock([{ start: 0, end: 1, text: "hi" }], { style: "lower-third", theme }));
-  assert.match(once, /data-height="1920">\n<!-- brag:captions:start style=lower-third -->/);
+  assert.match(once, /data-height="1920">\n<!-- shipreel:captions:start style=lower-third -->/);
   const twice = injectCaptions(once, buildCaptionBlock([{ start: 0, end: 1, text: "bye" }], { style: "karaoke", theme }));
-  assert.equal((twice.match(/brag:captions:start/g) ?? []).length, 1);
+  assert.equal((twice.match(/shipreel:captions:start/g) ?? []).length, 1);
   assert.match(twice, /style=karaoke/);
   assert.doesNotMatch(twice, />hi</);
 });

@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { COVER_TARGETS, coverMode, makeCovers, gridCropRisk } from "../skills/brag/scripts/covers.mjs";
+import { COVER_TARGETS, coverMode, makeCovers, gridCropRisk } from "../skills/shipreel/scripts/covers.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -37,9 +37,9 @@ test("coverMode scales matching shapes and blur-fills mismatched ones", () => {
 });
 
 test("makeCovers writes every cover at its exact size", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-covers-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-covers-"));
   try {
-    const poster = path.join(dir, "brag.jpg");
+    const poster = path.join(dir, "shipreel.jpg");
     ff("-f", "lavfi", "-i", "color=0xe0380f:size=1080x1920", "-vf", "drawbox=x=140:y=800:w=800:h=300:color=black:t=fill", "-frames:v", "1", poster);
     const results = makeCovers(poster, { outDir: path.join(dir, "covers") });
     assert.deepEqual(results.map((r) => r.id).sort(), ["og", "reels-grid", "youtube"]);
@@ -54,7 +54,7 @@ test("makeCovers writes every cover at its exact size", { skip: !hasFfmpeg && "f
 });
 
 test("gridCropRisk flags detail in the rows the Reels grid crops away", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-grid-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-grid-"));
   try {
     const centered = path.join(dir, "centered.png");
     ff("-f", "lavfi", "-i", "color=white:size=1080x1920", "-vf", "drawbox=x=140:y=800:w=800:h=300:color=black:t=8", "-frames:v", "1", centered);

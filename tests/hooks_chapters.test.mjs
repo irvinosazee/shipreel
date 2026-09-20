@@ -1,15 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { replaceHook } from "../skills/brag/scripts/hooks.mjs";
-import { youtubeChapters } from "../skills/brag/scripts/cuts.mjs";
+import { replaceHook } from "../skills/shipreel/scripts/hooks.mjs";
+import { youtubeChapters } from "../skills/shipreel/scripts/cuts.mjs";
 
 test("replaceHook swaps only the marked hook region", () => {
-  const html = `<div data-composition-id="m">\n<!-- brag:hook:start -->\n<h1>old</h1>\n<!-- brag:hook:end -->\n<p>rest</p></div>`;
+  const html = `<div data-composition-id="m">\n<!-- shipreel:hook:start -->\n<h1>old</h1>\n<!-- shipreel:hook:end -->\n<p>rest</p></div>`;
   const out = replaceHook(html, "<h1>new hook</h1>");
-  assert.match(out, /<!-- brag:hook:start -->\n<h1>new hook<\/h1>\n<!-- brag:hook:end -->/);
+  assert.match(out, /<!-- shipreel:hook:start -->\n<h1>new hook<\/h1>\n<!-- shipreel:hook:end -->/);
   assert.match(out, /<p>rest<\/p>/);
-  assert.throws(() => replaceHook("<div></div>", "x"), /brag:hook:start/);
+  assert.throws(() => replaceHook("<div></div>", "x"), /shipreel:hook:start/);
 });
 
 test("youtubeChapters follows YouTube's rules: starts at 00:00, 3+ chapters, each 10s or longer", () => {

@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { cleanSubject, pickHighlights, notesHighlights, previousTag, projectInfo, releaseContent, tagline } from "../skills/brag/scripts/release_video.mjs";
+import { cleanSubject, pickHighlights, notesHighlights, previousTag, projectInfo, releaseContent, tagline } from "../skills/shipreel/scripts/release_video.mjs";
 
 test("cleanSubject reads conventional commits and strips scopes, PR refs, and trailing periods", () => {
   assert.deepEqual(cleanSubject("feat(cli): add vertical exports (#42)"), { kind: "feat", breaking: false, text: "add vertical exports" });
@@ -47,7 +47,7 @@ test("notesHighlights reads bullets from release notes, including GitHub's gener
 });
 
 test("projectInfo names a private root package after its README heading", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-info-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-info-"));
   try {
     writeFileSync(path.join(dir, "package.json"), JSON.stringify({ name: "thing-repo", private: true }));
     writeFileSync(path.join(dir, "README.md"), "# /thing\n\n**You built it.** Now ship it.\n");
@@ -61,7 +61,7 @@ test("projectInfo names a private root package after its README heading", () => 
 });
 
 test("projectInfo joins a wrapped README paragraph, and tagline keeps a short hook with its follow-up", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-info-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-info-"));
   try {
     writeFileSync(path.join(dir, "README.md"), "# HeartRank\n\n**Who does X actually love?** A live league table where anyone can pay to\nsend Hearts to a handle. Nothing is\nwithdrawable.\n\n## Run it\n");
     const info = projectInfo(dir);
@@ -75,7 +75,7 @@ test("projectInfo joins a wrapped README paragraph, and tagline keeps a short ho
 });
 
 function repo() {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-release-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-release-"));
   const git = (...args) => execFileSync("git", args, { cwd: dir, env: { ...process.env, GIT_AUTHOR_DATE: "2026-01-01T10:00:00Z", GIT_COMMITTER_DATE: "2026-01-01T10:00:00Z" } });
   git("init", "-q", "-b", "main");
   git("config", "user.email", "a@example.com");

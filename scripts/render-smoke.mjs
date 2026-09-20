@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Rendered end-to-end smoke test: render a small committed composition with the current
- * Hyperframes, then hold the output to the same gates /brag uses on real videos.
+ * Hyperframes, then hold the output to the same gates /shipreel uses on real videos.
  *
  *   node scripts/render-smoke.mjs [--out render-smoke-output] [--update-golden]
  *
@@ -17,9 +17,9 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { verifyRender } from "../skills/brag/scripts/verify_render.mjs";
-import { auditComposition } from "../skills/brag/scripts/text_audit.mjs";
-import { captureGolden, compareGolden } from "../skills/brag/scripts/golden.mjs";
+import { verifyRender } from "../skills/shipreel/scripts/verify_render.mjs";
+import { auditComposition } from "../skills/shipreel/scripts/text_audit.mjs";
+import { captureGolden, compareGolden } from "../skills/shipreel/scripts/golden.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SMOKE_MIN_SSIM = 0.85;
@@ -69,7 +69,7 @@ async function main(argv) {
     }
   }
 
-  const summary = ["## /brag render smoke test", "", "| Check | Result | Detail |", "|---|---|---|", ...checks.map((c) => `| ${c.name} | ${c.ok ? "✓" : "✗"} | ${String(c.detail).replace(/\|/g, "\\|").replace(/\n/g, " ")} |`), ""].join("\n");
+  const summary = ["## /shipreel render smoke test", "", "| Check | Result | Detail |", "|---|---|---|", ...checks.map((c) => `| ${c.name} | ${c.ok ? "✓" : "✗"} | ${String(c.detail).replace(/\|/g, "\\|").replace(/\n/g, " ")} |`), ""].join("\n");
   console.log(summary);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
   process.exitCode = checks.every((c) => c.ok) ? 0 : 1;

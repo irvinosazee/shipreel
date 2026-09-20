@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { extractStrings, applyStrings, validateTranslation, protectedTokens, makeLanguageVariant, KOKORO_VOICES, voiceFor } from "../skills/brag/scripts/i18n.mjs";
+import { extractStrings, applyStrings, validateTranslation, protectedTokens, makeLanguageVariant, KOKORO_VOICES, voiceFor } from "../skills/shipreel/scripts/i18n.mjs";
 
 const html = `<!doctype html>
 <html lang="en">
@@ -12,10 +12,10 @@ const html = `<!doctype html>
   <body>
     <div id="root" data-composition-id="main">
       <p id="q" class="kicker">built something cool?</p>
-      <h1 class="slam"><span class="line">let's <span class="hl">brag</span></span><span class="line">about it.</span></h1>
+      <h1 class="slam"><span class="line">let's <span class="hl">shipreel</span></span><span class="line">about it.</span></h1>
       <p class="sub">music &amp; motion · share copy</p>
-      <div data-i18n-skip><code>/plugin install brag@brag</code></div>
-      <p>made with /brag in 20 seconds</p>
+      <div data-i18n-skip><code>/plugin install shipreel@shipreel</code></div>
+      <p>made with /shipreel in 20 seconds</p>
       <script>const t = "not visible";</script>
     </div>
   </body>
@@ -26,10 +26,10 @@ test("extractStrings returns visible text runs inside the composition root, in o
   assert.deepEqual(strings.map((s) => [s.key, s.text]), [
     ["t0", "built something cool?"],
     ["t1", "let's"],
-    ["t2", "brag"],
+    ["t2", "shipreel"],
     ["t3", "about it."],
     ["t4", "music & motion · share copy"],
-    ["t5", "made with /brag in 20 seconds"],
+    ["t5", "made with /shipreel in 20 seconds"],
   ]);
   assert.equal(strings[0].context, "p#q.kicker");
   assert.equal(strings[2].context, "span.hl");
@@ -47,34 +47,34 @@ test("applyStrings replaces each run, keeps surrounding whitespace, escapes, and
     t2: "presumir",
     t3: "de ello.",
     t4: "música & movimiento · texto para compartir",
-    t5: "hecho con /brag en 20 segundos",
+    t5: "hecho con /shipreel en 20 segundos",
   };
   const out = applyStrings(html, translated, { lang: "es" });
   assert.match(out, /<html lang="es">/);
   assert.match(out, /<p id="q" class="kicker">¿construiste algo genial\?<\/p>/);
   assert.match(out, /<span class="line">vamos a <span class="hl">presumir<\/span><\/span>/, "the space before the nested span is kept");
   assert.match(out, /música &amp; movimiento/);
-  assert.match(out, /<code>\/plugin install brag@brag<\/code>/, "skipped regions are untouched");
+  assert.match(out, /<code>\/plugin install shipreel@shipreel<\/code>/, "skipped regions are untouched");
   assert.match(out, /const t = "not visible";/, "scripts are untouched");
   assert.deepEqual(extractStrings(out).strings.map((s) => s.key), ["t0", "t1", "t2", "t3", "t4", "t5"], "the translated file extracts with the same keys");
 });
 
 test("protectedTokens are URLs, commands, handles, and numbers", () => {
-  assert.deepEqual(protectedTokens("made with /brag at https://brag.dev by @ada in 20 seconds, 99.1% uptime"), ["/brag", "https://brag.dev", "@ada", "20", "99.1%"]);
+  assert.deepEqual(protectedTokens("made with /shipreel at https://shipreel.dev by @ada in 20 seconds, 99.1% uptime"), ["/shipreel", "https://shipreel.dev", "@ada", "20", "99.1%"]);
 });
 
 test("validateTranslation requires every key, keeps protected tokens, and warns on long growth", () => {
   const source = extractStrings(html).strings;
-  const good = { t0: "¿algo genial?", t1: "vamos a", t2: "presumir", t3: "de ello.", t4: "música", t5: "hecho con /brag en 20 segundos" };
+  const good = { t0: "¿algo genial?", t1: "vamos a", t2: "presumir", t3: "de ello.", t4: "música", t5: "hecho con /shipreel en 20 segundos" };
   assert.deepEqual(validateTranslation(source, good), { errors: [], warnings: [] });
 
-  const bad = { ...good, t2: " ", t5: "hecho con brag en veinte segundos", t9: "extra" };
+  const bad = { ...good, t2: " ", t5: "hecho con shipreel en veinte segundos", t9: "extra" };
   delete bad.t3;
   const { errors } = validateTranslation(source, bad);
   assert.deepEqual(errors, [
-    't2 ("brag") is empty',
+    't2 ("shipreel") is empty',
     't3 ("about it.") is missing',
-    't5 ("made with /brag in 20 seconds") dropped "/brag", "20"',
+    't5 ("made with /shipreel in 20 seconds") dropped "/shipreel", "20"',
     "t9 is not a key in strings.json",
   ]);
 
@@ -83,13 +83,13 @@ test("validateTranslation requires every key, keeps protected tokens, and warns 
 });
 
 test("makeLanguageVariant writes composition-<lang> with translated markup and assets", () => {
-  const root = mkdtempSync(path.join(tmpdir(), "brag-i18n-"));
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-i18n-"));
   try {
     const src = path.join(root, "composition");
     mkdirSync(path.join(src, "assets"), { recursive: true });
     writeFileSync(path.join(src, "index.html"), html);
     writeFileSync(path.join(src, "assets", "a.txt"), "x");
-    const dir = makeLanguageVariant(src, "ja", { t0: "何か作った？", t1: "", t2: "自慢", t3: "しよう。", t4: "音楽", t5: "/brag で 20 秒" });
+    const dir = makeLanguageVariant(src, "ja", { t0: "何か作った？", t1: "", t2: "自慢", t3: "しよう。", t4: "音楽", t5: "/shipreel で 20 秒" });
     assert.equal(dir, path.join(root, "composition-ja"));
     const out = readFileSync(path.join(dir, "index.html"), "utf8");
     assert.match(out, /<html lang="ja">/);

@@ -13,7 +13,7 @@ import {
   budgetBitrateKbps,
   exportForPlatforms,
   drawSafeZones,
-} from "../skills/brag/scripts/platforms.mjs";
+} from "../skills/shipreel/scripts/platforms.mjs";
 
 const hasFfmpeg = (() => {
   try {
@@ -78,9 +78,9 @@ test("budgetBitrateKbps leaves headroom for audio and container overhead", () =>
 });
 
 test("exportForPlatforms copies renders that fit and re-encodes ones over budget", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-export-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-export-"));
   try {
-    const render = path.join(dir, "brag-landscape.mp4");
+    const render = path.join(dir, "shipreel-landscape.mp4");
     execFileSync("ffmpeg", [
       "-hide_banner", "-loglevel", "error", "-y",
       "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30:duration=4",
@@ -103,12 +103,12 @@ test("exportForPlatforms copies renders that fit and re-encodes ones over budget
     assert.equal(discord.action, "re-encoded");
     assert.ok(existsSync(discord.path));
     assert.ok(statSync(discord.path).size <= budgetMb * 1024 * 1024, `${statSync(discord.path).size} > ${budgetMb} MB`);
-    assert.match(path.basename(discord.path), /^brag-discord\.mp4$/);
+    assert.match(path.basename(discord.path), /^shipreel-discord\.mp4$/);
 
     const readme = results.find((r) => r.platform === "readme");
     assert.equal(readme.action, "copied", "640px source is narrower than the 1280px export width");
     assert.ok(existsSync(readme.gif));
-    assert.match(readme.gif, /brag-readme\.gif$/);
+    assert.match(readme.gif, /shipreel-readme\.gif$/);
     // Animated WebP needs an ffmpeg built with libwebp; without it the export says why it was skipped.
     if (readme.webp) assert.ok(existsSync(readme.webp));
     else assert.match(readme.webpSkipped, /libwebp/);
@@ -124,7 +124,7 @@ test("exportForPlatforms reports a missing render instead of failing silently", 
 });
 
 test("drawSafeZones overlays the unsafe margins on a frame", { skip: !hasFfmpeg && "ffmpeg not installed" }, () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "brag-zones-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "shipreel-zones-"));
   try {
     const frame = path.join(dir, "frame.png");
     execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=white:size=1080x1920", "-frames:v", "1", frame]);

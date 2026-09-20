@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { minLegiblePx, readingNeed, longestRun, analyzeSamples, findChrome, auditComposition } from "../skills/brag/scripts/text_audit.mjs";
+import { minLegiblePx, readingNeed, longestRun, analyzeSamples, findChrome, auditComposition } from "../skills/shipreel/scripts/text_audit.mjs";
 
 const fixture = path.join(path.dirname(fileURLToPath(import.meta.url)), "fixtures", "readability");
 
@@ -58,7 +58,7 @@ test("analyzeSamples flags short reads and small type, and honours read-exempt",
       frame: [1080, 1920],
       step: 0.1,
       elements: [
-        { id: "#hook", text: "let's brag", readable: Array(20).fill(true), fontPx: [120] },
+        { id: "#hook", text: "let's shipreel", readable: Array(20).fill(true), fontPx: [120] },
         { id: "#flash", text: "this sentence flashes by far too fast", readable: [...Array(10).fill(false), true, true, true, true], fontPx: [60] },
         { id: "#tiny", text: "tiny footnote", readable: Array(20).fill(true), fontPx: [18] },
         { id: "#body", text: "four words of body", readable: Array(20).fill(true), fontPx: [34] },
