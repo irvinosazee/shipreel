@@ -2,108 +2,542 @@
   "schemaVersion": 1,
   "note": "Delivery presets for --for. Safe zones are conservative fractions of the frame covered by each app's own UI (buttons, captions, progress bars); apps change their UI, so keep important text well inside them and check the preview. Size limits are the smallest common limit (free tiers).",
   "formats": {
-    "landscape": { "size": [1920, 1080], "aspect": "16:9" },
-    "vertical": { "size": [1080, 1920], "aspect": "9:16" },
-    "square": { "size": [1080, 1080], "aspect": "1:1" },
-    "feed": { "size": [1080, 1350], "aspect": "4:5" }
+    "landscape": {
+      "size": [
+        1920,
+        1080
+      ],
+      "aspect": "16:9"
+    },
+    "vertical": {
+      "size": [
+        1080,
+        1920
+      ],
+      "aspect": "9:16"
+    },
+    "square": {
+      "size": [
+        1080,
+        1080
+      ],
+      "aspect": "1:1"
+    },
+    "feed": {
+      "size": [
+        1080,
+        1350
+      ],
+      "aspect": "4:5"
+    },
+    "pin": {
+      "size": [
+        1000,
+        1500
+      ],
+      "aspect": "2:3"
+    }
   },
   "groups": {
-    "vertical": ["tiktok", "reels", "shorts"],
-    "social": ["tiktok", "reels", "shorts", "x", "linkedin"],
-    "all": ["tiktok", "reels", "shorts", "x", "linkedin", "youtube", "producthunt", "readme", "discord"]
+    "vertical": [
+      "tiktok",
+      "reels",
+      "shorts",
+      "stories",
+      "snapchat",
+      "facebook-reels",
+      "whatsapp"
+    ],
+    "meta": [
+      "reels",
+      "stories",
+      "instagram-feed",
+      "facebook",
+      "facebook-reels",
+      "threads",
+      "whatsapp"
+    ],
+    "fediverse": [
+      "bluesky",
+      "mastodon"
+    ],
+    "social": [
+      "tiktok",
+      "reels",
+      "shorts",
+      "x",
+      "linkedin",
+      "threads",
+      "bluesky",
+      "facebook-reels"
+    ],
+    "dev": [
+      "readme",
+      "devto",
+      "discord",
+      "slack",
+      "x"
+    ],
+    "stores": [
+      "appstore",
+      "googleplay",
+      "producthunt"
+    ],
+    "all": [
+      "tiktok",
+      "reels",
+      "shorts",
+      "x",
+      "linkedin",
+      "youtube",
+      "producthunt",
+      "readme",
+      "discord",
+      "instagram-feed",
+      "stories",
+      "facebook",
+      "facebook-reels",
+      "threads",
+      "bluesky",
+      "mastodon",
+      "reddit",
+      "snapchat",
+      "pinterest",
+      "whatsapp",
+      "telegram",
+      "slack",
+      "vimeo",
+      "devto",
+      "appstore",
+      "googleplay"
+    ]
   },
   "platforms": {
     "tiktok": {
       "label": "TikTok",
       "format": "vertical",
-      "safeZone": { "top": 0.08, "right": 0.13, "bottom": 0.25, "left": 0.06 },
+      "safeZone": {
+        "top": 0.08,
+        "right": 0.13,
+        "bottom": 0.25,
+        "left": 0.06
+      },
       "captions": "burned",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Pick a cover frame in the app; use the poster's moment.",
-      "notes": "Right rail holds like/comment/share; bottom holds the caption and sound name. Plays muted-to-sound, loops."
+      "notes": "Right rail holds like/comment/share; bottom holds the caption and sound name. Plays muted-to-sound, loops.",
+      "source": "https://support.tiktok.com/en/using-tiktok/creating-videos"
     },
     "reels": {
       "label": "Instagram Reels",
       "format": "vertical",
-      "safeZone": { "top": 0.13, "right": 0.08, "bottom": 0.22, "left": 0.06 },
+      "safeZone": {
+        "top": 0.13,
+        "right": 0.08,
+        "bottom": 0.22,
+        "left": 0.06
+      },
       "captions": "burned",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Upload shipreel.jpg cropped to 1080x1920; the grid shows the center 1080x1350.",
-      "notes": "Grid crops to 4:5, so keep the hook inside the center 1080x1350. Autoplays muted in feed."
+      "notes": "Grid crops to 4:5, so keep the hook inside the center 1080x1350. Autoplays muted in feed.",
+      "source": "https://help.instagram.com/1038071743007909"
     },
     "shorts": {
       "label": "YouTube Shorts",
       "format": "vertical",
-      "safeZone": { "top": 0.12, "right": 0.14, "bottom": 0.24, "left": 0.06 },
+      "safeZone": {
+        "top": 0.12,
+        "right": 0.14,
+        "bottom": 0.24,
+        "left": 0.06
+      },
       "captions": "burned",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Chosen from the video frames in YouTube Studio.",
-      "notes": "Channel name, title, and subscribe button sit over the bottom; actions on the right."
+      "notes": "Channel name, title, and subscribe button sit over the bottom; actions on the right.",
+      "source": "https://support.google.com/youtube/answer/10059070"
     },
     "x": {
       "label": "X",
       "format": "landscape",
-      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.1, "left": 0.05 },
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
       "captions": "burned",
       "maxMb": 512,
       "maxDurationSec": 140,
-      "cover": "X uses frame 0 — the baked poster.",
-      "notes": "Autoplays muted in the timeline. Put the link in a reply for reach."
+      "cover": "X uses frame 0 \u2014 the baked poster.",
+      "notes": "Autoplays muted in the timeline. Put the link in a reply for reach.",
+      "source": "https://help.x.com/en/using-x/x-videos"
     },
     "linkedin": {
       "label": "LinkedIn",
       "format": "feed",
-      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.1, "left": 0.05 },
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
       "captions": "burned",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Upload shipreel.jpg as the thumbnail in the post editor.",
-      "notes": "4:5 takes the most feed height on mobile. Autoplays muted; also accepts an .srt upload."
+      "notes": "4:5 takes the most feed height on mobile. Autoplays muted; also accepts an .srt upload.",
+      "source": "https://www.linkedin.com/help/linkedin/answer/a564064"
     },
     "youtube": {
       "label": "YouTube",
       "format": "landscape",
-      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.12, "left": 0.05 },
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.12,
+        "left": 0.05
+      },
       "captions": "sidecar",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Upload a 1280x720 thumbnail made from shipreel.jpg.",
-      "notes": "Upload shipreel.srt as subtitles; the progress bar covers the bottom edge on hover."
+      "notes": "Upload shipreel.srt as subtitles; the progress bar covers the bottom edge on hover.",
+      "source": "https://support.google.com/youtube/answer/57407"
     },
     "producthunt": {
       "label": "Product Hunt",
       "format": "landscape",
-      "safeZone": { "top": 0.05, "right": 0.05, "bottom": 0.12, "left": 0.05 },
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.12,
+        "left": 0.05
+      },
       "captions": "sidecar",
       "maxMb": null,
       "maxDurationSec": null,
       "cover": "Gallery images are 1270x760; export stills from the review frames.",
-      "notes": "The gallery video is a YouTube link — upload the YouTube export first."
+      "notes": "The gallery video is a YouTube link \u2014 upload the YouTube export first.",
+      "source": "https://help.producthunt.com/"
     },
     "readme": {
       "label": "GitHub README",
       "format": "landscape",
       "exportWidth": 1280,
       "gif": true,
-      "safeZone": { "top": 0.04, "right": 0.04, "bottom": 0.04, "left": 0.04 },
+      "safeZone": {
+        "top": 0.04,
+        "right": 0.04,
+        "bottom": 0.04,
+        "left": 0.04
+      },
       "captions": "none",
       "maxMb": 10,
       "maxDurationSec": null,
       "cover": "The GIF's first frame; frame 0 is the baked poster.",
-      "notes": "Drag the MP4 into the README editor to host it (10 MB on free plans). MP4s do not autoplay there; the GIF does."
+      "notes": "Drag the MP4 into the README editor to host it (10 MB on free plans). MP4s do not autoplay there; the GIF does.",
+      "source": "https://docs.github.com/en/get-started/writing-on-github"
     },
     "discord": {
       "label": "Discord",
       "format": "landscape",
-      "safeZone": { "top": 0.04, "right": 0.04, "bottom": 0.1, "left": 0.04 },
+      "safeZone": {
+        "top": 0.04,
+        "right": 0.04,
+        "bottom": 0.1,
+        "left": 0.04
+      },
       "captions": "none",
       "maxMb": 10,
       "maxDurationSec": null,
-      "cover": "Discord shows frame 0 — the baked poster.",
-      "notes": "Free uploads are capped at 10 MB, so the export is re-encoded to fit."
+      "cover": "Discord shows frame 0 \u2014 the baked poster.",
+      "notes": "Free uploads are capped at 10 MB, so the export is re-encoded to fit.",
+      "source": "https://support.discord.com/hc/en-us/articles/360028038352"
+    },
+    "instagram-feed": {
+      "label": "Instagram feed",
+      "format": "feed",
+      "safeZone": {
+        "top": 0.06,
+        "right": 0.06,
+        "bottom": 0.14,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Upload a custom cover; the profile grid crops it to 1080x1350.",
+      "notes": "Feed videos are served as Reels. The caption and audio strip sit under the frame; keep the last line clear of the bottom.",
+      "source": "https://help.instagram.com/1038071743007909"
+    },
+    "stories": {
+      "label": "Instagram Stories",
+      "format": "vertical",
+      "safeZone": {
+        "top": 0.14,
+        "right": 0.06,
+        "bottom": 0.2,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": 15,
+      "cover": "No cover; the first frame is what people see.",
+      "notes": "Each card is 15s, so use --stories to split. Profile row and close friends label sit at the top; the reply bar covers the bottom.",
+      "source": "https://help.instagram.com/1038071743007909"
+    },
+    "facebook": {
+      "label": "Facebook feed",
+      "format": "feed",
+      "safeZone": {
+        "top": 0.06,
+        "right": 0.06,
+        "bottom": 0.14,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": 4096,
+      "maxDurationSec": null,
+      "cover": "Choose a thumbnail at upload; use shipreel.jpg.",
+      "notes": "4:5 is the tallest the feed shows without cropping. Autoplays muted.",
+      "source": "https://www.facebook.com/business/m/one-sheeters/video-requirements"
+    },
+    "facebook-reels": {
+      "label": "Facebook Reels",
+      "format": "vertical",
+      "safeZone": {
+        "top": 0.08,
+        "right": 0.13,
+        "bottom": 0.25,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": 4096,
+      "maxDurationSec": 90,
+      "cover": "Pick a cover frame in the composer.",
+      "notes": "Same furniture as Instagram Reels: right rail of buttons, caption across the bottom.",
+      "source": "https://www.facebook.com/business/m/one-sheeters/video-requirements"
+    },
+    "threads": {
+      "label": "Threads",
+      "format": "vertical",
+      "safeZone": {
+        "top": 0.07,
+        "right": 0.07,
+        "bottom": 0.12,
+        "left": 0.07
+      },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": 300,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "Up to 5 minutes. Autoplays muted in the feed; vertical and square both display well.",
+      "source": "https://help.instagram.com/threads"
+    },
+    "bluesky": {
+      "label": "Bluesky",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
+      "captions": "burned",
+      "maxMb": 300,
+      "maxDurationSec": 600,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "Up to 10 minutes and 300 MB; playback is capped around 720p, so keep text large. Add alt text on the post.",
+      "source": "https://bsky.social/about/blog"
+    },
+    "mastodon": {
+      "label": "Mastodon",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
+      "captions": "burned",
+      "maxMb": 40,
+      "maxDurationSec": null,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "Limits are set per instance; 40 MB is the common default (mastodon.social allows more). Check your instance and add a media description.",
+      "source": "https://docs.joinmastodon.org/user/posting/"
+    },
+    "reddit": {
+      "label": "Reddit",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
+      "captions": "burned",
+      "maxMb": 1024,
+      "maxDurationSec": 900,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "Direct uploads go up to 1 GB, 15 minutes, 1080p30. Autoplays muted in feeds, so burn the captions.",
+      "source": "https://support.reddithelp.com/hc/en-us/articles/12571184427156"
+    },
+    "snapchat": {
+      "label": "Snapchat Spotlight",
+      "format": "vertical",
+      "safeZone": {
+        "top": 0.1,
+        "right": 0.13,
+        "bottom": 0.22,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": null,
+      "maxDurationSec": 60,
+      "cover": "Pick a cover in the app.",
+      "notes": "5\u201360s, sound required, no watermarks from other apps. 15\u201330s performs best.",
+      "source": "https://help.snapchat.com/hc/en-us/articles/7012287256596-Spotlight-Guidelines"
+    },
+    "pinterest": {
+      "label": "Pinterest",
+      "format": "pin",
+      "safeZone": {
+        "top": 0.06,
+        "right": 0.06,
+        "bottom": 0.12,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": 2048,
+      "maxDurationSec": 900,
+      "cover": "Upload a cover image; Pinterest shows it before play.",
+      "notes": "2:3 (1000x1500) is the native pin shape; 9:16 also works. 6\u201315s performs best.",
+      "source": "https://help.pinterest.com/en/business/article/video-pin-specs"
+    },
+    "whatsapp": {
+      "label": "WhatsApp status",
+      "format": "vertical",
+      "safeZone": {
+        "top": 0.1,
+        "right": 0.06,
+        "bottom": 0.16,
+        "left": 0.06
+      },
+      "captions": "burned",
+      "maxMb": 16,
+      "maxDurationSec": 30,
+      "cover": "No cover; the first frame is what people see.",
+      "notes": "16 MB and 30s per clip \u2014 the tightest budget here, so the export is re-encoded to fit.",
+      "source": "https://faq.whatsapp.com/"
+    },
+    "telegram": {
+      "label": "Telegram",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.08,
+        "left": 0.05
+      },
+      "captions": "sidecar",
+      "maxMb": 2000,
+      "maxDurationSec": null,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "2 GB per file. Channels autoplay muted; square and vertical also display well.",
+      "source": "https://telegram.org/faq"
+    },
+    "slack": {
+      "label": "Slack",
+      "format": "landscape",
+      "exportWidth": 1280,
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.08,
+        "left": 0.05
+      },
+      "captions": "burned",
+      "maxMb": 1024,
+      "maxDurationSec": null,
+      "cover": "Frame 0 \u2014 the baked poster.",
+      "notes": "1 GB per file, but workspaces have a shared storage cap, so a 1280-wide export is the polite size. Plays inline, muted until clicked.",
+      "source": "https://slack.com/help/articles/201330736-Add-files-to-Slack"
+    },
+    "vimeo": {
+      "label": "Vimeo",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.1,
+        "left": 0.05
+      },
+      "captions": "sidecar",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "Upload shipreel.jpg as the thumbnail.",
+      "notes": "Free accounts have a weekly upload quota rather than a per-file cap. Upload shipreel.srt as a caption track.",
+      "source": "https://help.vimeo.com/hc/en-us/articles/12426043233553"
+    },
+    "devto": {
+      "label": "dev.to",
+      "format": "landscape",
+      "exportWidth": 1000,
+      "gif": true,
+      "safeZone": {
+        "top": 0.04,
+        "right": 0.04,
+        "bottom": 0.04,
+        "left": 0.04
+      },
+      "captions": "none",
+      "maxMb": 25,
+      "maxDurationSec": null,
+      "cover": "The GIF's first frame.",
+      "notes": "Posts are markdown: embed the GIF, or a YouTube/Vimeo link with {% embed %}. Images upload up to 25 MB.",
+      "source": "https://dev.to/p/editor_guide"
+    },
+    "appstore": {
+      "label": "App Store preview",
+      "format": "vertical",
+      "exportCrop": [
+        886,
+        1920
+      ],
+      "safeZone": {
+        "top": 0.06,
+        "right": 0.1,
+        "bottom": 0.1,
+        "left": 0.1
+      },
+      "captions": "burned",
+      "maxMb": 500,
+      "minDurationSec": 15,
+      "maxDurationSec": 30,
+      "cover": "App Store Connect picks a poster frame; choose the strongest.",
+      "notes": "Apple requires exactly 886x1920 for iPhone previews, so the vertical render is centre-cropped \u2014 97px comes off each side, which is why this preset reserves wider margins. 15-30s, H.264 + AAC, and it must show real app footage: use --capture or --footage.",
+      "source": "https://developer.apple.com/help/app-store-connect/reference/app-preview-specifications/"
+    },
+    "googleplay": {
+      "label": "Google Play preview",
+      "format": "landscape",
+      "safeZone": {
+        "top": 0.05,
+        "right": 0.05,
+        "bottom": 0.12,
+        "left": 0.05
+      },
+      "captions": "sidecar",
+      "maxMb": null,
+      "maxDurationSec": null,
+      "cover": "YouTube thumbnail \u2014 upload the 1280x720 cover.",
+      "notes": "Play takes a YouTube URL, not an upload: publish the landscape render on YouTube (public, not age-restricted, not monetised) and paste the plain video URL. Only the first 30s autoplays.",
+      "source": "https://support.google.com/googleplay/android-developer/answer/9866151"
     }
   }
 }

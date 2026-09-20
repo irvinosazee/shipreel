@@ -9,6 +9,7 @@ import {
   loadPlatforms,
   resolvePlatforms,
   planRenders,
+  durationFit,
   safeZoneInsets,
   budgetBitrateKbps,
   exportForPlatforms,
@@ -43,8 +44,8 @@ test("platform data is complete and internally consistent", () => {
 
 test("resolvePlatforms accepts lists, groups, and rejects unknown names", () => {
   assert.deepEqual(resolvePlatforms("tiktok, reels,tiktok").map((p) => p.id), ["tiktok", "reels"]);
-  assert.deepEqual(resolvePlatforms("vertical").map((p) => p.id), ["tiktok", "reels", "shorts"]);
-  assert.ok(resolvePlatforms("all").length >= 9);
+  assert.deepEqual(resolvePlatforms("vertical").map((p) => p.id), ["tiktok", "reels", "shorts", "stories", "snapchat", "facebook-reels", "whatsapp"]);
+  assert.ok(resolvePlatforms("all").length >= 26);
   assert.throws(() => resolvePlatforms("myspace"), /Unknown platform "myspace".*tiktok/);
 });
 
@@ -147,4 +148,48 @@ test("drawSafeZones overlays the unsafe margins on a frame", { skip: !hasFfmpeg 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("every platform preset carries the fields the planner and export need, plus a source", () => {
+  const { platforms, formats, groups } = loadPlatforms();
+  assert.ok(Object.keys(platforms).length >= 26, `${Object.keys(platforms).length} platforms`);
+  for (const [id, platform] of Object.entries(platforms)) {
+    assert.ok(formats[platform.format], `${id} uses unknown format ${platform.format}`);
+    assert.ok(["burned", "sidecar", "none"].includes(platform.captions), `${id} captions`);
+    for (const edge of ["top", "right", "bottom", "left"]) {
+      assert.ok(platform.safeZone[edge] >= 0 && platform.safeZone[edge] < 0.5, `${id} safeZone.${edge}`);
+    }
+    assert.match(platform.source ?? "", /^https:\/\//, `${id} needs a source URL`);
+    assert.ok(platform.label && platform.notes && platform.cover, `${id} needs label, notes, cover`);
+    if (platform.exportCrop) {
+      const [w, h] = platform.exportCrop;
+      const [fw, fh] = formats[platform.format].size;
+      assert.ok(w <= fw && h <= fh, `${id} crop ${w}x${h} does not fit ${fw}x${fh}`);
+    }
+  }
+  for (const [name, ids] of Object.entries(groups)) {
+    for (const id of ids) assert.ok(platforms[id], `group ${name} names unknown platform ${id}`);
+  }
+  assert.deepEqual(formats.pin.size, [1000, 1500]);
+});
+
+test("planRenders merges duration windows across platforms sharing a frame size", () => {
+  const [render] = planRenders(resolvePlatforms("stories,snapchat,whatsapp"));
+  assert.equal(render.format, "vertical");
+  assert.equal(render.maxDurationSec, 15, "the strictest cap wins");
+  assert.equal(render.minDurationSec, null);
+  assert.equal(render.maxMb, 16, "WhatsApp's 16 MB budget wins");
+  const [store] = planRenders(resolvePlatforms("appstore"));
+  assert.equal(store.minDurationSec, 15);
+  assert.equal(store.maxDurationSec, 30);
+});
+
+test("durationFit reports which platforms a length does not suit", () => {
+  assert.deepEqual(durationFit(20, resolvePlatforms("tiktok,appstore,stories,whatsapp")), [
+    { platform: "stories", problem: "20.0s is over Instagram Stories' 15s per card; use --stories to split it." },
+  ]);
+  assert.deepEqual(durationFit(12, resolvePlatforms("appstore")), [
+    { platform: "appstore", problem: "12.0s is under App Store preview's 15s minimum." },
+  ]);
+  assert.deepEqual(durationFit(20, resolvePlatforms("tiktok")), []);
 });

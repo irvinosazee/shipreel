@@ -43,8 +43,8 @@ Parse these options:
 | Option | Values | Default |
 |---|---|---|
 | `--tone` | preset or freeform description | inferred |
-| `--format` | `landscape`, `vertical`, `square`, `feed` (4:5) | `landscape` |
-| `--for` | platforms or groups: `tiktok`, `reels`, `shorts`, `x`, `linkedin`, `youtube`, `producthunt`, `readme`, `discord`, `vertical`, `social`, `all` | none (single `--format` render) |
+| `--format` | `landscape`, `vertical`, `square`, `feed` (4:5), `pin` (2:3) | `landscape` |
+| `--for` | platforms or groups. Platforms: `tiktok`, `reels`, `shorts`, `stories`, `snapchat`, `whatsapp`, `facebook-reels`, `instagram-feed`, `facebook`, `threads`, `x`, `linkedin`, `bluesky`, `mastodon`, `reddit`, `telegram`, `slack`, `vimeo`, `youtube`, `pinterest`, `devto`, `readme`, `discord`, `producthunt`, `appstore`, `googleplay`. Groups: `vertical`, `meta`, `fediverse`, `social`, `dev`, `stores`, `all` | none (single `--format` render) |
 | `--captions` | `auto`, `burned`, `sidecar`, `off` | `auto` (from `--for`; sidecar `.srt` otherwise) |
 | `--duration` | seconds | auto (15-25s) |
 | `--cutdown` | `6`, `15` (comma-separated for both) | none |

@@ -60,6 +60,7 @@ export function planRenders(selected) {
         captions: "none",
         maxMb: null,
         maxDurationSec: null,
+        minDurationSec: null,
       });
     }
     const render = byFormat.get(platform.format);
@@ -70,11 +71,30 @@ export function planRenders(selected) {
     if (platform.maxDurationSec != null) {
       render.maxDurationSec = Math.min(render.maxDurationSec ?? Infinity, platform.maxDurationSec);
     }
+    if (platform.minDurationSec != null) {
+      render.minDurationSec = Math.max(render.minDurationSec ?? 0, platform.minDurationSec);
+    }
   }
   return [...byFormat.values()].map((render) => ({
     ...render,
     safeZonePx: safeZoneInsets(render.size, render.safeZone),
   }));
+}
+
+/** Platforms whose duration window a finished render misses, with what to do about it. */
+export function durationFit(durationSec, selected) {
+  const problems = [];
+  for (const platform of selected) {
+    if (platform.maxDurationSec != null && durationSec > platform.maxDurationSec + 0.05) {
+      const fix = platform.id === "stories" ? " use --stories to split it." : platform.id === "appstore" ? " trim it with --cutdown." : " shorten it.";
+      const owns = platform.label.endsWith("s") ? `${platform.label}'` : `${platform.label}'s`;
+      problems.push({ platform: platform.id, problem: `${durationSec.toFixed(1)}s is over ${owns} ${platform.maxDurationSec}s per card;${fix}` });
+    } else if (platform.minDurationSec != null && durationSec < platform.minDurationSec - 0.05) {
+      const owns = platform.label.endsWith("s") ? `${platform.label}'` : `${platform.label}'s`;
+      problems.push({ platform: platform.id, problem: `${durationSec.toFixed(1)}s is under ${owns} ${platform.minDurationSec}s minimum.` });
+    }
+  }
+  return problems;
 }
 
 export function safeZoneInsets([width, height], zone) {
@@ -106,8 +126,9 @@ function probe(file) {
   return { duration: Number(data.format.duration), width: video.width, hasAudio: data.streams.some((s) => s.codec_type === "audio") };
 }
 
-function encode({ source, target, videoKbps, width }) {
-  const scale = width ? ["-vf", `scale=${width}:-2`] : [];
+function encode({ source, target, videoKbps, width, crop }) {
+  const filters = [width ? `scale=${width}:-2` : null, crop ? `crop=${crop[0]}:${crop[1]}` : null].filter(Boolean);
+  const scale = filters.length ? ["-vf", filters.join(",")] : [];
   const common = ["-hide_banner", "-loglevel", "error", "-y", "-i", source, ...scale, "-c:v", "libx264", "-pix_fmt", "yuv420p"];
   if (!videoKbps) {
     run("ffmpeg", [...common, "-crf", "20", "-preset", "slow", "-map", "0:v", "-map", "0:a?", "-c:a", "copy", "-movflags", "+faststart", target]);
@@ -163,6 +184,8 @@ export function exportForPlatforms({ renders, platformIds, outDir, overrides = {
     const target = path.join(outDir, `shipreel-${id}.mp4`);
     const info = probe(source);
     const tooWide = platform.exportWidth && info.width > platform.exportWidth;
+    // A platform that demands an exact frame (App Store previews) is centre-cropped from its format's render.
+    const crop = platform.exportCrop && (info.width !== platform.exportCrop[0] || info.height !== platform.exportCrop[1]) ? platform.exportCrop : null;
     const overBudget = platform.maxMb && statSync(source).size > platform.maxMb * 1024 * 1024;
 
     let action = "copied";
@@ -170,18 +193,21 @@ export function exportForPlatforms({ renders, platformIds, outDir, overrides = {
       encode({
         source,
         target,
+        crop,
         width: tooWide ? platform.exportWidth : null,
         videoKbps: budgetBitrateKbps({ maxMb: platform.maxMb, durationSec: info.duration, audioKbps: info.hasAudio ? 128 : 0 }),
       });
       action = "re-encoded";
-    } else if (tooWide) {
-      encode({ source, target, width: platform.exportWidth });
-      action = "scaled";
+    } else if (tooWide || crop) {
+      encode({ source, target, width: tooWide ? platform.exportWidth : null, crop });
+      action = crop ? "cropped" : "scaled";
     } else {
       copyFileSync(source, target);
     }
 
     const result = { platform: id, action, path: target, sizeMb: Number((statSync(target).size / 1024 / 1024).toFixed(2)) };
+    const [durationProblem] = durationFit(info.duration, [{ ...platform, id }]);
+    if (durationProblem) result.durationWarning = durationProblem.problem;
     if (platform.maxMb && statSync(target).size > platform.maxMb * 1024 * 1024) {
       result.warning = `Still over the ${platform.maxMb} MB budget; shorten the video or lower the resolution.`;
     }

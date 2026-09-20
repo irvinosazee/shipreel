@@ -35,6 +35,34 @@ Copy the plan into `shipreel-plan.md` under `## Delivery`.
 | `youtube`, `producthunt` | landscape | `.srt` sidecar; Product Hunt galleries link to the YouTube upload. |
 | `readme` | landscape, exported at 1280 wide | 10 MB MP4 plus an autoplaying GIF, because MP4s do not autoplay in READMEs. |
 | `discord` | landscape | Re-encoded to fit the 10 MB free upload limit. |
+| `stories` | vertical | 15s per card — pair with `--stories`. Profile row on top, reply bar on the bottom. |
+| `snapchat` | vertical | Spotlight: 5–60s, sound required, no other app's watermark. |
+| `whatsapp` | vertical | 30s and **16 MB** per clip: the tightest budget here, so the export is re-encoded down. |
+| `facebook-reels` | vertical | Same furniture as Instagram Reels; 90s is the practical cap. |
+| `instagram-feed`, `facebook` | feed 1080x1350 (4:5) | Tallest shape the feed shows uncropped; autoplays muted. |
+| `threads` | vertical | Up to 5 minutes, autoplays muted. |
+| `bluesky` | landscape | 10 minutes, 300 MB, playback around 720p — keep type large. |
+| `mastodon` | landscape | Limits are per instance; 40 MB is the common default. Add a media description. |
+| `reddit` | landscape | 1 GB, 15 minutes, 1080p30. |
+| `telegram`, `slack` | landscape | Chat clients: Telegram 2 GB, Slack exported at 1280 wide to respect workspace storage. |
+| `vimeo` | landscape | `.srt` sidecar; free accounts have a weekly quota, not a per-file cap. |
+| `pinterest` | **pin 1000x1500 (2:3)** | The native pin shape; 6–15s performs best. |
+| `devto` | landscape, exported at 1000 wide | Markdown posts: embed the GIF or a video link. |
+| `appstore` | vertical, **centre-cropped to 886x1920** | Apple's exact iPhone preview frame. 15–30s, and it must show real app footage (`--capture`, `--footage`). |
+| `googleplay` | landscape | Play takes a **YouTube URL**, not an upload; only the first 30s autoplays. |
+
+Groups: `vertical`, `meta`, `fediverse`, `social`, `dev`, `stores`, `all`. Every preset carries a `source` link to the platform's own documentation in `assets/platforms.json` — check it before trusting a limit, because platforms move them.
+
+### Durations that do not fit
+
+`planRenders` merges the strictest window of the platforms sharing a frame size, and `platforms.mjs export` warns per platform:
+
+```
+22.6s is over Instagram Stories' 15s per card; use --stories to split it.
+12.0s is under App Store preview's 15s minimum.
+```
+
+A 15–25s shipreel fits everything except Stories (split it) and WhatsApp (30s cap, so only the long end is a problem).
 
 ## Storyboard for every format (Step 2)
 
