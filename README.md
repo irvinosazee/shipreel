@@ -148,6 +148,10 @@ node skills/shipreel/scripts/doctor.mjs
 - `.agents/skills/shipreel/` — symlink → `skills/shipreel/` (Codex CLI + opencode discovery)
 - `.opencode/skills/shipreel/` — symlink → `skills/shipreel/` (opencode discovery)
 
+## Publishing it
+
+Installing, the plugin marketplace, the site, npm, and the launch post: [PUBLISHING.md](PUBLISHING.md).
+
 ## What changed since the fork
 
 The original `/brag` was a prompt-and-assets skill: it told an agent how to make one landscape video. `shipreel` turns that into a pipeline that checks its own work.
