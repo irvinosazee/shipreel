@@ -115,8 +115,9 @@ button { font: inherit; cursor: pointer; }
 }
 .hero-body { min-width: 0; }
 .hero-headline {
-  font-size: clamp(64px, 13vw, 200px);
-  line-height: 0.86;
+  /* Sized so "you shipped it." stays on one line in the hero column (662px per 100px of type). */
+  font-size: clamp(50px, 9.5vw, 137px);
+  line-height: 1.0;
   letter-spacing: -0.04em;
   font-weight: 900;
   margin: 0;
@@ -126,7 +127,11 @@ button { font: inherit; cursor: pointer; }
   font-style: italic;
   background: var(--hero-ink);
   color: var(--hero-bg);
-  padding: 0 0.06em;
+  /* inline-block with its own tight line-height keeps the plate hugging the words, so the
+     descenders on the line above ("shipped") never sit inside it. */
+  display: inline-block;
+  line-height: 0.82;
+  padding: 0.1em 0.06em 0.06em;
 }
 .hero-sub {
   margin: clamp(28px, 3vw, 44px) 0 0;

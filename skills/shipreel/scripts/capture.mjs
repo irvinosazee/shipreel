@@ -173,11 +173,12 @@ export async function startProject(dir, { timeoutMs = 90_000 } = {}) {
 
 const slug = (route) => route.replace(/^\/|\/$/g, "").replace(/[^a-z0-9]+/gi, "-") || "home";
 
-export async function capturePages(baseUrl, { routes = ["/"], viewport = [1080, 1920], outDir, scrollFrames = 0, navigationTimeoutMs = NAVIGATION_TIMEOUT_MS }) {
+export async function capturePages(baseUrl, { routes = ["/"], viewport = [1080, 1920], outDir, scrollFrames = 0, scale = 1, navigationTimeoutMs = NAVIGATION_TIMEOUT_MS }) {
   mkdirSync(outDir, { recursive: true });
   const [width, height] = viewport;
   return withPage("about:blank", async (session) => {
-    await session.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < height });
+    // scale 2 gives a retina capture: the same layout at twice the pixels, for README and site images.
+    await session.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: scale, mobile: width < height });
     const results = [];
     for (const route of routes) {
       const url = new URL(route, baseUrl).href;
@@ -246,11 +247,11 @@ async function main(argv) {
   const [dir, ...rest] = argv;
   const flag = (name, fallback) => (rest.includes(name) ? rest[rest.indexOf(name) + 1] : fallback);
   const outDir = flag("--out");
-  if (!dir || !outDir) throw new Error("Usage: capture.mjs <project-dir> --out <dir> [--routes /,/pricing] [--viewport 1080x1920] [--scroll-frames 24]");
+  if (!dir || !outDir) throw new Error("Usage: capture.mjs <project-dir> --out <dir> [--routes /,/pricing] [--viewport 1080x1920] [--scale 2] [--scroll-frames 24]");
   const viewport = flag("--viewport", "1080x1920").split("x").map(Number);
   const server = await startProject(dir);
   try {
-    const shots = await capturePages(server.url, { routes: flag("--routes", "/").split(","), viewport, outDir, scrollFrames: Number(flag("--scroll-frames", 0)) });
+    const shots = await capturePages(server.url, { routes: flag("--routes", "/").split(","), viewport, outDir, scale: Number(flag("--scale", 1)), scrollFrames: Number(flag("--scroll-frames", 0)) });
     for (const shot of shots) {
       if (shot.scrollFrames.length) shot.scrollVideo = scrollVideo(shot.scrollFrames, path.join(outDir, `scroll-${slug(shot.route)}.mp4`));
     }

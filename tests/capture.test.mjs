@@ -148,3 +148,22 @@ test("capturePages screenshots a real site at the video's viewport and records a
     rmSync(out, { recursive: true, force: true });
   }
 });
+
+test("capturePages honours a device scale factor, for retina site images", async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "shipreel-scale-"));
+  try {
+    writeFileSync(path.join(root, "index.html"), "<!doctype html><html><body style='margin:0;background:#123'><h1>hi</h1></body></html>");
+    const server = await startProject(root);
+    try {
+      const [one] = await capturePages(server.url, { routes: ["/"], viewport: [400, 300], outDir: path.join(root, "one") });
+      const [two] = await capturePages(server.url, { routes: ["/"], viewport: [400, 300], scale: 2, outDir: path.join(root, "two") });
+      const size = (file) => execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", file], { encoding: "utf8" }).trim();
+      assert.equal(size(one.screenshot), "400,300");
+      assert.equal(size(two.screenshot), "800,600");
+    } finally {
+      await server.stop();
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

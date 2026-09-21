@@ -18,6 +18,10 @@ skills-lock.json
 
 # HyperFrames render artifacts + heavy composition sources (never committed)
 **/shipreel-output*/
+**/brag-output*/
+**/shipreel-video/
+**/shipreel-release/
+**/shipreel-pr/
 **/renders/
 **/.thumbnails/
 **/.waveform-cache/
