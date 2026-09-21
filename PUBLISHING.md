@@ -142,7 +142,7 @@ A shape that works:
 
 ## 8. Portfolio entry
 
-A draft sits on irvinosazee.me (slug `shipreel`), written through the site's MCP endpoint. Nothing is published by it: open `/studio` → "awaiting review", read it, fix anything you disagree with, press **Publish**.
+A draft sits on irvinosazee.me (slug `shipreel`), written through the site's MCP endpoint: [admin/collections/projects/24](https://www.irvinosazee.me/admin/collections/projects/24), with the site capture as its cover plus a frame strip and the poster in the gallery. Nothing is published by it: open `/studio` → "awaiting review", read it, change anything you disagree with (the rating is deliberately unset — that call is yours), press **Publish**.
 
 ---
 

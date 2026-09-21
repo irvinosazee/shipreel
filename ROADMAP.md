@@ -46,8 +46,8 @@ Worked in order, one batch per iteration, each with tests and a green CI run.
 - [x] **R2 · Wider platform coverage.** Beyond the current nine: Instagram feed and Stories, Facebook feed and Reels, Threads, Bluesky, Mastodon, Reddit, Snapchat Spotlight, Pinterest, WhatsApp status, Telegram, Slack, Vimeo, dev.to, App Store and Google Play previews. New `pin` format (2:3), seven groups, a `source` link per preset, duration windows (`durationFit` warns when a render is over Stories' 15s or under the App Store's 15s), and exact-frame exports (`exportCrop` centre-crops the vertical render to Apple's 886x1920). 26 presets.
 - [x] **R3 · New hero video.** Hero re-rendered at 1080x1920 (22.6s, -14.9 LUFS, poster baked): "let's show it off", the shipreel install commands, "now go ship", "made with /shipreel". The install line wraps onto a fourth card line rather than shrinking type below the 40px phone floor. Site headline resized and its highlight plate tightened so the descenders in "shipped" clear it; hero.png re-captured at 2x (capturePages gained a `--scale` option).
 - [x] **R4 · PUBLISHING.md.** Making the repository public, the Claude Code plugin marketplace listing, GitHub Pages, the optional npm publish, and the launch-kit-driven portfolio and social copy.
-- [ ] **R5 · Portfolio entry.** Draft the project record on irvinosazee.me through its MCP endpoint (draft only; the owner publishes by hand).
-- [ ] **R6 · Example gallery re-renders.** The four demo videos, re-rendered with the new name.
+- [x] **R5 · Portfolio entry.** Drafted on irvinosazee.me through its MCP endpoint: slug `shipreel`, three uploaded images (site capture, frame strip, poster), awaiting the owner's review at `/admin/collections/projects/24`. Draft-only by design — no tool on that endpoint can publish.
+- [x] **R6 · Example gallery re-renders — not needed.** Checked the gallery videos frame by frame: they are entirely about their own fake products (Horse Tinder, Fish Flight School, Taxi for Taxis) and never name the tool, so the rename does not touch them. Re-rendering would change nothing.
 
 ## Idea notes
 
