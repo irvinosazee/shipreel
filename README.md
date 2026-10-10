@@ -15,29 +15,21 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 
 ## Install
 
-```bash
-/plugin marketplace add irvinosazee/shipreel
-/plugin install shipreel@shipreel
-```
-
-Then run `/shipreel` inside any project.
-
-**Any other agent** — one command via the [`skills`](https://github.com/vercel-labs/skills) CLI (Cursor, Codex, Copilot, Gemini CLI, opencode, and more):
+shipreel is a paid, private tool. Buying it gets you a tarball; install it into whichever agent you
+use.
 
 ```bash
-npx skills add https://github.com/irvinosazee/shipreel --skill shipreel
+# from the download
+npm i -g ./shipreel-0.2.2.tgz        # the standalone CLI
+rsync -a shipreel/skills/shipreel/ ~/.claude/skills/shipreel/   # the skill, for Claude Code
 ```
 
-Add `-g` to install globally (available in every project); drop it to scope to the current one. ([browse on skills.sh](https://www.skills.sh/irvinosazee/shipreel/shipreel))
+Restart your agent after copying. Other agents read the same folder from
+`.agents/skills/shipreel/` or `.opencode/skills/shipreel/` in a project.
 
-<details>
-<summary>No installer? Copy the skill directly.</summary>
-
-```bash
-rsync -a --exclude '.DS_Store' skills/shipreel/ ~/.claude/skills/shipreel/
-```
-
-Restart Claude Code after copying.
+> **Not published anywhere.** There is no marketplace listing, no `npx skills add`, and no public
+> npm package — if you saw an install command for one of those, it is out of date. The name
+> `shipreel` on npm belongs to someone else.
 </details>
 
 ### Also works with
