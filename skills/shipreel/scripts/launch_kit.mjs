@@ -99,7 +99,11 @@ export function creditsFor(compositionHtml) {
   const sources = [...String(compositionHtml ?? "").matchAll(/\bsrc="([^"]+)"/g)].map((m) => m[1]);
   const lines = [];
   const tracks = [...new Set(sources.map((s) => s.match(/happy-beats-business-moves-vol-(\d+)-by-ende-dot-app/)?.[1]).filter(Boolean))];
-  for (const vol of tracks) lines.push(`Music: "Happy Beats / Business Moves Vol. ${vol}" by ende.app (https://ende.app/en)`);
+  // CC BY 4.0 asks for author + licence, not just a link. ende.app waives credit as a courtesy;
+  // the licence still requires it, and a paid product should not lean on a waiver.
+  for (const vol of tracks) {
+    lines.push(`Music: "Happy Beats & Business Moves Vol. ${vol}" by Sascha Ende — ende.app, CC BY 4.0 (https://ende.app/en/standard-license)`);
+  }
   const sfx = new Set(sources.filter((s) => /(^|\/)sfx\//.test(s)));
   if (sfx.size) lines.push(`Sound effects: ${sfx.size} sound effect${sfx.size === 1 ? "" : "s"} by Kenney (https://kenney.nl/), CC0`);
   lines.push("Made with /shipreel (https://github.com/irvinosazee/shipreel) and Hyperframes (https://hyperframes.heygen.com/)");

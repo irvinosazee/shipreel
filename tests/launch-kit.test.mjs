@@ -52,7 +52,7 @@ test("creditsFor names bundled music and Kenney SFX once each", () => {
     '<audio id="c" src="assets/sfx/ui/click2.ogg">',
   ].join("\n");
   const credits = creditsFor(html);
-  assert.match(credits, /Happy Beats \/ Business Moves Vol\. 10.*ende\.app/);
+  assert.match(credits, /Happy Beats & Business Moves Vol\. 10" by Sascha Ende — ende\.app, CC BY 4\.0/);
   assert.match(credits, /2 sound effects.*Kenney/);
   assert.match(credits, /Hyperframes/);
   assert.equal(creditsFor("").includes("Music"), false);
