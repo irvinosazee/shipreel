@@ -22,11 +22,19 @@ use.
 ```bash
 # from the download
 npm i -g ./shipreel-0.2.2.tgz        # the standalone CLI
-rsync -a shipreel/skills/shipreel/ ~/.claude/skills/shipreel/   # the skill, for Claude Code
+shipreel licence install <token>     # the token from your receipt
+shipreel skill install               # the skill, into ~/.claude/skills/shipreel
 ```
 
-Restart your agent after copying. Other agents read the same folder from
-`.agents/skills/shipreel/` or `.opencode/skills/shipreel/` in a project.
+`shipreel skill install --project . --agent all` puts it in one project for Claude Code, Codex
+and opencode at once — one copy, with the other two linked to it, because the bundled audio is
+16MB. `shipreel skill where` prints the paths without touching anything.
+
+The licence is a signed file at `~/.shipreel/licence` naming who bought the copy; in CI, set
+`SHIPREEL_LICENCE` instead. It never expires the software and never calls home — `shipreel doctor`
+will tell you what it sees.
+
+Restart your agent after installing.
 
 > **Not published anywhere.** There is no marketplace listing, no `npx skills add`, and no public
 > npm package — if you saw an install command for one of those, it is out of date. The name
@@ -130,7 +138,7 @@ node skills/shipreel/scripts/doctor.mjs
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
 - `tests/` — Node test suite (`npm test`) and the examples eval baseline
-- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `shipreel` npm package into `dist/`, without publishing)
+- `scripts/` — repo checks and `issue-licence.mjs` (the seller's script): `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `shipreel` npm package into `dist/`, without publishing)
 - `action.yml` — composite GitHub Action for release videos and PR previews
 - `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
@@ -150,8 +158,8 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 
 | | /brag (original) | shipreel |
 |---|---|---|
-| Skill scripts | 1 | 36 |
-| Tests | none | 253, on every push |
+| Skill scripts | 1 | 37 |
+| Tests | none | 289, on every push |
 | Reference docs | 6 | 15 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes |

@@ -18,8 +18,11 @@
 
 import { copyFileSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { ISSUER_PUBLIC_KEY, describeLicence, licenceStatus } from "./licence.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = { release: "release-video.yml", "pr-preview": "pr-preview.yml" };
@@ -51,7 +54,63 @@ export const COMMANDS = {
   studio: { script: "studio.mjs", summary: "review renders and leave notes" },
   versions: { script: "versions.mjs", summary: "save and compare render versions" },
   "upload-page": { script: "upload_page.mjs", summary: "an upload checklist page for exports" },
+  licence: { script: "licence.mjs", summary: "show your licence, or install one from your receipt" },
+  skill: { script: "skill_install.mjs", summary: "install the skill where your agent will find it" },
 };
+
+/**
+ * Commands that must keep working when the licence is the thing that is wrong: you cannot
+ * install a licence with a command that demands one, and a diagnostic that refuses to run is
+ * not a diagnostic.
+ */
+const UNGATED = new Set(["licence", "doctor"]);
+
+const WHERE_TO_BUY = "https://irvinosazee.github.io/shipreel-site/";
+
+/** True when this copy is the source checkout rather than an installed one. */
+function ownCheckout() {
+  const file = path.join(HERE, "../../../package.json");
+  if (!existsSync(file)) return false;
+  try {
+    return JSON.parse(readFileSync(file, "utf8")).name === "shipreel-repo";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Decide whether a command may run. Nothing here phones home and nothing expires: an
+ * unlicensed copy is asked for a licence, and a licensed one whose update window has ended
+ * keeps working and is simply told.
+ */
+export function licenceGate(command, options = {}) {
+  const allow = { allowed: true, notice: null };
+  if (UNGATED.has(command)) return allow;
+  if (options.ownCheckout ?? ownCheckout()) return allow;
+
+  const {
+    env = process.env,
+    home = homedir(),
+    publicKey = ISSUER_PUBLIC_KEY,
+    now = new Date(),
+    status = licenceStatus({ env, home, publicKey, now }),
+  } = options;
+
+  if (status.valid) return status.updatesExpired ? { allowed: true, notice: describeLicence(status) } : allow;
+
+  const problem = status.reason === "no licence found" ? "shipreel needs a licence." : `That licence did not verify: ${status.reason}`;
+  return {
+    allowed: false,
+    notice: [
+      problem,
+      "",
+      "  shipreel licence install <token>   the token from your receipt",
+      "  SHIPREEL_LICENCE=<token>           for CI",
+      "",
+      `Don't have one? ${WHERE_TO_BUY}`,
+    ].join("\n"),
+  };
+}
 
 function version() {
   for (const candidate of ["../../../package.json", "../../../.claude-plugin/plugin.json"]) {
@@ -229,6 +288,10 @@ export async function main(argv) {
     console.error(`Unknown command "${command}". Run shipreel --help.`);
     return 2;
   }
+  const gate = licenceGate(command);
+  if (gate.notice) console.error(gate.notice);
+  if (!gate.allowed) return 1;
+
   if (command === "make") return make(args);
   if (command === "github") {
     if (args[0] !== "install" || !args[1]) {
