@@ -26,6 +26,12 @@ skills-lock.json
 **/.thumbnails/
 **/.waveform-cache/
 
+# Key material — the licence issuer's private key lives in ~/.shipreel, never here
+*.pem
+*.key
+issuer-*.json
+licences/
+
 # Codex packaging — excluded from the Claude-only initial release
 .codex-plugin/
 CODEX_PLUGIN_FOLLOWUPS.md
