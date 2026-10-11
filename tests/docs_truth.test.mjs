@@ -59,3 +59,31 @@ test("the commercial licence sells one tier, not two", () => {
 test("the commercial licence states plainly that there is no DRM", () => {
   assert.match(read("LICENSE-COMMERCIAL.md"), /no DRM/i);
 });
+
+test("the publishing guide does not tell you to do what was decided against", () => {
+  const guide = read("PUBLISHING.md");
+  for (const [phrase, why] of [
+    ["Change visibility → Public", "the repo stays private"],
+    ["/plugin marketplace add", "there is no marketplace listing"],
+    ["npm publish", "the package is not published"],
+    ["npx skills add", "there is no public clone to add from"],
+  ]) {
+    assert.ok(!guide.includes(phrase), `PUBLISHING.md still says "${phrase}" — ${why}`);
+  }
+});
+
+test("the publishing guide leads with backing up the signing key", () => {
+  const guide = read("PUBLISHING.md");
+  assert.match(guide, /## 1\. Back up the signing key/);
+  assert.ok(
+    guide.indexOf("issuer-ed25519.pem") < guide.indexOf("## 2."),
+    "losing the key strands every licence sold, so it belongs before anything else",
+  );
+});
+
+test("the README points at a page that exists", () => {
+  // The product repo is private; its own Pages site and the sales site are the two live URLs.
+  for (const url of readme.match(/https:\/\/irvinosazee\.github\.io\/[^\s)"']+/g) ?? []) {
+    assert.match(url, /^https:\/\/irvinosazee\.github\.io\/shipreel(-site)?\//, `unexpected site URL ${url}`);
+  }
+});

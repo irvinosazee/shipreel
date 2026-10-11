@@ -16,7 +16,15 @@ path/to/skills/shipreel/SKILL.md
 
 ## Option 3: Copy the skill folder
 
-Copy `skills/shipreel/` into wherever your agent looks for skill files:
+For Claude Code, Codex and opencode, the CLI does this for you:
+
+```bash
+shipreel skill install                          # ~/.claude/skills/shipreel
+shipreel skill install --project . --agent all  # all three, in one project
+shipreel skill where                            # print the paths, change nothing
+```
+
+For anything else, copy `skills/shipreel/` into wherever your agent looks for skill files:
 
 ```bash
 cp -r skills/shipreel/ ~/.your-agent/skills/shipreel/
@@ -28,6 +36,7 @@ Regardless of method, the environment needs:
 - **Node.js 22+**
 - **FFmpeg** on `PATH`
 - **Hyperframes CLI** — `npx hyperframes doctor` to verify
-- **This repo cloned** (or `skills/shipreel/` accessible) for assets (music, SFX, reference docs)
+- **The skill folder accessible** for its assets (music, SFX, reference docs)
+- **A licence** — `shipreel licence install <token>`, or `SHIPREEL_LICENCE` in the environment
 
-Verify with `node skills/shipreel/scripts/doctor.mjs`.
+Verify with `shipreel doctor`, which reports all of the above including the licence.

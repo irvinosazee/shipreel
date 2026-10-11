@@ -8,17 +8,24 @@ brand
 
 People building things with AI coding agents (Claude Code, Codex, Cursor, etc.) who want a faster, more fun way to share what they made than a screenshot or screen recording. Many of them post on X, LinkedIn, Discord, group chats. They have taste, they care about how the work looks, and they'd rather not spend an evening editing a video.
 
+They are **buyers**, not trialists: shipreel costs $49 once, and there is nothing to try first. So the page has to earn a payment from someone who has never run it — which it does by showing the output and the numbers behind it, not by describing features.
+
 Secondary audience: curious onlookers who hit the page from a link in a tweet. They need to understand what `/shipreel` is and see proof inside of 5 seconds, or they're gone.
 
 ## Product Purpose
 
-This site is the launchpad for `/shipreel` — a Claude Code skill that turns a project website into a short, polished, shareable launch video using Hyperframes. The site exists to:
+There are two pages, and they do different jobs:
+
+- **The sales page** (`shipreel-site`, live at irvinosazee.github.io/shipreel-site) is where money changes hands. It exists to earn $49 from someone who cannot try the tool first.
+- **The demo site** (`docs/`, live at irvinosazee.github.io/shipreel) is the gallery: example videos on fake products, made by shipreel. It sells nothing and points at the sales page.
+
+Both exist to:
 
 1. Show the output (real launch videos for real example projects), not describe it.
-2. Make the install command impossible to miss.
-3. Convince builders that `/shipreel` is worth the 30 seconds it takes to try.
+2. Prove the claims — every number on the page is checkable in this repo, and a test fails if one drifts.
+3. Convince a builder that the work is worth paying for, in the first five seconds.
 
-Success looks like: a visitor watches at least one launch video, copies the install command, and runs `/shipreel` on their own project the same day.
+Success looks like: a visitor watches at least one launch video and buys the same day.
 
 ## Brand Personality
 
