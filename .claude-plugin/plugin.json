@@ -1,13 +1,18 @@
 {
   "name": "shipreel",
-  "description": "Turn any project — site, app, CLI, library, API, mobile, game, or ML — into a short, polished, shareable launch video using HyperFrames.",
+  "description": "Turn any project \u2014 site, app, CLI, library, API, mobile, game, or ML \u2014 into a short, polished, shareable launch video using HyperFrames.",
   "version": "0.2.2",
   "author": {
     "name": "Irvin Osazee",
     "email": "136273899+irvinosazee@users.noreply.github.com"
   },
-  "license": "MIT",
+  "license": "SEE LICENSE-COMMERCIAL.md",
   "homepage": "https://github.com/irvinosazee/shipreel",
   "repository": "https://github.com/irvinosazee/shipreel",
-  "keywords": ["video", "launch", "hyperframes", "skill"]
+  "keywords": [
+    "video",
+    "launch",
+    "hyperframes",
+    "skill"
+  ]
 }

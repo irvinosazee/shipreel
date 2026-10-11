@@ -1,3 +1,13 @@
+shipreel is a fork of /brag by Shunit Haviv Hakimi, which is MIT licensed. The MIT licence
+below covers the portions of this software that came from that project, and it is reproduced
+here unaltered, carrying both copyright notices.
+
+Everything added since the fork is covered by LICENSE-COMMERCIAL.md instead. Where the two
+disagree about an upstream portion, the MIT licence below wins — see "Two carve-outs that
+override everything above" in LICENSE-COMMERCIAL.md.
+
+----
+
 MIT License
 
 Copyright (c) 2026 Irvin Osazee

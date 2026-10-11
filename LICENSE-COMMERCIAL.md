@@ -4,8 +4,8 @@ Version 1.0 · plain-language terms. Not legal advice; have a lawyer read it bef
 
 ## What you bought
 
-A perpetual, non-exclusive, non-transferable licence to use shipreel, for **one developer** (a solo
-licence) or **everyone at one company** (a team licence), whichever you paid for.
+One purchase, one licence, no tiers. It is perpetual and non-exclusive, and it covers **you** —
+plus the people you work with, if you bought it for work.
 
 You may:
 
@@ -14,6 +14,18 @@ You may:
 - read, modify and extend the source for your own use, including inside your company;
 - run it in your own CI;
 - make **unlimited videos**, and use them however you want — commercially, publicly, forever.
+
+## There is no DRM
+
+No licence server, no activation, no expiry check, no phone-home. Nothing in shipreel contacts
+anything of mine, before or after you buy, and nothing stops the files you downloaded from running
+on any machine you put them on. That is deliberate: a tool that reads your private repository has
+no business making network calls to its author, and a check that runs on your machine could never
+be more than theatre anyway.
+
+What you get instead is a signed licence file with your name in it. It proves the copy is yours,
+and it is how support, updates and refunds find you. Honour it the way you would want yours
+honoured.
 
 ## The videos are yours
 
@@ -25,7 +37,8 @@ use it.
 
 - Redistribute, resell, sublicense, publish or open-source **shipreel's own source code**, in whole
   or in substantial part, whether modified or not.
-- Share your copy, licence key or download link outside your licence (you, or your company).
+- Share your copy, licence file or download link outside your licence (you, or the people you
+  work with) — if a friend finds it useful, send them here, not the tarball.
 - Offer shipreel itself to third parties as a hosted service or a competing product.
 
 Showing someone the videos, screenshots, or how you use it is fine and encouraged.
@@ -52,7 +65,7 @@ files — including redistributing them. In exchange, CC BY asks two things of y
 ## Updates, refunds, and the end
 
 Updates released within **12 months** of purchase are included. After that, the version you have
-keeps working forever; new versions may need a new purchase.
+keeps working forever — nothing switches off — and new versions may need a new purchase.
 
 Refunds: ask within 30 days and you get one, no argument.
 

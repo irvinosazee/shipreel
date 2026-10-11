@@ -11,7 +11,8 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 > **Built on [/brag](https://github.com/latent-spaces/brag) by [Shunit Haviv Hakimi](https://github.com/shunithaviv).**
 > Her project is the original: the idea, the tone, the example suite, and the first version of this skill are hers.
 > `shipreel` is a fork that grew well past it — see [what changed](#what-changed-since-the-fork).
-> The MIT license carries her copyright alongside mine.
+> `LICENSE` is her MIT licence, unaltered, carrying both copyrights; it governs the upstream
+> portions. Everything added since the fork is under [`LICENSE-COMMERCIAL.md`](LICENSE-COMMERCIAL.md).
 
 ## Install
 
@@ -30,7 +31,6 @@ Restart your agent after copying. Other agents read the same folder from
 > **Not published anywhere.** There is no marketplace listing, no `npx skills add`, and no public
 > npm package — if you saw an install command for one of those, it is out of date. The name
 > `shipreel` on npm belongs to someone else.
-</details>
 
 ### Also works with
 
@@ -40,7 +40,7 @@ This repo exposes the skill at every agent's standard discovery path via symlink
 |---|---|
 | **opencode** | Auto-detects from `.opencode/skills/shipreel/` at project root |
 | **Codex CLI** | Reads `.agents/skills/shipreel/`, walking up to repo root |
-| **Claude Code** | Also reads `.claude/skills/shipreel/` (in addition to the `.claude-plugin/` marketplace install above) |
+| **Claude Code** | Reads `.claude/skills/shipreel/`, or `~/.claude/skills/shipreel/` for every project |
 | **Other agents** | Point custom instructions at `skills/shipreel/SKILL.md` — see [`docs/other-agents.md`](docs/other-agents.md) |
 
 > **Windows users:** Git requires `git config core.symlinks true` (or `git clone -c core.symlinks=true`) and Windows Developer Mode or Administrator privileges to create symlinks. If symlinks don't work on your system, copy `skills/shipreel/` to the agent's skill directory manually instead.
@@ -135,14 +135,14 @@ node skills/shipreel/scripts/doctor.mjs
 - `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
 - `ROADMAP.md` — backlog and feature ideas
-- `.claude-plugin/` — plugin manifest + marketplace catalog
+- `.claude-plugin/` — plugin manifest, for installing this clone as a local Claude Code plugin
 - `.claude/skills/shipreel/` — symlink → `skills/shipreel/` (Claude Code discovery)
 - `.agents/skills/shipreel/` — symlink → `skills/shipreel/` (Codex CLI + opencode discovery)
 - `.opencode/skills/shipreel/` — symlink → `skills/shipreel/` (opencode discovery)
 
 ## Publishing it
 
-Installing, the plugin marketplace, the site, npm, and the launch post: [PUBLISHING.md](PUBLISHING.md).
+Selling it, the sales site, the licence, and the launch post: [PUBLISHING.md](PUBLISHING.md).
 
 ## What changed since the fork
 
@@ -150,9 +150,9 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 
 | | /brag (original) | shipreel |
 |---|---|---|
-| Skill scripts | 1 | 36 |
-| Tests | none | 230, on every push |
-| Reference docs | 6 | 16 |
+| Skill scripts | 1 | 35 |
+| Tests | none | 241, on every push |
+| Reference docs | 6 | 15 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes |
 | Source material | reads the project's code | also captures the running site, cuts real screen recordings, and cites every on-screen claim to a source file |
