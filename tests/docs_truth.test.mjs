@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -49,15 +50,39 @@ test("the README's HTML disclosure tags are balanced", () => {
   assert.equal((readme.match(/<details/g) ?? []).length, (readme.match(/<\/details>/g) ?? []).length);
 });
 
-test("the commercial licence sells one tier, not two", () => {
-  const licence = read("LICENSE-COMMERCIAL.md");
-  for (const tiered of ["solo licence", "team licence", "a solo", "a team"]) {
-    assert.ok(!licence.toLowerCase().includes(tiered), `licence still mentions "${tiered}"`);
+test("everything is MIT, carrying both copyrights", () => {
+  const licence = read("LICENSE");
+  assert.match(licence, /^MIT License/);
+  assert.match(licence, /Copyright \(c\) 2026 Irvin Osazee/);
+  assert.match(licence, /Copyright \(c\) 2026 Shunit Haviv Hakimi/, "the upstream copyright must travel with the code");
+  assert.match(licence, /CC BY 4\.0/, "the bundled music is not MIT, and LICENSE has to say so");
+  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).license, "MIT");
+});
+
+test("no commercial licence or licence gate survives the move to open source", () => {
+  for (const gone of ["LICENSE-COMMERCIAL.md", "skills/shipreel/scripts/licence.mjs", "scripts/issue-licence.mjs"]) {
+    assert.ok(!existsSync(path.join(root, gone)), `${gone} should be gone`);
+  }
+  for (const file of ["README.md", "PUBLISHING.md", "docs/other-agents.md", "skills/shipreel/scripts/cli.mjs", "skills/shipreel/scripts/doctor.mjs"]) {
+    const text = read(file);
+    for (const stale of ["LICENSE-COMMERCIAL", "licence install", "SHIPREEL_LICENCE"]) {
+      assert.ok(!text.includes(stale), `${file} still mentions "${stale}"`);
+    }
   }
 });
 
-test("the commercial licence states plainly that there is no DRM", () => {
-  assert.match(read("LICENSE-COMMERCIAL.md"), /no DRM/i);
+test("no private key is ever committed", () => {
+  let tracked = "";
+  try {
+    tracked = execFileSync("git", ["grep", "-lE", "BEGIN [A-Z ]*PRIVATE KEY", "--", ".", ":!tests/docs_truth.test.mjs"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
+  } catch (error) {
+    // git grep exits 1 when nothing matches, which is the result this test wants.
+    if (error.status !== 1) throw error;
+  }
+  assert.equal(tracked, "", "a private key must never be committed to a public repo");
 });
 
 test("the publishing guide does not tell you to do what was decided against", () => {
@@ -70,15 +95,6 @@ test("the publishing guide does not tell you to do what was decided against", ()
   ]) {
     assert.ok(!guide.includes(phrase), `PUBLISHING.md still says "${phrase}" — ${why}`);
   }
-});
-
-test("the publishing guide leads with backing up the signing key", () => {
-  const guide = read("PUBLISHING.md");
-  assert.match(guide, /## 1\. Back up the signing key/);
-  assert.ok(
-    guide.indexOf("issuer-ed25519.pem") < guide.indexOf("## 2."),
-    "losing the key strands every licence sold, so it belongs before anything else",
-  );
 });
 
 test("the README points at a page that exists", () => {

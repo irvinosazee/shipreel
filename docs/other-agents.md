@@ -37,6 +37,5 @@ Regardless of method, the environment needs:
 - **FFmpeg** on `PATH`
 - **Hyperframes CLI** — `npx hyperframes doctor` to verify
 - **The skill folder accessible** for its assets (music, SFX, reference docs)
-- **A licence** — `shipreel licence install <token>`, or `SHIPREEL_LICENCE` in the environment
 
-Verify with `shipreel doctor`, which reports all of the above including the licence.
+Verify with `shipreel doctor`, which reports all of the above.

@@ -28,7 +28,7 @@ Two conditions matter:
   requires it, so shipreel always writes it.
 - **Never register a render with YouTube Content ID** or any similar system. The licence forbids it.
 
-CC BY also forbids adding restrictions on top: if shipreel ships under a commercial licence, that
-licence cannot restrict what recipients may do with *these audio files*. See `LICENSE-COMMERCIAL.md`.
+CC BY also forbids adding restrictions on top, so shipreel's own MIT licence (`LICENSE`) covers the
+code, and these audio files stay under CC BY 4.0 with the two conditions above.
 
 Sound effects are by [Kenney](https://kenney.nl/) under CC0 — no conditions at all.

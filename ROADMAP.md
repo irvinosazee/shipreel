@@ -62,7 +62,18 @@ green CI run.
 - [x] **P5 · `shipreel skill install`.** Replaces the rsync line in the README, for Claude Code, Codex and opencode, globally or per project. Several agents in one project share one copy with relative symlinks — three copies of the bundled audio came to 51 MB, one copy and two links to 17 MB — falling back to real copies where symlinks are unavailable.
 - [x] **P6 · Docs.** PUBLISHING.md rewritten for selling a private tool: back up the signing key first, take payment, build the tarball, issue a licence, launch post, portfolio. PRODUCT.md updated for an audience that buys rather than trials. Tests guard the guide against the advice that was decided against.
 
-**Still for the owner:** back up `~/.shipreel/issuer-ed25519.pem`; set up a checkout and replace the three contact-form links on the sales page; rotate the exposed portfolio MCP key.
+**Superseded by the open-source batches below.** The licence gate, signing key and commercial licence were removed; the batches stay as a record.
+
+## Open source — batches
+
+shipreel is free and MIT: the audience it builds is the point. Worked in order, one batch per iteration, each with tests green and a commit.
+
+- [x] **O1 · History audit.** All 62 commits, every blob and patch: no private keys, API tokens, licence tokens, customer names or emails, or local machine paths. The only author emails besides the owner's noreply address are upstream /brag contributors', already public. No history rewrite needed.
+- [x] **O2 · MIT everywhere.** Removed `licence.mjs`, `scripts/issue-licence.mjs`, `LICENSE-COMMERCIAL.md`, the CLI gate and the doctor's licence line, and their three test files. `LICENSE` is plain MIT with both copyrights, plus a note that the bundled music stays CC BY 4.0. The private-key `git grep` guard survives, in `tests/docs_truth`.
+- [ ] **O3 · One-line install.** npm package and Claude plugin marketplace manifest; README and PUBLISHING rewritten for open source, with a stars/email call to action.
+- [ ] **O4 · Landing page.** `shipreel-site` from sales page to landing page: install, email signup.
+- [ ] **O5 · User manual** in `docs/`.
+- [ ] **O6 · Portfolio and launch.** Portfolio entry fix (cover, counts, copy) and launch post draft.
 
 ## Idea notes
 

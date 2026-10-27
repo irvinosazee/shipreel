@@ -8,7 +8,7 @@
  *
  *   node <skill-root>/scripts/doctor.mjs [--json] [--no-music] [--no-sfx] [--voice]
  *
- * Exit code 1 only for hard blockers (Node < 22, FFmpeg/ffprobe, Hyperframes, no licence).
+ * Exit code 1 only for hard blockers (Node < 22, FFmpeg/ffprobe, Hyperframes).
  * Missing audio assets or beat-sync tooling degrade the run instead.
  */
 
@@ -17,7 +17,6 @@ import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { describeLicence, licenceStatus } from "./licence.mjs";
 
 const MIN_NODE = [22, 0, 0];
 const MIN_HYPERFRAMES_BEATS = [0, 6, 99];
@@ -98,14 +97,9 @@ export function detectTools({ nodeVersion = process.version, run = defaultRun } 
 
 const fmt = (v) => (v ? v.join(".") : "missing");
 
-export function summarize({ tools, assets, flags = {}, licence } = {}) {
+export function summarize({ tools, assets, flags = {} } = {}) {
   const blockers = [];
   const warnings = [];
-
-  // Reported, never enforced here: the doctor's job is to say what is wrong, and a licence
-  // whose update window closed is not wrong — the software keeps working either way.
-  if (licence && !licence.valid) blockers.push(`No usable licence: ${licence.reason}. Run \`shipreel licence install <token>\`.`);
-  if (licence?.updatesExpired) warnings.push(describeLicence(licence));
 
   if (!tools.node || compareVersions(tools.node, MIN_NODE) < 0) {
     blockers.push(`Node.js 22+ is required (found ${fmt(tools.node)}).`);
@@ -156,7 +150,7 @@ export function summarize({ tools, assets, flags = {}, licence } = {}) {
   };
 }
 
-function printReport({ skillRoot, tools, assets, report, licence }) {
+function printReport({ skillRoot, tools, assets, report }) {
   const line = (ok, label, detail) => console.log(`${ok ? "✓" : "✗"} ${label.padEnd(12)} ${detail}`);
   console.log(`/shipreel doctor — skill root: ${skillRoot}\n`);
   line(Boolean(tools.node) && compareVersions(tools.node, MIN_NODE) >= 0, "node", fmt(tools.node));
@@ -167,7 +161,6 @@ function printReport({ skillRoot, tools, assets, report, licence }) {
   line(assets.music.tracks.length > 0, "music", `${assets.music.tracks.length} tracks`);
   const sfxCount = Object.values(assets.sfx.families).reduce((a, b) => a + b, 0);
   line(sfxCount > 0, "sfx", `${sfxCount} files`);
-  if (licence) line(licence.valid, "licence", describeLicence(licence));
 
   const { capabilities } = report;
   console.log(
@@ -189,13 +182,12 @@ function main(argv) {
   const skillRoot = resolveSkillRoot();
   const tools = detectTools();
   const assets = checkAssets(skillRoot);
-  const licence = licenceStatus();
-  const report = summarize({ tools, assets, flags, licence });
+  const report = summarize({ tools, assets, flags });
 
   if (flags.json) {
-    console.log(JSON.stringify({ skillRoot, assetsRoot: assets.root, tools, assets, licence, ...report }, null, 2));
+    console.log(JSON.stringify({ skillRoot, assetsRoot: assets.root, tools, assets, ...report }, null, 2));
   } else {
-    printReport({ skillRoot, tools, assets, report, licence });
+    printReport({ skillRoot, tools, assets, report });
   }
   process.exitCode = report.blockers.length > 0 ? 1 : 0;
 }

@@ -26,7 +26,7 @@ export function packageJson() {
     description: "Launch videos, release videos, and PR previews for your projects, rendered with Hyperframes. The standalone CLI of the /shipreel skill.",
     type: "module",
     bin: { [PACKAGE_NAME]: "skills/shipreel/scripts/cli.mjs" },
-    files: ["skills/shipreel", "README.md", "LICENSE", "LICENSE-COMMERCIAL.md"],
+    files: ["skills/shipreel", "README.md", "LICENSE"],
     engines: { node: ">=22" },
     license: plugin.license,
     author: plugin.author.name,
@@ -63,9 +63,7 @@ export function stageCli(out = path.join(ROOT, "dist", PACKAGE_NAME)) {
     dereference: true,
     filter: (source) => !EXCLUDE.test(path.relative(ROOT, source).split(path.sep).join("/")),
   });
-  // Both licences travel with the tarball: the MIT one for the upstream portions, the
-  // commercial one for everything added since.
-  for (const file of ["LICENSE", "LICENSE-COMMERCIAL.md"]) cpSync(path.join(ROOT, file), path.join(out, file));
+  cpSync(path.join(ROOT, "LICENSE"), path.join(out, "LICENSE"));
   writeFileSync(path.join(out, "README.md"), README);
   writeFileSync(path.join(out, "package.json"), `${JSON.stringify(packageJson(), null, 2)}\n`);
   return out;

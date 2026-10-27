@@ -11,18 +11,13 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 > **Built on [/brag](https://github.com/latent-spaces/brag) by [Shunit Haviv Hakimi](https://github.com/shunithaviv).**
 > Her project is the original: the idea, the tone, the example suite, and the first version of this skill are hers.
 > `shipreel` is a fork that grew well past it — see [what changed](#what-changed-since-the-fork).
-> `LICENSE` is her MIT licence, unaltered, carrying both copyrights; it governs the upstream
-> portions. Everything added since the fork is under [`LICENSE-COMMERCIAL.md`](LICENSE-COMMERCIAL.md).
+> The whole project is MIT, under [`LICENSE`](LICENSE), carrying both copyrights.
 
 ## Install
 
-shipreel is a paid, private tool. Buying it gets you a tarball; install it into whichever agent you
-use.
-
 ```bash
-# from the download
-npm i -g ./shipreel-0.2.2.tgz        # the standalone CLI
-shipreel licence install <token>     # the token from your receipt
+npm run pack-cli                     # from a clone: builds dist/shipreel-0.2.2.tgz
+npm i -g ./dist/shipreel-0.2.2.tgz   # the standalone CLI
 shipreel skill install               # the skill, into ~/.claude/skills/shipreel
 ```
 
@@ -30,9 +25,7 @@ shipreel skill install               # the skill, into ~/.claude/skills/shipreel
 and opencode at once — one copy, with the other two linked to it, because the bundled audio is
 16MB. `shipreel skill where` prints the paths without touching anything.
 
-The licence is a signed file at `~/.shipreel/licence` naming who bought the copy; in CI, set
-`SHIPREEL_LICENCE` instead. It never expires the software and never calls home — `shipreel doctor`
-will tell you what it sees.
+`shipreel doctor` checks Node, FFmpeg, Hyperframes and the bundled audio, and says what is missing.
 
 Restart your agent after installing.
 
@@ -138,7 +131,7 @@ node skills/shipreel/scripts/doctor.mjs
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
 - `tests/` — Node test suite (`npm test`) and the examples eval baseline
-- `scripts/` — repo checks and `issue-licence.mjs` (the seller's script): `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `shipreel` npm package into `dist/`, without publishing)
+- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `shipreel` npm package into `dist/`, without publishing)
 - `action.yml` — composite GitHub Action for release videos and PR previews
 - `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
@@ -150,7 +143,7 @@ node skills/shipreel/scripts/doctor.mjs
 
 ## Publishing it
 
-Selling it, the sales site, the licence, and the launch post: [PUBLISHING.md](PUBLISHING.md).
+Releasing it, the site, and the launch post: [PUBLISHING.md](PUBLISHING.md).
 
 ## What changed since the fork
 
@@ -158,8 +151,8 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 
 | | /brag (original) | shipreel |
 |---|---|---|
-| Skill scripts | 1 | 37 |
-| Tests | none | 292, on every push |
+| Skill scripts | 1 | 36 |
+| Tests | none | 256, on every push |
 | Reference docs | 6 | 15 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes |

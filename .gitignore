@@ -26,7 +26,8 @@ skills-lock.json
 **/.thumbnails/
 **/.waveform-cache/
 
-# Key material — the licence issuer's private key lives in ~/.shipreel, never here
+# Key material never belongs in a public repo. licences/ is the retired sales ledger, which
+# holds customer email addresses.
 *.pem
 *.key
 issuer-*.json

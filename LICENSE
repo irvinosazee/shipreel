@@ -1,13 +1,3 @@
-shipreel is a fork of /brag by Shunit Haviv Hakimi, which is MIT licensed. The MIT licence
-below covers the portions of this software that came from that project, and it is reproduced
-here unaltered, carrying both copyright notices.
-
-Everything added since the fork is covered by LICENSE-COMMERCIAL.md instead. Where the two
-disagree about an upstream portion, the MIT licence below wins — see "Two carve-outs that
-override everything above" in LICENSE-COMMERCIAL.md.
-
-----
-
 MIT License
 
 Copyright (c) 2026 Irvin Osazee
@@ -30,3 +20,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----
+
+The bundled music in skills/shipreel/assets/music is by Sascha Ende (ende.app)
+under CC BY 4.0, and the sound effects in skills/shipreel/assets/sfx are by
+Kenney (kenney.nl) under CC0. Those files are not covered by the MIT licence
+above; see skills/shipreel/assets/music/README.md.
