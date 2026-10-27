@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Stage the standalone `shipreel` npm package from this repo, and optionally pack it.
+ * Stage the standalone `@irvinosazee/shipreel` npm package from this repo, and optionally pack it.
  *
  *   node scripts/pack-cli.mjs [--out dist/shipreel] [--pack]
  *
@@ -16,7 +16,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const EXCLUDE = /(^|\/)(__pycache__|\.venv|\.pytest_cache|node_modules)(\/|$)|\.pyc$|\.DS_Store$/;
-export const PACKAGE_NAME = "shipreel";
+// Scoped because the unscoped `shipreel` on npm belongs to someone else. The command stays `shipreel`.
+export const PACKAGE_NAME = "@irvinosazee/shipreel";
+export const BIN_NAME = "shipreel";
 
 export function packageJson() {
   const plugin = JSON.parse(readFileSync(path.join(ROOT, ".claude-plugin", "plugin.json"), "utf8"));
@@ -25,36 +27,43 @@ export function packageJson() {
     version: plugin.version,
     description: "Launch videos, release videos, and PR previews for your projects, rendered with Hyperframes. The standalone CLI of the /shipreel skill.",
     type: "module",
-    bin: { [PACKAGE_NAME]: "skills/shipreel/scripts/cli.mjs" },
+    bin: { [BIN_NAME]: "skills/shipreel/scripts/cli.mjs" },
     files: ["skills/shipreel", "README.md", "LICENSE"],
     engines: { node: ">=22" },
     license: plugin.license,
     author: plugin.author.name,
     homepage: plugin.homepage,
     repository: { type: "git", url: `git+${plugin.repository}.git` },
-    keywords: ["video", "launch", "release", "hyperframes", "cli"],
+    keywords: ["video", "launch", "release", "hyperframes", "cli", "claude-code", "skill"],
+    publishConfig: { access: "public" },
   };
 }
 
-const README = `# shipreel
+const README = `# @irvinosazee/shipreel
 
-Launch videos for your projects, without a coding agent. The standalone CLI of [/shipreel](https://github.com/irvinosazee/shipreel).
+Launch videos for your projects. Free and open source: [github.com/irvinosazee/shipreel](https://github.com/irvinosazee/shipreel).
 
 \`\`\`bash
-npx shipreel make                 # a launch video for the project in this folder
-npx shipreel release --tag v1.2.0 # a release video from git history
-npx shipreel kit shipreel-output      # videos, covers, captions, and embeds in one folder
-npx shipreel embed . --video shipreel-output/shipreel.mp4 --poster shipreel-output/shipreel.jpg
-npx shipreel github install release
-npx shipreel --help
+npx @irvinosazee/shipreel skill install   # the /shipreel skill, for Claude Code
+npx @irvinosazee/shipreel make            # or: a launch video for this folder, no agent needed
+\`\`\`
+
+Installed globally (\`npm i -g @irvinosazee/shipreel\`), the command is \`shipreel\`:
+
+\`\`\`bash
+shipreel release --tag v1.2.0              # a release video from git history
+shipreel kit shipreel-output               # videos, covers, captions, and embeds in one folder
+shipreel embed . --video shipreel-output/shipreel.mp4 --poster shipreel-output/shipreel.jpg
+shipreel github install release
+shipreel --help
 \`\`\`
 
 Needs Node 22+, FFmpeg, and Chrome. Rendering runs \`npx hyperframes\`. Nothing is uploaded or posted anywhere.
 
-With Claude Code, Codex, or another coding agent, install the /shipreel skill instead: it writes a video made for your project rather than filling a template.
+Update with \`npx @irvinosazee/shipreel@latest skill install\`. The unscoped \`shipreel\` package on npm is someone else's.
 `;
 
-export function stageCli(out = path.join(ROOT, "dist", PACKAGE_NAME)) {
+export function stageCli(out = path.join(ROOT, "dist", BIN_NAME)) {
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
   // dereference: .claude/skills/shipreel style symlinks must become real files in the package.
@@ -83,7 +92,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
     } else {
       const tarball = path.join(dest, result.stdout.trim().split("\n").at(-1));
       console.log(`packed ${tarball}${existsSync(tarball) ? "" : " (missing?)"}`);
-      console.log(`Not published. To publish: npm publish ${staged}`);
+      console.log(`Not published. To publish: npm publish ${staged} --access public`);
     }
   }
 }

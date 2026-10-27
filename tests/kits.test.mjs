@@ -61,7 +61,7 @@ test("renderKit escapes content and rejects unknown kits", () => {
 });
 
 test("terminal types each command with stepped width and shows output after it", () => {
-  const out = renderKit("terminal", { id: "term", at: 2, theme, props: { lines: [{ command: "npx shipreel", output: ["rendering…", "done in 20s"] }], charSeconds: 0.05 } });
+  const out = renderKit("terminal", { id: "term", at: 2, theme, props: { lines: [{ command: "shipreel kit", output: ["rendering…", "done in 20s"] }], charSeconds: 0.05 } });
   const { tl, calls } = recorder();
   out.build(tl);
   const typing = calls.find((c) => c[0] === "fromTo" && c[1] === "#term-cmd-0");

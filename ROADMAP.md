@@ -70,7 +70,7 @@ shipreel is free and MIT: the audience it builds is the point. Worked in order, 
 
 - [x] **O1 · History audit.** All 62 commits, every blob and patch: no private keys, API tokens, licence tokens, customer names or emails, or local machine paths. The only author emails besides the owner's noreply address are upstream /brag contributors', already public. No history rewrite needed.
 - [x] **O2 · MIT everywhere.** Removed `licence.mjs`, `scripts/issue-licence.mjs`, `LICENSE-COMMERCIAL.md`, the CLI gate and the doctor's licence line, and their three test files. `LICENSE` is plain MIT with both copyrights, plus a note that the bundled music stays CC BY 4.0. The private-key `git grep` guard survives, in `tests/docs_truth`.
-- [ ] **O3 · One-line install.** npm package and Claude plugin marketplace manifest; README and PUBLISHING rewritten for open source, with a stars/email call to action.
+- [x] **O3 · One-line install.** `npx @irvinosazee/shipreel skill install` — scoped because the unscoped `shipreel` on npm is someone else's; the command it installs is still `shipreel`, and `publishConfig.access` is public. Every `npx shipreel` in code, docs, kits and tests replaced, and a test fails if one comes back. Marketplace manifest passes `claude plugin validate`. README: install, other routes, an Updating section, and a star/email call to action. PUBLISHING.md rewritten for an open-source release: check the package, go public (npm and GitHub together), ship an update, the list, the launch post. Tarball installed into a scratch prefix and `skill install` verified end to end.
 - [ ] **O4 · Landing page.** `shipreel-site` from sales page to landing page: install, email signup.
 - [ ] **O5 · User manual** in `docs/`.
 - [ ] **O6 · Portfolio and launch.** Portfolio entry fix (cover, counts, copy) and launch post draft.
@@ -131,4 +131,4 @@ shipreel is free and MIT: the audience it builds is the point. Worked in order, 
 - **Embed into the user's site.** Offer a patch that adds the launch video (with poster) to the project's own landing page.
 - **GitHub Action.** On release, run `/shipreel` headless against the diff and attach `shipreel.mp4` and share copy to the release.
 - **PR preview videos.** A 10-second clip of UI changes posted on the pull request from the preview deploy.
-- **Standalone `npx shipreel` CLI** for people who do not use a coding agent.
+- **Standalone `npx @irvinosazee/shipreel` CLI** for people who do not use a coding agent.

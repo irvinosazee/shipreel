@@ -11,7 +11,7 @@
  *   "stats": [{ "value": "142", "label": "commits" }],
  *   "screenshots": [{ "file": "home.png", "caption": "the landing page" }],
  *   "highlights": { "heading": "what's new", "items": ["vertical exports", "karaoke captions"] },
- *   "outro": { "line": "try it", "detail": "npx shipreel make" },
+ *   "outro": { "line": "try it", "detail": "npx @irvinosazee/shipreel make" },
  *   "theme": { "bg": "#0f0d15", "fg": "#f5f1ea", "muted": "#b9b2a8", "accent": "#ff6b3d" }
  * }
  *

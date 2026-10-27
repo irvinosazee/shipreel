@@ -45,7 +45,7 @@ const dots = `<span class="kit-dots"><i></i><i></i><i></i></span>`;
 export const KITS = {
   terminal: {
     description: "A terminal window that types real commands character by character, then prints their output.",
-    example: { title: "zsh", lines: [{ command: "npx shipreel --for vertical", output: ["✓ rendered shipreel-vertical.mp4"] }], charSeconds: 0.04 },
+    example: { title: "zsh", lines: [{ command: "/shipreel --for vertical", output: ["✓ rendered shipreel-vertical.mp4"] }], charSeconds: 0.04 },
     render({ id, at, theme, props }) {
       const lines = props.lines ?? [];
       const charSeconds = props.charSeconds ?? 0.04;

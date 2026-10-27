@@ -15,23 +15,51 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 
 ## Install
 
+Free and open source (MIT). One line, if you have Node 22+:
+
 ```bash
-npm run pack-cli                     # from a clone: builds dist/shipreel-0.2.2.tgz
-npm i -g ./dist/shipreel-0.2.2.tgz   # the standalone CLI
-shipreel skill install               # the skill, into ~/.claude/skills/shipreel
+npx @irvinosazee/shipreel skill install
 ```
 
-`shipreel skill install --project . --agent all` puts it in one project for Claude Code, Codex
-and opencode at once — one copy, with the other two linked to it, because the bundled audio is
-16MB. `shipreel skill where` prints the paths without touching anything.
+That puts the skill in `~/.claude/skills/shipreel`. Restart Claude Code and say `let's /shipreel`.
 
-`shipreel doctor` checks Node, FFmpeg, Hyperframes and the bundled audio, and says what is missing.
+Other ways in:
 
-Restart your agent after installing.
+```bash
+# Claude Code plugin marketplace
+/plugin marketplace add irvinosazee/shipreel
+/plugin install shipreel@shipreel
 
-> **Not published anywhere.** There is no marketplace listing, no `npx skills add`, and no public
-> npm package — if you saw an install command for one of those, it is out of date. The name
-> `shipreel` on npm belongs to someone else.
+# the standalone CLI, for people without a coding agent
+npm i -g @irvinosazee/shipreel
+shipreel make
+
+# one project, for Claude Code, Codex and opencode at once
+npx @irvinosazee/shipreel skill install --project . --agent all
+```
+
+The last one installs one copy and links the other two to it, because the bundled audio is 16MB.
+`shipreel skill where` prints the paths without touching anything. `shipreel doctor` checks Node,
+FFmpeg, Hyperframes and the bundled audio, and says what is missing.
+
+> The unscoped `shipreel` package on npm is somebody else's. This one is always
+> `@irvinosazee/shipreel`.
+
+### Updating
+
+```bash
+npx @irvinosazee/shipreel@latest skill install   # refreshes the skill in place
+npm i -g @irvinosazee/shipreel@latest            # if you use the CLI
+/plugin marketplace update shipreel              # if you installed the plugin
+```
+
+Releases, with a video of what changed, are on the [releases page](https://github.com/irvinosazee/shipreel/releases).
+
+### Stay in the loop
+
+If shipreel made you a video you posted, **[star the repo](https://github.com/irvinosazee/shipreel)** —
+it is how other people find it. For new releases and what I build next, join the list on
+[the site](https://irvinosazee.github.io/shipreel-site/#updates). One email per release, no more.
 
 ### Also works with
 
@@ -91,9 +119,9 @@ You get a `shipreel-output/` folder with the plan, a composition brief, a self-r
 `shipreel` is the same toolkit as a plain CLI. It fills a clean card template from your package metadata, README, git history, and a capture of the running site; it does not write a bespoke video the way the skill does.
 
 ```bash
-node skills/shipreel/scripts/cli.mjs make ~/code/my-app --format vertical
-node skills/shipreel/scripts/cli.mjs release ~/code/my-app --tag v1.2.0 --out shipreel-release
-node skills/shipreel/scripts/cli.mjs --help
+npx @irvinosazee/shipreel make ~/code/my-app --format vertical
+npx @irvinosazee/shipreel release ~/code/my-app --tag v1.2.0 --out shipreel-release
+npx @irvinosazee/shipreel --help
 ```
 
 ### In GitHub Actions
@@ -101,7 +129,7 @@ node skills/shipreel/scripts/cli.mjs --help
 Release videos attached to every GitHub release, and before/after preview clips commented on pull requests:
 
 ```bash
-node skills/shipreel/scripts/cli.mjs github install release      # or: pr-preview
+npx @irvinosazee/shipreel github install release      # or: pr-preview
 ```
 
 Both use the composite action in `action.yml` (`uses: irvinosazee/shipreel@main`) and only the workflow token. The PR preview needs a `SHIPREEL_PRODUCTION_URL` repository variable. See [distribution.md](skills/shipreel/references/distribution.md).
@@ -120,7 +148,7 @@ Both use the composite action in `action.yml` (`uses: irvinosazee/shipreel@main`
 Check everything at once, including the bundled music and SFX:
 
 ```bash
-node skills/shipreel/scripts/doctor.mjs
+npx @irvinosazee/shipreel doctor
 ```
 
 `/shipreel` runs the same check before every video and tells you what it will skip.
@@ -131,7 +159,7 @@ node skills/shipreel/scripts/doctor.mjs
 - `examples/` — fake product sites used as a benchmark suite
 - `docs/` — the launch site (GitHub Pages)
 - `tests/` — Node test suite (`npm test`) and the examples eval baseline
-- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `shipreel` npm package into `dist/`, without publishing)
+- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `@irvinosazee/shipreel` npm package into `dist/`, without publishing)
 - `action.yml` — composite GitHub Action for release videos and PR previews
 - `.github/workflows/ci.yml` — runs all of the above on every push and pull request
 - `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
@@ -152,7 +180,7 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 | | /brag (original) | shipreel |
 |---|---|---|
 | Skill scripts | 1 | 36 |
-| Tests | none | 256, on every push |
+| Tests | none | 258, on every push |
 | Reference docs | 6 | 15 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes |

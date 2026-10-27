@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
- * shipreel: /shipreel for people who do not use a coding agent.
+ * shipreel: /shipreel for people who do not use a coding agent. Published as @irvinosazee/shipreel,
+ * so without a global install every line below starts `npx @irvinosazee/shipreel` instead.
  *
- *   npx shipreel make [project-dir] [--format landscape|vertical|square] [--out shipreel-output] [--screenshot home.png] [--no-capture]
- *   npx shipreel release [project-dir] --tag v1.2.0 [--out shipreel-release]
- *   npx shipreel preview --base https://site.com --head https://pr-7.preview.app --changed-files changed.txt --out shipreel-pr
- *   npx shipreel kit [output-dir] [--url https://…]
- *   npx shipreel embed [project-dir] --video shipreel-output/shipreel.mp4 --poster shipreel-output/shipreel.jpg [--apply]
- *   npx shipreel github install release|pr-preview [project-dir]
- *   npx shipreel doctor | verify | platforms | captions | covers | cuts | … (every skill script)
+ *   shipreel make [project-dir] [--format landscape|vertical|square] [--out shipreel-output] [--screenshot home.png] [--no-capture]
+ *   shipreel release [project-dir] --tag v1.2.0 [--out shipreel-release]
+ *   shipreel preview --base https://site.com --head https://pr-7.preview.app --changed-files changed.txt --out shipreel-pr
+ *   shipreel kit [output-dir] [--url https://…]
+ *   shipreel embed [project-dir] --video shipreel-output/shipreel.mp4 --poster shipreel-output/shipreel.jpg [--apply]
+ *   shipreel github install release|pr-preview [project-dir]
+ *   shipreel doctor | verify | platforms | captions | covers | cuts | … (every skill script)
  *
  * `make` is the agent-free floor: it reads the project (package metadata, README features, git
  * history), captures the running site when it can, fills the card template, renders, masters,

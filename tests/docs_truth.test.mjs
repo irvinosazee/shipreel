@@ -37,13 +37,36 @@ test("the README's test count matches the tests that run", () => {
   assert.match(tableClaim("Tests"), new RegExp(`\\b${declared}\\b`));
 });
 
-test("the README does not promise an install route that does not exist", () => {
-  for (const stale of ["/plugin marketplace add", "npx skills add", "marketplace catalog", "skills add shipreel"]) {
-    const lines = readme
-      .split("\n")
-      .filter((line) => line.includes(stale) && !line.trimStart().startsWith("> **Not published"));
-    assert.deepEqual(lines, [], `README still advertises "${stale}"`);
+test("the README leads with the one-line install and every route that exists", () => {
+  const install = readme.slice(readme.indexOf("## Install"), readme.indexOf("### Also works with"));
+  assert.match(install, /npx @irvinosazee\/shipreel skill install/);
+  assert.match(install, /\/plugin marketplace add irvinosazee\/shipreel/);
+  assert.match(install, /npm i -g @irvinosazee\/shipreel/);
+  assert.match(install, /### Updating/, "a user who installed once needs to know how to get the next version");
+  assert.match(install, /star the repo/i, "the README is the funnel; it has to ask");
+});
+
+test("nothing tells anyone to run the unscoped shipreel package, which is somebody else's", () => {
+  let hits = "";
+  try {
+    hits = execFileSync("git", ["grep", "-nE", "npx shipreel\\b|npm i(nstall)? (-g )?shipreel\\b", "--", ".", ":!tests/docs_truth.test.mjs"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
+  } catch (error) {
+    if (error.status !== 1) throw error;
   }
+  assert.equal(hits, "", `these lines would run a stranger's package:\n${hits}`);
+});
+
+test("the npm package is scoped, public, and still installs the shipreel command", async () => {
+  const { packageJson } = await import("../scripts/pack-cli.mjs");
+  const pkg = packageJson();
+  assert.equal(pkg.name, "@irvinosazee/shipreel");
+  assert.deepEqual(Object.keys(pkg.bin), ["shipreel"]);
+  assert.equal(pkg.publishConfig?.access, "public", "a scoped package publishes as private without this");
+  assert.equal(pkg.license, "MIT");
+  assert.deepEqual(pkg.files.filter((f) => f.startsWith("LICENSE")), ["LICENSE"]);
 });
 
 test("the README's HTML disclosure tags are balanced", () => {
@@ -85,20 +108,17 @@ test("no private key is ever committed", () => {
   assert.equal(tracked, "", "a private key must never be committed to a public repo");
 });
 
-test("the publishing guide does not tell you to do what was decided against", () => {
+test("the publishing guide is for an open-source release, not a sale", () => {
   const guide = read("PUBLISHING.md");
-  for (const [phrase, why] of [
-    ["Change visibility → Public", "the repo stays private"],
-    ["/plugin marketplace add", "there is no marketplace listing"],
-    ["npm publish", "the package is not published"],
-    ["npx skills add", "there is no public clone to add from"],
-  ]) {
-    assert.ok(!guide.includes(phrase), `PUBLISHING.md still says "${phrase}" — ${why}`);
+  assert.match(guide, /npm publish dist\/shipreel --access public/);
+  assert.match(guide, /## 3\. Ship an update/);
+  for (const stale of ["issuer-ed25519.pem", "issue-licence", "Take payment", "$49 once"]) {
+    assert.ok(!guide.includes(stale), `PUBLISHING.md still says "${stale}" from the paid-product days`);
   }
 });
 
 test("the README points at a page that exists", () => {
-  // The product repo is private; its own Pages site and the sales site are the two live URLs.
+  // The demo site (this repo's Pages) and the landing page (shipreel-site) are the two live URLs.
   for (const url of readme.match(/https:\/\/irvinosazee\.github\.io\/[^\s)"']+/g) ?? []) {
     assert.match(url, /^https:\/\/irvinosazee\.github\.io\/shipreel(-site)?\//, `unexpected site URL ${url}`);
   }

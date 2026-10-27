@@ -30,7 +30,7 @@ Load the bundle after GSAP, give each kit an empty slot element inside its scene
 <script>
   const theme = { bg: "#120b08", panel: "#1d1410", fg: "#f6eee8", muted: "#b9aaa0", accent: "#ff6a3d", font: "Geist", mono: "Geist Mono" };
   const tl = gsap.timeline({ paused: true });
-  ShipreelKits.mount(tl, "install-slot", "terminal", { id: "install", at: 7.1, theme, props: { lines: [{ command: "npx shipreel", output: ["✓ done"] }] } });
+  ShipreelKits.mount(tl, "install-slot", "terminal", { id: "install", at: 7.1, theme, props: { lines: [{ command: "npx @irvinosazee/shipreel", output: ["✓ done"] }] } });
   window.__timelines["main"] = tl;
 </script>
 ```

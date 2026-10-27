@@ -11,7 +11,7 @@ const content = {
   stats: [{ value: "142", label: "commits" }, { value: "3", label: "contributors" }],
   screenshots: [{ file: "shot.png", width: 1080, height: 3000, caption: "the landing page" }],
   highlights: { heading: "what's new", items: ["vertical exports for tiktok and reels", "burned-in karaoke captions", "golden-frame regression tests"] },
-  outro: { line: "try it", detail: "npx shipreel make" },
+  outro: { line: "try it", detail: "npx @irvinosazee/shipreel make" },
 };
 
 test("fitFontPx picks the largest size whose wrapped lines fit, and truncates only when the minimum cannot", () => {
@@ -79,7 +79,7 @@ test("buildCardComposition emits a lint-shaped Hyperframes root with one paused 
   assert.doesNotMatch(html, /oklch\(/, "hex colors keep the contrast audit working");
   assert.equal((html.match(/class="clip scene/g) || []).length, plan.scenes.length);
   assert.match(html, /<img id="shot-0-img" src="assets\/shot-0\.png"/);
-  assert.match(html, /npx shipreel make/);
+  assert.match(html, /npx @irvinosazee\/shipreel make/);
   assert.doesNotMatch(buildCardComposition({ title: "<script>" }, { format: "square" }).html, /<h1[^>]*><script>/, "text is escaped");
 });
 
