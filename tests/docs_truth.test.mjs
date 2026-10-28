@@ -117,6 +117,23 @@ test("the publishing guide is for an open-source release, not a sale", () => {
   }
 });
 
+test("the manual documents every flag the skill accepts", () => {
+  // The options table in SKILL.md is the source of truth; a flag added there must reach users.
+  const skill = read("skills/shipreel/SKILL.md");
+  const table = skill.slice(skill.indexOf("| Option | Values | Default |"), skill.indexOf("Voice is opt-in."));
+  const flags = [...table.matchAll(/^\| `(--[a-z-]+)`/gm)].map((m) => m[1]);
+  assert.ok(flags.length > 20, `expected the options table, found ${flags.length} flags`);
+  const manual = read("docs/manual.md");
+  const missing = flags.filter((flag) => !manual.includes(`\`${flag}`));
+  assert.deepEqual(missing, [], `docs/manual.md does not document ${missing.join(", ")}`);
+});
+
+test("the manual only ever installs the scoped package", () => {
+  const manual = read("docs/manual.md");
+  assert.match(manual, /npx @irvinosazee\/shipreel skill install/);
+  assert.match(manual, /## 10\. Updating/);
+});
+
 test("the README points at a page that exists", () => {
   // The demo site (this repo's Pages) and the landing page (shipreel-site) are the two live URLs.
   for (const url of readme.match(/https:\/\/irvinosazee\.github\.io\/[^\s)"']+/g) ?? []) {
