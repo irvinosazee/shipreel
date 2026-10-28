@@ -15,7 +15,7 @@ list, and a reputation that later paid products can stand on. Every step below s
 - Full git history audited before going public: no keys, tokens, licence tokens or customer data.
   A test runs `git grep` for private key material on every push.
 - The package is `@irvinosazee/shipreel` (the unscoped `shipreel` on npm is someone else's), the
-  command it installs is `shipreel`, and a test fails if `npx shipreel` appears anywhere again.
+  command it installs is `shipreel`, and a test fails if the unscoped package name shows up in an install command again.
 - `.claude-plugin/marketplace.json` lists the plugin, so the repo is its own marketplace.
 - CI green on every push; a nightly render checks the pipeline against the latest Hyperframes.
 

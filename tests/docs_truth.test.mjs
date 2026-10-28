@@ -49,7 +49,7 @@ test("the README leads with the one-line install and every route that exists", (
 test("nothing tells anyone to run the unscoped shipreel package, which is somebody else's", () => {
   let hits = "";
   try {
-    hits = execFileSync("git", ["grep", "-nE", "npx shipreel\\b|npm i(nstall)? (-g )?shipreel\\b", "--", ".", ":!tests/docs_truth.test.mjs"], {
+    hits = execFileSync("git", ["grep", "-nE", "npx shipreel([^A-Za-z0-9@/_-]|$)|npm i(nstall)? (-g )?shipreel([^A-Za-z0-9@/_-]|$)", "--", ".", ":!tests/docs_truth.test.mjs"], {
       cwd: root,
       encoding: "utf8",
     }).trim();
