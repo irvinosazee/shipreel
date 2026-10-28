@@ -37,8 +37,8 @@ contain the examples or the tests.
 The README's install line points at both, so do them in one sitting.
 
 ```bash
-npm login                                  # as irvinosazee; the scope must match the account
-npm publish dist/shipreel --access public  # scoped packages are private unless told otherwise
+npm login                                  # as irvinosazee; publishing asks for a 2FA code
+npm publish ./dist/shipreel --access public  # the ./ matters: without it npm reads a GitHub repo
 gh repo edit irvinosazee/shipreel --visibility public --accept-visibility-change-consequences
 ```
 
@@ -62,7 +62,7 @@ npm version and a tag.
 
 1. Bump `version` in `.claude-plugin/plugin.json` (the package version follows it).
 2. `npm test && npm run pack-cli`
-3. `npm publish dist/shipreel --access public`
+3. `npm publish ./dist/shipreel --access public`
 4. `git tag v<version> && git push --tags && gh release create v<version> --generate-notes`
 
 `shipreel github install release` adds a workflow that renders a release video from the tag and

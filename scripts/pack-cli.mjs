@@ -6,7 +6,7 @@
  *
  * The package mirrors the repo layout (skills/shipreel/…) so the CLI resolves its scripts and assets
  * the same way in both places. --pack runs `npm pack` into dist/. This never publishes: to
- * release, check the tarball, then run `npm publish dist/shipreel` yourself.
+ * release, check the tarball, then run `npm publish ./dist/shipreel` yourself.
  */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";

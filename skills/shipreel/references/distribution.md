@@ -80,4 +80,4 @@ The PR preview workflow needs the repository variable `SHIPREEL_PRODUCTION_URL`,
 
 The CLI never calls a model. When the user has an agent, /shipreel's own workflow is the better video, so do not substitute `make` for Steps 1–4.
 
-`npm run pack-cli` stages `dist/shipreel/` (the `@irvinosazee/shipreel` npm package, mirroring this layout) and packs a tarball. Publishing is the user's step: `npm publish dist/shipreel --access public`. Point users at the scoped name: the unscoped `shipreel` on npm is a different package.
+`npm run pack-cli` stages `dist/shipreel/` (the `@irvinosazee/shipreel` npm package, mirroring this layout) and packs a tarball. Publishing is the user's step: `npm publish ./dist/shipreel --access public`. Point users at the scoped name: the unscoped `shipreel` on npm is a different package.

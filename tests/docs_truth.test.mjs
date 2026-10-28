@@ -110,7 +110,7 @@ test("no private key is ever committed", () => {
 
 test("the publishing guide is for an open-source release, not a sale", () => {
   const guide = read("PUBLISHING.md");
-  assert.match(guide, /npm publish dist\/shipreel --access public/);
+  assert.match(guide, /npm publish \.\/dist\/shipreel --access public/);
   assert.match(guide, /## 3\. Ship an update/);
   for (const stale of ["issuer-ed25519.pem", "issue-licence", "Take payment", "$49 once"]) {
     assert.ok(!guide.includes(stale), `PUBLISHING.md still says "${stale}" from the paid-product days`);
