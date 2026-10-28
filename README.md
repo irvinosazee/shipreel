@@ -58,8 +58,10 @@ Releases, with a video of what changed, are on the [releases page](https://githu
 ### Stay in the loop
 
 If shipreel made you a video you posted, **[star the repo](https://github.com/irvinosazee/shipreel)** —
-it is how other people find it. For new releases and what I build next, join the list on
-[the site](https://irvinosazee.github.io/shipreel-site/#updates). One email per release, no more.
+it is how other people find it. **Watch → Custom → Releases** gets you one notification per release.
+To follow what I build next: [GitHub](https://github.com/irvinosazee) ·
+[LinkedIn](https://www.linkedin.com/in/irvin-osazee) · [Medium](https://medium.com/@uyiosazeeirvin) ·
+[irvinosazee.me](https://www.irvinosazee.me).
 
 ### Also works with
 

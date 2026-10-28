@@ -726,3 +726,6 @@ button { font: inherit; cursor: pointer; }
   }
   .card:hover { transform: none; }
 }
+
+/* Leave room for the copy button so it never sits on the command. */
+.install:has(.copy) code { padding-right: 64px; }

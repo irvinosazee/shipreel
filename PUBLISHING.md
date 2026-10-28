@@ -69,11 +69,15 @@ npm version and a tag.
 attaches it to the release. Running it on this repo means every shipreel release announces itself
 with a shipreel video — the best demo there is.
 
-## 4. The landing page and the list
+## 4. The landing page
 
-`shipreel-site` is the landing page. Its job changes from earning $49 to earning a star or an
-email address. Every visitor who leaves without one is gone for good, and the list is the audience
-a later paid product launches to — it is the asset, not the star count.
+`shipreel-site` is the landing page. Its job changed from earning $49 to earning an install and a
+star, and its footer links GitHub, LinkedIn, Medium and irvinosazee.me — the same accounts the
+portfolio links — so a visitor who likes the tool can follow the person who made it. Publishing it
+is `git push` in that repo.
+
+There is deliberately no email list yet. Add one before the first paid product, when there is
+something to tell people about; anyone who only starred before then will not be on it.
 
 ## 5. The launch post
 
