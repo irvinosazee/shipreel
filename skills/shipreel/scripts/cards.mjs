@@ -190,9 +190,9 @@ export function cardHtml(card, theme, { projectDir = "." } = {}) {
 
   const text = [
     card.kicker && `<div class="kicker" data-text>${escapeHtml(card.kicker)}</div>`,
-    `<h1 data-text style="font-size:${titleFit.px}px">${escapeHtml(titleFit.text)}</h1>`,
-    subFit && `<p class="sub" data-text style="font-size:${subFit.px}px">${escapeHtml(subFit.text)}</p>`,
-    detailFit && `<div class="detail" data-text style="font-size:${detailFit.px}px">${escapeHtml(detailFit.text)}</div>`,
+    `<h1 data-text data-fit data-min="${Math.round(short * 0.05)}" style="font-size:${titleFit.px}px">${escapeHtml(titleFit.text)}</h1>`,
+    subFit && `<p class="sub" data-text data-fit data-min="${Math.ceil(short * 28 / 1080)}" style="font-size:${subFit.px}px">${escapeHtml(subFit.text)}</p>`,
+    detailFit && `<div class="detail" data-text data-fit data-min="${Math.ceil(short * 28 / 1080)}" style="font-size:${detailFit.px}px">${escapeHtml(detailFit.text)}</div>`,
     card.footer && `<div class="footer" data-text>${escapeHtml(card.footer)}</div>`,
   ].filter(Boolean).join("\n      ");
 
@@ -212,7 +212,7 @@ body { position: relative; font-family: ${body}system-ui, sans-serif; color: ${t
 .frame { position: absolute; left: ${m}px; top: ${m}px; width: ${W - 2 * m}px; height: ${H - 2 * m}px; display: ${portrait ? "flex" : "grid"}; ${portrait ? `flex-direction: column; gap: ${gap}px;` : `grid-template-columns: ${hasImage && card.kind !== "cta" ? `${textW}px 1fr` : "1fr"}; gap: ${gap}px; align-items: center;`} }
 .copy { ${portrait && textH && card.kind !== "cta" ? `height: ${textH}px; flex: none;` : ""} display: flex; flex-direction: column; justify-content: ${card.kind === "cta" ? "center" : portrait ? "flex-start" : "center"}; gap: ${Math.round(short * 0.025)}px; ${card.kind === "cta" ? "height: 100%;" : ""} }
 .kicker { font-family: ${mono}ui-monospace, monospace; font-size: ${small}px; letter-spacing: 0.12em; text-transform: uppercase; color: ${theme.accentText}; }
-h1 { font-family: ${display}system-ui, sans-serif; font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; color: ${theme.fg}; }
+h1 { overflow-wrap: normal; word-break: keep-all; font-family: ${display}system-ui, sans-serif; font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; color: ${theme.fg}; }
 .sub { line-height: 1.3; color: ${theme.muted}; max-width: ${textW}px; }
 .detail { align-self: flex-start; max-width: 100%; overflow-wrap: anywhere; font-family: ${mono}ui-monospace, monospace; font-weight: 500; padding: ${Math.round(short * 0.03)}px ${Math.round(short * 0.04)}px; border-radius: ${Math.round(short * 0.025)}px; background: ${theme.accent}; color: ${theme.onAccent}; }
 .footer { font-family: ${mono}ui-monospace, monospace; font-size: ${small}px; color: ${theme.muted}; }
@@ -229,6 +229,29 @@ h1 { font-family: ${display}system-ui, sans-serif; font-weight: 800; line-height
     </div>
     ${card.kind === "cta" ? "" : media}
   </div>
+<script>
+// The estimate above is a first guess; the real font decides. Shrink each text 2px at a time until no
+// word is wider than its column and the copy fits beside or above the image. Deterministic for a given font.
+window.__cardReady = document.fonts.ready.then(() => {
+  const copy = document.querySelector(".copy"), media = document.querySelector(".media");
+  const clash = () => {
+    if (copy.scrollHeight > copy.clientHeight + 1 && getComputedStyle(copy).height !== "auto") return true;
+    if (!media) return false;
+    const a = copy.getBoundingClientRect(), b = media.getBoundingClientRect();
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  };
+  const shrink = (el, until) => {
+    const min = Number(el.dataset.min);
+    let px = parseFloat(getComputedStyle(el).fontSize);
+    while (px > min && until()) el.style.fontSize = (px -= 2) + "px";
+  };
+  const fits = [...document.querySelectorAll("[data-fit]")];
+  // First every line fits its own width; then, if the copy still crowds the image, the supporting
+  // lines give way before the title does.
+  for (const el of fits) shrink(el, () => el.scrollWidth > el.clientWidth + 1);
+  for (const el of [...fits].reverse()) shrink(el, clash);
+});
+</script>
 </body>
 </html>
 `;
@@ -258,7 +281,7 @@ export async function renderCards(dossier, { projectDir, outDir, targets } = {})
       await session.send("Page.navigate", { url: pathToFileURL(path.join(htmlDir, card.file.replace(/\.png$/, ".html"))).href });
       await loaded;
       // Web fonts and images must be ready before the shot, or the card renders in a fallback face.
-      await session.send("Runtime.evaluate", { expression: "Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))])", awaitPromise: true });
+      await session.send("Runtime.evaluate", { expression: "Promise.all([window.__cardReady, ...[...document.images].map((i) => i.decode().catch(() => {}))])", awaitPromise: true });
       const clip = { x: 0, y: 0, width, height, scale: 1 };
       const { data } = await session.send("Page.captureScreenshot", { format: "png", clip });
       writeFileSync(path.join(dir, card.file), Buffer.from(data, "base64"));
@@ -271,7 +294,13 @@ export async function renderCards(dossier, { projectDir, outDir, targets } = {})
   }, { extraArgs: ["--allow-file-access-from-files"] });
 
   if (pdfPages.length) writeFileSync(path.join(dir, CARD_TARGETS.linkedin.pdf), buildPdf(pdfPages));
-  writeFileSync(path.join(dir, "cards.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+  // Re-rendering some targets keeps the other targets' entries.
+  const manifestFile = path.join(dir, "cards.json");
+  const done = new Set(cards.map((c) => c.target));
+  const kept = targets && existsSync(manifestFile) ? JSON.parse(readFileSync(manifestFile, "utf8")).filter((c) => !done.has(c.target)) : [];
+  const order = Object.keys(CARD_TARGETS);
+  const all = [...kept, ...manifest].sort((a, b) => order.indexOf(a.target) - order.indexOf(b.target));
+  writeFileSync(manifestFile, `${JSON.stringify(all, null, 2)}\n`);
   return { dir, cards: manifest, pdf: pdfPages.length ? path.join(dir, CARD_TARGETS.linkedin.pdf) : null };
 }
 
