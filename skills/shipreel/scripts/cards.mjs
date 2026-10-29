@@ -96,7 +96,7 @@ export function cardGeometry({ size: [W, H], layout, kind }, hasImage = true) {
   const portrait = H > W;
   if (kind === "cta" || !hasImage) return { m, gap, portrait, textW: W - 2 * m, media: null };
   if (portrait) {
-    const textH = Math.round((H - 2 * m) * (kind === "feature" ? 0.3 : 0.34));
+    const textH = Math.round((H - 2 * m) * (kind === "feature" ? 0.4 : 0.34));
     return { m, gap, portrait, textW: W - 2 * m, textH, media: { w: W - 2 * m, h: H - 2 * m - textH - gap } };
   }
   const textW = Math.round((W - 2 * m - gap) * (layout === "gallery" ? 0.36 : 0.4));
@@ -114,24 +114,33 @@ export function planCards(dossier, { targets = Object.keys(CARD_TARGETS), projec
   // The i-th best-shaped image for a box. A poster of the right orientation leads (it is the run's chosen
   // best frame); then frames and captures, closest shape first.
   const posters = new Set((media.posters ?? []).map((f) => path.resolve(projectDir, f)));
-  const pick = (card, i) => {
+  // A run's posters are one frame in several shapes, so features show other moments: frames spread
+  // evenly across the video, in time order, so no two cards in a set repeat.
+  const pick = (card, k, count) => {
     const box = cardGeometry(card).media;
     if (!box || !images.length) return null;
     const miss = (img) => Math.abs(Math.log(img.size[0] / img.size[1] / (box.w / box.h)));
-    const best = Math.min(...images.map(miss));
-    const rank = (img) => (posters.has(img.file) && miss(img) < 0.7 ? 0 : 1);
-    const fits = images.filter((img) => miss(img) <= best + 0.12 || rank(img) === 0).sort((a, b) => rank(a) - rank(b) || miss(a) - miss(b));
-    return fits[i % fits.length].file;
+    if (card.kind === "hero") {
+      const shaped = images.filter((img) => posters.has(img.file) && miss(img) < 0.7).sort((a, b) => miss(a) - miss(b));
+      if (shaped.length) return shaped[0].file;
+    }
+    const others = images.filter((img) => !posters.has(img.file));
+    const pool = others.length ? others : images;
+    const best = Math.min(...pool.map(miss));
+    const fits = pool.filter((img) => miss(img) <= best + 0.25);
+    return fits[Math.min(fits.length - 1, Math.floor(((k + 0.5) * fits.length) / Math.max(1, count)))].file;
   };
   const words = (t) => String(t ?? "").split(/\s+/).filter(Boolean).length;
   const tagline = sentence(project.description && words(project.description) <= 24 ? project.description : project.tagline ?? project.description ?? "", 24);
   const link = host(project.url) ?? host(project.repository);
   // A short link reads as a kicker; a long repository path does not.
-  const kicker = link && link.length <= 26 ? link : (project.type && project.type !== "unknown" ? project.type.replace(/-/g, " ") : "introducing");
+  const repo = String(project.repository ?? project.url ?? "").match(/github\.com\/([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/)?.[1];
+  const kicker = link && link.length <= 26 ? link : repo && repo.length <= 32 ? repo : project.type && project.type !== "unknown" ? project.type.replace(/-/g, " ") : "introducing";
   // "Label: what it means" becomes a short title over a smaller line; plain bullets stay one title.
   const features = highlights.slice(0, MAX_FEATURES).map((h) => {
     const m = h.match(/^([^:.!?]{3,40}):\s+(.+)$/);
-    return m ? { title: m[1].trim(), subtitle: sentence(m[2], 18) } : { title: sentence(h, 12) };
+    const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+    return m ? { title: m[1].trim(), subtitle: cap(sentence(m[2], 24)) } : { title: sentence(h, 12) };
   });
   const cta = { kind: "cta", kicker: "try it", title: project.name, detail: project.install ?? link ?? null, footer: project.install && link ? link : null };
   const hero = { kind: "hero", kicker, title: project.name, subtitle: tagline };
@@ -143,9 +152,11 @@ export function planCards(dossier, { targets = Object.keys(CARD_TARGETS), projec
     let set = [hero];
     if (spec.layout === "gallery") set = [hero, ...features.map((f) => ({ kind: "feature", kicker: project.name, ...f }))];
     if (spec.layout === "carousel") set = [hero, ...features.map((f, i) => ({ kind: "feature", kicker: `${String(i + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`, ...f })), cta];
+    const featureCount = set.filter((c) => c.kind === "feature").length;
+    let k = 0;
     set.forEach((card, i) => {
       const full = { target, size: spec.size, layout: spec.layout, file: spec.file(i), ...card };
-      cards.push({ ...full, image: card.kind === "cta" ? null : pick(full, i) });
+      cards.push({ ...full, image: card.kind === "cta" ? null : pick(full, card.kind === "feature" ? k++ : 0, featureCount) });
     });
   }
   return cards;
@@ -172,7 +183,8 @@ export function cardHtml(card, theme, { projectDir = "." } = {}) {
   const short = Math.min(W, H);
   // Heavy display faces run wider than the estimator assumes.
   const titleFit = fitFontPx(card.title, { width: textW * 0.88, maxPx: Math.round(short * (card.kind === "feature" ? 0.11 : 0.15)), minPx: Math.round(short * 0.06), maxLines: card.kind === "feature" && !card.subtitle ? 3 : 2 });
-  const subFit = card.subtitle ? fitFontPx(card.subtitle, { width: textW, maxPx: Math.round(short * 0.05), minPx: Math.round(short * 0.034), maxLines: 4 }) : null;
+  // Generous lines here: the in-page fit shrinks the real text, so the estimate should not cut words.
+  const subFit = card.subtitle ? fitFontPx(card.subtitle, { width: textW, maxPx: Math.round(short * 0.05), minPx: Math.ceil(short * 28 / 1080), maxLines: 7 }) : null;
   const detailFit = card.detail ? fitFontPx(card.detail, { width: (W - 2 * m - 2 * Math.round(short * 0.04)) * 0.78, maxPx: Math.round(short * 0.05), minPx: Math.round(short * 0.03), maxLines: 2 }) : null;
   const small = Math.round(short * 0.034);
   const display = theme.display ? `"${theme.display}", ` : "";

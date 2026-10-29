@@ -75,6 +75,18 @@ shipreel is free and MIT: the audience it builds is the point. Worked in order, 
 - [x] **O5 · User manual.** `docs/manual.md`, for people using it rather than building it: install and every route, the first video, what each output file is, every flag grouped by what you want, posting everywhere, iterating and Studio, the brand kit, the CLI, release and PR videos, updating, a troubleshooting table keyed to the doctor's own messages, and what you may do with the videos. A test fails if a flag in SKILL.md's options table is missing from it. Linked from the README and the landing page.
 - [x] **O6 · Portfolio and launch, prepared.** New cover captured from the landing page (free install line, no price); new description and closing paragraph with current counts (36 scripts, 260 tests) and open-source framing; `githubUrl` to move from the site repo to the tool. LinkedIn, X and Show HN drafts that credit /brag first. Nothing written to the portfolio and nothing posted: both wait for the owner.
 
+## Launch content: one dossier, every output
+
+The video was the first thing rendered from what shipreel learns about a project. These batches read that once, into a dossier, and render and check more from it. Branch `launch-images`, one batch per iteration, tests green and a commit each.
+
+- [x] **L1 · Dossier.** `dossier.mjs`: name, description, install line, type, README highlights, the brand kit or the palette, fonts and theme the project's own CSS and font imports declare (through `var()`, shadcn tokens, dark-by-default apps), the git story, re-verified claims, and the run's media. Checked against six real projects.
+- [x] **L2 · Cards.** `cards.mjs`: link preview, X, GitHub social preview, Product Hunt gallery, LinkedIn carousel and PDF, in the project's palette and fonts, showing its real frames matched to each card's shape. Text fits itself to the real font after it loads.
+- [x] **L3 · Image checks.** `verify_image.mjs`: exact size, platform file budgets, legibility, safe margin, overflow, text over the image, WCAG contrast against the colour behind it, uncited claims line by line.
+- [x] **L4 · Copy checks.** `copy_check.mjs`: X's weighted length with the thread counter, LinkedIn's limit and fold, the Show HN title, Product Hunt's limits, filler, uncited claims, em dashes. Found that the launch kit's thread went over 280 once its counter was added; fixed.
+- [x] **L5 · Wired in.** `--images`, `shipreel images` (plus `dossier`, `verify-images`, `copy-check`), cards and a copy check in the launch kit, the skill reference, the manual, the README.
+- [x] **L6 · Dogfood.** Ran on this repo and fixed what it showed: the product name and install line for a private root package, a palette read from `examples/` instead of the brand, a repo-layout list taken for features (README now has a "What it does" list; claims stand in when a README has none), every card repeating one poster frame, descriptions cut to ten words, cramped portrait slides, and two false positives in the claims scanner ("0, and", "the latest"). `.shipreel/config.json` now holds the brand. The real launch drafts failed the copy check (an X post at 437, a Show HN title at 89) and were rewritten.
+- [ ] **L7 · Next.** A `showhn.txt` in the launch kit; release and PR cards from `release_video.mjs` and `pr_preview.mjs`; cards in the GitHub Action; a carousel built from the video's own scenes when a README has no highlights.
+
 ## Idea notes
 
 ### Formats and platforms

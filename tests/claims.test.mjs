@@ -62,3 +62,8 @@ test("findUncitedClaims flags numbers and superlatives on screen that no claim c
 test("findUncitedClaims ignores times, dates, versions, and aspect labels", () => {
   assert.deepEqual(findUncitedClaims("00:17 / 00:20 · 9:16 · 1080P · v2.1 · 2026 · step 1", []), []);
 });
+
+test("findUncitedClaims ignores clause-ending numbers and -est words that are not superlatives", () => {
+  assert.deepEqual(findUncitedClaims("baked into frame 0, and checked against the latest Hyperframes by the test suite", []), []);
+  assert.deepEqual(findUncitedClaims("the fastest tool, 1,200 users, 10x faster", []), ["the fastest", "1,200 users", "10x faster"]);
+});

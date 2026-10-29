@@ -85,16 +85,16 @@ function help() {
 }
 
 const strip = (text) => text.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\*\*|__|`|\*/g, "").replace(/\s+/g, " ").trim();
-const shorten = (text) => {
+const shorten = (text, maxWords = MAX_WORDS) => {
   const tokens = text.split(" ");
-  if (tokens.length <= MAX_WORDS) return text;
-  const kept = tokens.slice(0, MAX_WORDS);
+  if (tokens.length <= maxWords) return text;
+  const kept = tokens.slice(0, maxWords);
   while (kept.length > 1 && DANGLING.test(kept.at(-1))) kept.pop();
   return `${kept.join(" ").replace(/[,;:]$/, "")}…`;
 };
 
 /** Up to four feature bullets: a Features/Highlights/Why section first, otherwise the first list that is not install steps or links. */
-export function readmeHighlights(markdown, max = 4) {
+export function readmeHighlights(markdown, max = 4, { maxWords = MAX_WORDS } = {}) {
   const sections = [];
   let current = { heading: "", bullets: [] };
   for (const line of String(markdown ?? "").split("\n")) {
@@ -109,11 +109,12 @@ export function readmeHighlights(markdown, max = 4) {
     if (bullet && !/^`?[A-Z][A-Z0-9_]{2,}`?(\s|$)/.test(bullet[1])) current.bullets.push(bullet[1]);
   }
   sections.push(current);
-  const useful = (s) => s.bullets.map(strip).filter((b) => b.split(" ").length >= 2 && !/^(npm|npx|pnpm|yarn|pip|cargo|brew|git|curl)\b/i.test(b));
-  const skip = /install|setup|getting started|license|contribut|usage|requirements|develop|test|changelog|credits|links?|docs|deploy|environment|config|architecture|stack|run it/i;
+  // File listings ("src/ — the app") describe the repository, not the product.
+  const useful = (s) => s.bullets.map(strip).filter((b) => b.split(" ").length >= 2 && !/^(npm|npx|pnpm|yarn|pip|cargo|brew|git|curl)\b/i.test(b) && !/^\.?[\w.-]+(\/[\w.-]*)+\s/.test(b));
+  const skip = /install|setup|getting started|license|contribut|usage|requirements|develop|test|changelog|credits|links?|docs|deploy|environment|config|architecture|stack|run it|in this repo|repo(sitory)? (layout|structure)|layout|structure|folders|files/i;
   const preferred = sections.find((s) => /feature|highlight|what it does|why|capabilit/i.test(s.heading) && useful(s).length);
   const fallback = sections.find((s) => !skip.test(s.heading) && useful(s).length >= 2);
-  return (preferred ?? fallback) ? useful(preferred ?? fallback).slice(0, max).map(shorten) : [];
+  return (preferred ?? fallback) ? useful(preferred ?? fallback).slice(0, max).map((b) => shorten(b, maxWords)) : [];
 }
 
 export function scenesFromPlan(plan) {

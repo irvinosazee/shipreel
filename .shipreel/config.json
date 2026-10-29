@@ -1,0 +1,7 @@
+{
+  "name": "shipreel",
+  "tone": "polished",
+  "palette": { "bg": "#130503", "fg": "#ffede9", "muted": "#c9a9a0", "accent": "#ff6134" },
+  "fonts": { "display": "Geist", "body": "Hanken Grotesk" },
+  "url": "https://github.com/irvinosazee/shipreel"
+}

@@ -64,6 +64,8 @@ export function verifyClaims(claims, { projectDir }) {
   return { verified, problems };
 }
 
+const NOT_SUPERLATIVE = /^(latest|test|rest|request|interest|contest|forest|guest|honest|modest|chest|west|nest|quest|digest|manifest|protest|harvest|arrest|suggest|invest|crest|pest|vest|zest|jest|unrest)$/i;
+
 /** Numbers-with-a-noun, multipliers, and superlatives on screen that no claim's text covers. */
 export function findUncitedClaims(screenText, claims) {
   const covered = claims.map((claim) => normalizeText(claim.text));
@@ -72,7 +74,8 @@ export function findUncitedClaims(screenText, claims) {
     .replace(/\bv\d+(?:\.\d+)*\b/gi, " "); // version labels
   const candidates = [];
   const patterns = [
-    /(?<![\w.])\d[\d,]*(?:\.\d+)?\s?(?:%|x|×)?\s+(?:[a-z][a-z-]*)/gi,
+    // A number is digits with optional thousands separators: "1,200 users", never the "0," that ends a clause.
+    /(?<![\w.])\d(?:[\d,]*\d)?(?:\.\d+)?\s?(?:%|x|×)?\s+(?:[a-z][a-z-]*)/gi,
     /\b(?:the|most)\s+(?:[a-z]+est|best|most\s+[a-z]+)\b/gi,
     /#1\b/g,
   ];
@@ -81,6 +84,8 @@ export function findUncitedClaims(screenText, claims) {
       const phrase = match[0].replace(/\s+/g, " ").trim();
       const words = phrase.split(" ");
       if (/^\d/.test(phrase) && (MEASURE_WORD.test(words.at(-1)) || /^(19|20)\d{2}$/.test(words[0]))) continue;
+      // "-est" nouns and recency words are not superlatives: "the test", "the latest Hyperframes".
+      if (/^(the|most)\s/i.test(phrase) && NOT_SUPERLATIVE.test(words.at(-1))) continue;
       candidates.push({ index: match.index, phrase });
     }
   }

@@ -77,3 +77,10 @@ test("installWorkflow copies a workflow template into .github/workflows and refu
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("readmeHighlights skips repository layout lists and file-path bullets", async () => {
+  const { readmeHighlights } = await import("../skills/shipreel/scripts/cli.mjs");
+  const md = "# x\n\n## What's in this repo\n\n- `src/` the app code\n- `docs/` the site\n\n## What it does\n\n- Checks: every render is measured before you post it, with a very long tail of words here\n- Ships: a file per platform\n";
+  assert.deepEqual(readmeHighlights(md), ["Checks: every render is measured before you post it…", "Ships: a file per platform"]);
+  assert.equal(readmeHighlights(md, 4, { maxWords: 40 })[0], "Checks: every render is measured before you post it, with a very long tail of words here");
+});

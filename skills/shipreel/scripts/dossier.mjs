@@ -27,7 +27,8 @@ import { gitStory, storyLine } from "./git_story.mjs";
 import { projectInfo } from "./release_video.mjs";
 
 export const DOSSIER_VERSION = 1;
-const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", "out", ".next", ".nuxt", ".svelte-kit", ".turbo", "coverage", "vendor", "target"]);
+// Build output, dependencies, and other people's sites (examples, fixtures, tests) say nothing about this project's brand.
+const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", "out", ".next", ".nuxt", ".svelte-kit", ".turbo", "coverage", "vendor", "target", "examples", "fixtures", "__fixtures__", "test", "tests", "__tests__", "e2e", "storybook-static"]);
 const MAX_CSS_FILES = 40;
 const DEFAULT_PALETTE = { bg: "#0f0d15", fg: "#f5f1ea", muted: "#b9b2a8", accent: "#ff6b3d" };
 
@@ -227,6 +228,7 @@ function brandFor(dir) {
     theme: dark ? "dark" : "light",
     palette,
     fonts: { display: kit?.brand?.fonts?.display ?? fonts.display, body: kit?.brand?.fonts?.body ?? fonts.body, mono: fonts.mono, files: kit?.brand?.fonts?.files ?? {} },
+    name: kit?.brand?.name ?? null,
     logo: kit?.brand?.logo ?? null,
     handle: kit?.brand?.handle ?? null,
     url: kit?.brand?.url ?? null,
@@ -260,6 +262,19 @@ function claimsIn(dir, outDir) {
   });
 }
 
+const INSTALL = /^(npx|npm (?:i|install)|pnpm (?:add|dlx)|yarn (?:add|dlx)|bunx|bun add|pip install|pipx install|uv tool install|brew install|cargo (?:install|add)|go install|gem install|composer require)\s+\S/;
+
+/** The first install command in a README's code blocks, for projects whose package is private or absent. */
+export function installFromReadme(markdown) {
+  for (const [, block] of String(markdown ?? "").matchAll(/```[^\n]*\n([\s\S]*?)```/g)) {
+    for (const raw of block.split("\n")) {
+      const line = raw.replace(/^\$\s*/, "").replace(/\s+#.*$/, "").trim();
+      if (INSTALL.test(line)) return line;
+    }
+  }
+  return null;
+}
+
 /** A product name fit for a card: no emoji, and no " — tagline" a README heading tacks on. */
 export function displayName(name) {
   const clean = String(name ?? "").replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, "").replace(/\s+/g, " ").trim();
@@ -283,25 +298,30 @@ export function buildDossier(projectDir, { outDir } = {}) {
   }
 
   const brand = brandFor(dir);
-  const { problems: brandProblems, ...brandFields } = brand;
+  const { problems: brandProblems, name: kitName, ...brandFields } = brand;
+  const readmeText = readme ? readFileSync(readme, "utf8") : "";
+  const claims = claimsIn(dir, out);
+  // README highlights first; without a feature list, the run's own verified claims are the proof points.
+  // Whole bullets: each output (a 20s video, a card, a post) decides how much of one fits.
+  const highlights = readme ? readmeHighlights(readmeText, 4, { maxWords: 40 }) : [];
   return {
     dossierVersion: DOSSIER_VERSION,
     project: {
-      name: displayName(info.name),
+      name: kitName ?? displayName(info.name),
       fullName: info.name,
       description: info.description,
       tagline: info.tagline,
       version: info.version,
       url: brand.url ?? info.homepage ?? info.repository ?? null,
       repository: info.repository,
-      install: info.install,
+      install: info.install ?? installFromReadme(readmeText),
       type: detected.type,
       framework: detected.framework,
     },
-    highlights: readme ? readmeHighlights(readFileSync(readme, "utf8")) : [],
+    highlights: highlights.length ? highlights : claims.filter((c) => c.verified).map((c) => c.text).slice(0, 4),
     brand: brandFields,
     story,
-    claims: claimsIn(dir, out),
+    claims,
     media: mediaIn(dir, out),
     problems: brandProblems,
   };

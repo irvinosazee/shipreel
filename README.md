@@ -13,6 +13,13 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 > `shipreel` is a fork that grew well past it — see [what changed](#what-changed-since-the-fork).
 > The whole project is MIT, under [`LICENSE`](LICENSE), carrying both copyrights.
 
+## What it does
+
+- Checks its own work: every render is measured for loudness, phone-legible text, safe zones and contrast before you post it.
+- Every screen: one plan becomes a ready-to-upload file for 26 platforms, reflowed, not cropped.
+- Claims you can back up: every number on screen is cited to a file in your repo.
+- Videos that keep coming: a release video for every git tag and a before/after clip for every pull request.
+
 ## Install
 
 Free and open source (MIT). One line, if you have Node 22+:
@@ -184,7 +191,7 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 | | /brag (original) | shipreel |
 |---|---|---|
 | Skill scripts | 1 | 40 |
-| Tests | none | 291, on every push |
+| Tests | none | 296, on every push |
 | Reference docs | 6 | 15 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels, launch images |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes; launch images and launch copy checked against each platform's limits |

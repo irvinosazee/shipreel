@@ -83,7 +83,7 @@ test("planCards: one hero per single-image target, features for galleries, a clo
     assert.deepEqual(by("linkedin").map((c) => c.file), ["linkedin-01.png", "linkedin-02.png", "linkedin-03.png", "linkedin-04.png"]);
     const snooze = by("producthunt")[1];
     assert.equal(snooze.title, "Snooze", "a 'Label: meaning' highlight splits into title and line");
-    assert.equal(snooze.subtitle, "newsletters wait until Friday");
+    assert.equal(snooze.subtitle, "Newsletters wait until Friday", "capitalised as a line of its own");
     assert.equal(by("og")[0].kicker, "tidy.app");
     assert.equal(by("linkedin").at(-1).detail, "npx tidy");
     assert.equal(by("linkedin").at(-1).image, null);
@@ -139,3 +139,23 @@ test("renderCards writes PNGs at their exact sizes, a carousel PDF, and a manife
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("feature cards spread across the run's frames instead of repeating the poster", () => {
+  const { dir, dossier } = fixture();
+  try {
+    png(path.join(dir, "out", "review", "frame-02.png"), 160, 90);
+    png(path.join(dir, "out", "review", "frame-03.png"), 160, 90);
+    const d = { ...dossier, highlights: ["a b", "c d", "e f"], media: { ...dossier.media, frames: ["out/review/frame-01.png", "out/review/frame-02.png", "out/review/frame-03.png"] } };
+    const gallery = planCards(d, { projectDir: dir, targets: ["producthunt"] });
+    assert.equal(path.basename(gallery[0].image), "shipreel.png", "the hero shows the poster");
+    assert.deepEqual(gallery.slice(1).map((c) => path.basename(c.image)), ["frame-01.png", "frame-02.png", "frame-03.png"], "features show three different moments");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a GitHub project's kicker is owner/repo, not the long URL", () => {
+  const [card] = planCards({ project: { name: "x", url: "https://github.com/someone/a-long-project-name" } }, { targets: ["og"] });
+  assert.equal(card.kicker, "someone/a-long-project-name");
+});
+

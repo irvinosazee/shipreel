@@ -125,3 +125,30 @@ test("buildDossier works without git, an output directory, or any CSS", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("dogfood fixes: kit name, README install line, no palette from examples/, claims stand in for missing highlights", () => {
+  const dir = project({
+    "package.json": JSON.stringify({ name: "repo", private: true }),
+    "README.md": "# /thing\n\nDoes things.\n\n## Install\n\n```bash\n$ npx @me/thing skill install   # one line\n```\n\n## What's in this repo\n\n- `src/` the code\n- `docs/` the site\n",
+    "examples/fake-site/styles.css": ":root { --background: #94ddfd; --foreground: #0d2034; }",
+    "app.css": "body { background: #130503; color: #ffede9; } .cta { background: #ff6134; } a { color: #ff6134; }",
+    ".shipreel/config.json": JSON.stringify({ name: "thing", palette: { bg: "#130503", fg: "#ffede9", accent: "#ff6134" }, fonts: { display: "Geist" } }),
+    "out/claims.json": JSON.stringify([{ text: "Does things", source: "README.md", quote: "Does things." }]),
+  });
+  try {
+    const d = buildDossier(dir, { outDir: "out" });
+    assert.equal(d.project.name, "thing", "the brand kit names the product");
+    assert.equal(d.project.install, "npx @me/thing skill install");
+    assert.deepEqual(d.highlights, ["Does things"], "a repo layout list is not a feature list; verified claims stand in");
+    const css = buildDossier(dir).brand;
+    assert.notEqual(css.palette.bg, "#94ddfd", "examples/ is someone else's site");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("installFromReadme finds the first install command in a code block", async () => {
+  const { installFromReadme } = await import("../skills/shipreel/scripts/dossier.mjs");
+  assert.equal(installFromReadme("```sh\ngit clone x\npip install tidy\n```"), "pip install tidy");
+  assert.equal(installFromReadme("no code here"), null);
+});
