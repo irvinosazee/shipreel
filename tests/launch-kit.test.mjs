@@ -75,6 +75,11 @@ test("buildLaunchKit assembles videos, images, copy, embeds, and credits into on
     mkdirSync(path.join(out, "composition"));
     writeFileSync(path.join(out, "composition", "index.html"), '<audio id="m" src="assets/music/happy-beats-business-moves-vol-1-by-ende-dot-app.mp3"></audio>');
 
+    mkdirSync(path.join(out, "cards"));
+    writeFileSync(path.join(out, "cards", "og.png"), "png");
+    writeFileSync(path.join(out, "cards", "linkedin-carousel.pdf"), "%PDF");
+    writeFileSync(path.join(out, "cards", "cards.json"), JSON.stringify([{ file: "og.png", target: "og", size: [1200, 630] }]));
+
     const manifest = buildLaunchKit(out, { title: "thing", url: "https://thing.dev", highlights: ["makes videos"], zip: true });
     const kit = path.join(out, "launch-kit");
     for (const file of [
@@ -88,6 +93,10 @@ test("buildLaunchKit assembles videos, images, copy, embeds, and credits into on
     assert.equal(size, "1270,760");
     assert.ok(existsSync(path.join(out, "launch-kit.zip")));
     assert.ok(manifest.files.length >= 15);
+    assert.ok(existsSync(path.join(kit, "images", "cards", "og.png")), "launch cards ride along");
+    assert.ok(existsSync(path.join(kit, "images", "cards", "linkedin-carousel.pdf")));
+    assert.equal(manifest.copy.ok, true, JSON.stringify(manifest.copy.files));
+    assert.deepEqual(manifest.copy.files.map((f) => f.file).sort(), ["linkedin.txt", "producthunt.txt", "share-copy.txt", "x-thread.txt"]);
   } finally {
     rmSync(out, { recursive: true, force: true });
   }

@@ -113,10 +113,10 @@ You get a `shipreel-output/` folder with the plan, a composition brief, a self-r
 ### Ship it
 
 ```text
-/shipreel --for tiktok,reels,x --kit --embed
+/shipreel --for tiktok,reels,x --images --kit --embed
 ```
 
-`--kit` bundles every video, the covers, Product Hunt gallery images, an X thread, a LinkedIn post, README and HTML embed snippets, and credits into `shipreel-output/launch-kit/` (and a zip). `--embed` writes a patch that puts the video, with its poster, under the first headline of your landing page (Next.js, Astro, SvelteKit, Vite, Vue, plain HTML, or the README). Nothing is posted anywhere.
+`--images` renders the launch images from the same run, in your project's own palette and fonts and showing its real frames: a link preview, an X image, a GitHub social preview, a Product Hunt gallery, and a LinkedIn carousel with its PDF. Each one is checked like the video is (exact size, file budget, legibility, contrast, cited claims). `--kit` bundles every video, the covers, Product Hunt gallery images, an X thread, a LinkedIn post, README and HTML embed snippets, and credits into `shipreel-output/launch-kit/` (and a zip). `--embed` writes a patch that puts the video, with its poster, under the first headline of your landing page (Next.js, Astro, SvelteKit, Vite, Vue, plain HTML, or the README). Nothing is posted anywhere.
 
 ### Without an agent
 
@@ -186,8 +186,8 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 | Skill scripts | 1 | 40 |
 | Tests | none | 291, on every push |
 | Reference docs | 6 | 15 |
-| Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels |
-| Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes |
+| Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels, launch images |
+| Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes; launch images and launch copy checked against each platform's limits |
 | Source material | reads the project's code | also captures the running site, cuts real screen recordings, and cites every on-screen claim to a source file |
 | Distribution | manual | launch kit, site-embed patch, release videos from git tags, PR preview clips, GitHub Action, standalone CLI |
 

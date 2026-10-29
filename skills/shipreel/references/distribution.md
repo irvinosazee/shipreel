@@ -1,6 +1,32 @@
-# Distribution (`--kit`, `--embed`, release videos, PR previews, the CLI)
+# Distribution (`--images`, `--kit`, `--embed`, release videos, PR previews, the CLI)
 
 Getting a finished reel in front of people. Nothing here posts anything: every tool writes files for the user to upload, a patch for them to apply, or a workflow for them to commit.
+
+## Launch images (`--images`)
+
+After the final render, so the cards can show the run's own poster and review frames:
+
+```bash
+node <skill-root>/scripts/cli.mjs images <project-dir> [--out <output-dir>] [--only og,x,github,producthunt,linkedin]
+```
+
+It runs three scripts in order:
+
+1. `dossier.mjs` writes `<output-dir>/dossier.json`: name, description, install line and link, project type, README highlights, the brand kit or the palette and fonts the project's own CSS and font imports declare, the git story, every claim re-verified against its source, and the run's posters, frames, and captures. Every later step reads this one file.
+2. `cards.mjs` renders `<output-dir>/cards/` in that palette and those fonts, showing real frames matched to each card's shape (never cropped, never generated UI):
+
+   | File | Size | For |
+   |---|---|---|
+   | `og.png` | 1200x630 | link previews (og:image) |
+   | `x.png` | 1600x900 | the X post image |
+   | `github-social.png` | 1280x640 | the repository's social preview and the README hero |
+   | `producthunt-N.png` | 1270x760 | the Product Hunt gallery: a cover, then one per README highlight |
+   | `linkedin-NN.png` + `linkedin-carousel.pdf` | 1080x1350 | a LinkedIn document post: cover, one slide per highlight, a "try it" slide |
+
+   A highlight written as `Label: what it means` becomes a short title over a smaller line. Each card fits its text to the real font after it loads, so supporting lines shrink before the title does.
+3. `verify_image.mjs` checks every card: exact size, the platform's file budget (GitHub refuses social previews over 1 MB; WhatsApp drops link previews over about 300 KB), text at least 2.6% of the short side, inside the safe margin, not overflowing or running into the image, WCAG AA contrast against the colour actually behind it, and no uncited number or superlative (`claims.json`, line by line).
+
+Look at the cards yourself before handing them over. Fix weak ones at the source: a better poster or review frame, a `Label: meaning` README highlight, or a `.shipreel/config.json` palette, then run `images` again. `--only` re-renders some targets and keeps the rest.
 
 ## Launch kit (`--kit`)
 
@@ -16,7 +42,10 @@ Writes `<output-dir>/launch-kit/` and `launch-kit.zip`:
 - `images/`: poster, `og.jpg` (1200x630), `youtube.jpg`, `reels-grid.jpg`, and `producthunt-N.jpg` (1270x760, one per scene still from `scenes.json`, from a landscape render when there is one).
 - `copy/`: `share-copy.txt`, `x-thread.txt` (numbered posts, each ≤280 characters), `linkedin.txt`, `producthunt.txt` (name, ≤60-character tagline, ≤260-character description). A `## X`, `## LinkedIn`, or `## Product Hunt` section in `share-copy-variants.md` replaces the caption for that platform.
 - `embed/`: a README image-link snippet and an autoplaying, muted `<video>` tag.
+- `images/cards/`: the launch cards from `--images`, when the run has them.
 - `credits.txt`: the bundled music track and Kenney SFX the composition actually uses, plus tools.
+
+The kit then checks its own copy with `copy_check.mjs`: each X post weighted the way X counts it (links are 23, emoji 2) including its counter, LinkedIn's 3000 limit and its 210-character "see more" fold, Product Hunt's 60/260 limits, a `showhn.txt` title (when present) starting "Show HN: " within 80 characters, generic filler, uncited claims, and em dashes. The report is the `copy` field of the result; fix every error before handing the kit over.
 
 Pass `--highlights` with two to four of the video's own proof points (the same claims as in `claims.json`, in plain words) so the thread and LinkedIn post list them. Pass `--url` unless `.shipreel/config.json` has one. Tell the user the kit's path and that nothing was posted.
 
@@ -76,7 +105,8 @@ The PR preview workflow needs the repository variable `SHIPREEL_PRODUCTION_URL`,
 `scripts/cli.mjs` is the `shipreel` command for people without a coding agent:
 
 - `make [dir] [--format] [--screenshot file | --no-capture]` reads package metadata, the README's first paragraph and Features list, and git history. It captures the running site for web apps and landing pages, fills the card template, renders, finishes, and writes covers, `scenes.json`, and `share-copy.txt`, so `kit` and `cuts` work on the result.
-- `release`, `preview`, `kit`, `embed`, and `github install` wrap the tools above. Every other skill script is available by name (`doctor`, `verify`, `platforms`, `captions`, `cuts`, …).
+- `images [dir]` builds the dossier, renders the launch cards, and verifies them (above).
+- `release`, `preview`, `kit`, `embed`, and `github install` wrap the tools above. `dossier`, `verify-images`, and `copy-check` run those scripts on their own. Every other skill script is available by name (`doctor`, `verify`, `platforms`, `captions`, `cuts`, …).
 
 The CLI never calls a model. When the user has an agent, /shipreel's own workflow is the better video, so do not substitute `make` for Steps 1–4.
 

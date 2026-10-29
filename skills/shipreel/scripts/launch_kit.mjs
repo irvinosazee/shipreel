@@ -23,6 +23,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { checkCopyDir } from "./copy_check.mjs";
 import { fitImage, makeCovers } from "./covers.mjs";
 import { loadScenes, stillTime } from "./cuts.mjs";
 import { parseShareVariants } from "./upload_page.mjs";
@@ -157,6 +158,13 @@ export function buildLaunchKit(outputDir, { url, title, highlights, zip = true }
   for (const cover of covers) put(`images/${cover.id}.jpg`, cover.path);
   rmSync(path.join(kit, ".covers"), { recursive: true, force: true });
 
+  // Launch cards from `shipreel images` (cards.mjs), when the run has them.
+  const cardsDir = path.join(dir, "cards");
+  if (existsSync(path.join(cardsDir, "cards.json"))) {
+    for (const card of JSON.parse(readFileSync(path.join(cardsDir, "cards.json"), "utf8"))) put(`images/cards/${card.file}`, path.join(cardsDir, card.file));
+    if (existsSync(path.join(cardsDir, "linkedin-carousel.pdf"))) put("images/cards/linkedin-carousel.pdf", path.join(cardsDir, "linkedin-carousel.pdf"));
+  }
+
   const scenesPath = path.join(dir, "scenes.json");
   const times = existsSync(scenesPath) ? loadScenes(scenesPath).map(stillTime).slice(0, MAX_GALLERY) : [];
   // Product Hunt's gallery is landscape: use a landscape render when the run has one.
@@ -203,6 +211,7 @@ export function buildLaunchKit(outputDir, { url, title, highlights, zip = true }
       "| --- | --- | --- |",
       "| `videos/` | the main video, per-format renders, per-platform exports | upload `shipreel-<platform>.mp4` to that platform; `shipreel.mp4` everywhere else |",
       "| `images/` | poster, link preview, thumbnail, Instagram grid, Product Hunt gallery | custom thumbnail fields, og:image, Product Hunt media |",
+      "| `images/cards/` | launch cards from `shipreel images`: og, X, GitHub social preview, Product Hunt gallery, LinkedIn carousel (+ PDF) | og:image, the X post, the repo's social preview, Product Hunt media, a LinkedIn document post |",
       "| `copy/` | captions, an X thread, a LinkedIn post, Product Hunt text | paste as-is; each is already within the platform's limits |",
       "| `embed/` | README and HTML snippets | the project's README and landing page |",
       "| `credits.txt` | music, sound effects, tools | the video description where credits are expected |",
@@ -213,6 +222,10 @@ export function buildLaunchKit(outputDir, { url, title, highlights, zip = true }
     ].join("\n"),
   );
 
+  // Check the copy this kit just wrote against each platform's rules (copy_check.mjs).
+  const claims = JSON.parse(readIf(path.join(dir, "claims.json")) ?? "[]");
+  const copyReport = checkCopyDir(path.join(kit, "copy"), { claims, brand });
+
   let zipPath = null;
   if (zip) {
     zipPath = path.join(dir, "launch-kit.zip");
@@ -220,7 +233,7 @@ export function buildLaunchKit(outputDir, { url, title, highlights, zip = true }
     const result = spawnSync("zip", ["-qr", zipPath, "launch-kit"], { cwd: dir, encoding: "utf8" });
     if (result.error || result.status !== 0) zipPath = null;
   }
-  return { kit, zip: zipPath, files: files.sort() };
+  return { kit, zip: zipPath, files: files.sort(), copy: copyReport };
 }
 
 if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {

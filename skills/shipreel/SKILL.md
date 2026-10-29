@@ -71,6 +71,7 @@ Parse these options:
 | `--reroll` | scene name or number | none |
 | `--retone` | tone preset | none |
 | `--shorter` | flag — about 20% shorter | off |
+| `--images` | flag — launch images from the run: link preview, X, GitHub social preview, Product Hunt gallery, LinkedIn carousel + PDF, each verified | off |
 | `--kit` | flag — bundle videos, covers, Product Hunt gallery, X thread, LinkedIn post, embeds, and credits into `launch-kit/` | off |
 | `--embed` | flag — a patch that adds the video to the project's own landing page or README | off |
 
@@ -141,7 +142,7 @@ Every run keeps a claims ledger; read [references/truth-and-proof.md](references
 
 If the project has `.shipreel/config.json`, or the user asks for an end card, watermark, reduced-motion variant, or audio descriptions, read [references/brand-and-polish.md](references/brand-and-polish.md).
 
-For `--kit` or `--embed`, or when the user wants release videos, PR preview videos, a GitHub workflow, or to run without an agent, read [references/distribution.md](references/distribution.md).
+For `--images`, `--kit` or `--embed`, or when the user wants release videos, PR preview videos, a GitHub workflow, or to run without an agent, read [references/distribution.md](references/distribution.md).
 
 Initialize run state right after choosing the output directory, and mark each step at its gate. For `--resume`, `--reroll`, `--retone`, `--shorter`, or feedback from Shipreel Studio, read [references/iterate.md](references/iterate.md) first.
 
@@ -193,7 +194,7 @@ Validate, run the text audit, preview, render a draft, review its settled frames
 
 With `--for`, also render every planned format, write captions with `captions.mjs`, check vertical review frames against their safe zones, run `platforms.mjs export`, make covers with `covers.mjs`, and write the upload checklist with `upload_page.mjs`.
 
-With `--kit`, finish with `launch_kit.mjs`; with `--embed`, write the site patch with `embed.mjs` and apply it only when the user asks.
+With `--images`, run `cli.mjs images` after the final render (it builds `dossier.json`, renders `cards/`, and verifies them with `verify_image.mjs`; fix every error); with `--kit`, finish with `launch_kit.mjs` and fix anything its copy check reports; with `--embed`, write the site patch with `embed.mjs` and apply it only when the user asks.
 
 **Gate:** `review.md` records the self-review. `verify_render.mjs` reports no errors for `<output-dir>/shipreel.mp4` (duration, size, audio, poster baked into frame 0). Share copy is written.
 

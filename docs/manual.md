@@ -195,6 +195,7 @@ which file goes where.
 | `--cutdown 6,15` | 6- and 15-second cuts that keep the hook and the payoff. |
 | `--stories` | Splits it into segments of 15 seconds or less that each end on a settled frame. |
 | `--carousel` | 1080x1350 slides for Instagram, and a PDF for a LinkedIn document post. |
+| `--images` | Launch images from the video: a link preview (1200x630), an X image (1600x900), a GitHub social preview and README hero (1280x640), a Product Hunt gallery (1270x760), and a LinkedIn carousel with its PDF (1080x1350). Every one is checked for size, file budget, legibility, contrast and claims. |
 | `--kit` | Bundles every video, the covers, Product Hunt gallery images, an X thread, a LinkedIn post, embed snippets and credits into `launch-kit/`, plus a zip. |
 | `--embed` | Writes a patch that puts the video on your own landing page or README (Next.js, Astro, SvelteKit, Vite, Vue, plain HTML). It is applied only when you say so. |
 
@@ -261,12 +262,17 @@ writes a video made for your project; the CLI fills in a good one.
 npm i -g @irvinosazee/shipreel     # or prefix each line with npx @irvinosazee/
 
 shipreel make ~/code/my-app --format vertical
+shipreel images ~/code/my-app       # launch images from that video, checked
 shipreel kit shipreel-output        # covers, captions, embeds in one folder
 shipreel --help                     # every command
 ```
 
 `shipreel make` options: `--format landscape|vertical|square`, `--out <dir>`,
 `--screenshot <file.png>` to use your own image, and `--no-capture` to skip starting the project.
+
+`shipreel images` options: `--out <dir>` (default `shipreel-output`) and `--only og,x,github,producthunt,linkedin`.
+It prints every image with ✓ or the problem to fix, and exits non-zero when one fails.
+`shipreel verify-images` and `shipreel copy-check` run the two checks on their own.
 
 ---
 

@@ -31,6 +31,7 @@ export const COMMANDS = {
   make: { summary: "make a launch video for a project, no agent needed" },
   release: { script: "release_video.mjs", summary: "a release video from a git tag" },
   preview: { script: "pr_preview.mjs", summary: "a before/after clip of the pages a pull request changes" },
+  images: { summary: "launch images (link preview, X, GitHub, Product Hunt, LinkedIn), checked" },
   kit: { script: "launch_kit.mjs", summary: "bundle videos, images, captions, and embeds into a launch kit" },
   embed: { script: "embed.mjs", summary: "a patch that adds the video to the project's own site" },
   github: { summary: "install a workflow: github install release|pr-preview [project-dir]" },
@@ -39,6 +40,9 @@ export const COMMANDS = {
   template: { script: "template_video.mjs", summary: "build a card composition from content.json" },
   render: { script: "deliver.mjs", summary: "render or finish a composition (deliver.mjs render|finish)" },
   verify: { script: "verify_render.mjs", summary: "check a rendered video against the delivery contract" },
+  "verify-images": { script: "verify_image.mjs", summary: "check launch images: size, budget, legibility, contrast, claims" },
+  "copy-check": { script: "copy_check.mjs", summary: "check launch copy against each platform's limits" },
+  dossier: { script: "dossier.mjs", summary: "everything shipreel knows about a project, as one JSON file" },
   platforms: { script: "platforms.mjs", summary: "plan and export per-platform files" },
   captions: { script: "captions.mjs", summary: "write and burn captions" },
   covers: { script: "covers.mjs", summary: "thumbnails and link previews from the poster" },
@@ -138,6 +142,33 @@ export function installWorkflow(projectDir, kind) {
   return target;
 }
 
+/** `shipreel images`: dossier, then cards, then the checks, in one go. Exits 1 when a card fails. */
+async function images(args) {
+  const { buildDossier } = await import("./dossier.mjs");
+  const { renderCards } = await import("./cards.mjs");
+  const { verifyCards } = await import("./verify_image.mjs");
+  const flag = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
+  const dir = path.resolve(args.find((a, i) => !a.startsWith("--") && !["--out", "--only"].includes(args[i - 1])) ?? ".");
+  const out = path.resolve(dir, flag("--out") ?? "shipreel-output");
+  mkdirSync(out, { recursive: true });
+  const dossier = buildDossier(dir, { outDir: out });
+  writeFileSync(path.join(out, "dossier.json"), `${JSON.stringify(dossier, null, 2)}\n`);
+  if (!dossier.media.posters.length && !dossier.media.frames.length && !dossier.media.captures.length) {
+    console.error("shipreel: no posters, frames, or captures in the output folder yet; the cards will be text-only. Make a video first for cards that show the product.");
+  }
+  const { dir: cardsDir, cards, pdf } = await renderCards(dossier, { projectDir: dir, outDir: out, targets: flag("--only")?.split(",") });
+  const claims = dossier.claims.map(({ text, source, quote }) => ({ text, source, quote }));
+  const report = await verifyCards(cardsDir, { claims });
+  for (const c of report.cards) {
+    console.log(`${c.errors.length ? "✗" : "✓"} ${path.relative(process.cwd(), path.join(cardsDir, c.file))}  ${c.size.join("x")}`);
+    for (const e of c.errors) console.log(`    ✗ ${e.code}: ${e.message}`);
+    for (const w of c.warnings) console.log(`    ! ${w.code}: ${w.message}`);
+  }
+  if (pdf) console.log(`  ${path.relative(process.cwd(), pdf)}`);
+  console.error(report.ok ? `shipreel: ${cards.length} image(s) verified.` : "shipreel: fix the errors above before posting.");
+  return report.ok ? 0 : 1;
+}
+
 async function make(args) {
   const { projectInfo } = await import("./release_video.mjs");
   const { detectProject } = await import("./detect_project.mjs");
@@ -232,6 +263,7 @@ export async function main(argv) {
     return 2;
   }
   if (command === "make") return make(args);
+  if (command === "images") return images(args);
   if (command === "github") {
     if (args[0] !== "install" || !args[1]) {
       console.error("Usage: shipreel github install release|pr-preview [project-dir]");
