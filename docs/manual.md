@@ -1,7 +1,7 @@
 # The shipreel manual
 
-shipreel turns a project you built into a short launch video — music, motion, captions, and share
-copy included — and checks the result before you post it. This manual is for using it. For how it
+shipreel turns a project you built into a short launch video, with music, motion, captions, and share
+copy included, and checks the result before you post it. This manual is for using it. For how it
 is built, see the [README](../README.md).
 
 - [1. Install](#1-install)
@@ -38,8 +38,8 @@ Other agents and routes:
 | Claude Code, plugin marketplace | `/plugin marketplace add irvinosazee/shipreel`, then `/plugin install shipreel@shipreel` |
 | Claude Code, Codex and opencode in one project | `npx @irvinosazee/shipreel skill install --project . --agent all` |
 | Codex or opencode only | `npx @irvinosazee/shipreel skill install --project . --agent codex` (or `opencode`) |
-| Any other agent | point its custom instructions at the skill's `SKILL.md` — see [other agents](other-agents.md) |
-| No agent at all | `npm i -g @irvinosazee/shipreel` — see [section 8](#8-without-an-agent) |
+| Any other agent | point its custom instructions at the skill's `SKILL.md`; see [other agents](other-agents.md) |
+| No agent at all | `npm i -g @irvinosazee/shipreel`; see [section 8](#8-without-an-agent) |
 
 `shipreel skill where` prints where each copy would go without changing anything.
 
@@ -49,7 +49,7 @@ Other agents and routes:
 npx @irvinosazee/shipreel doctor
 ```
 
-Every line should be a tick. A `BLOCKER` line names exactly what to install. `uv` is optional — it
+Every line should be a tick. A `BLOCKER` line names exactly what to install. `uv` is optional: it
 only improves beat detection for music you bring yourself.
 
 > The unscoped `shipreel` package on npm is somebody else's. Always use `@irvinosazee/shipreel`.
@@ -64,13 +64,13 @@ Open your agent in the project you want to show off and say:
 let's /shipreel
 ```
 
-That is all. It reads the project the way a person would — package metadata, README, routes, git
-history — plans a 15 to 25 second video, builds it, renders it, and checks it. A first run takes a
+That is all. It reads the project the way a person would (package metadata, README, routes, git
+history), plans a 15 to 25 second video, builds it, renders it, and checks it. A first run takes a
 few minutes, most of it rendering.
 
 It works on any kind of project: a website or web app, a CLI, a library, an API, a mobile app, a
 game, or a data and ML project. It works out which one it is looking at and tells the story that
-suits it — a CLI gets a terminal, an API gets a request and its response.
+suits it: a CLI gets a terminal, an API gets a request and its response.
 
 You do not need a live URL or screenshots. When the project can be started locally and you want its
 real screens in the video, add `--capture` (see [section 4](#4-steering-the-video)).
@@ -205,7 +205,7 @@ shipreel never posts anything. It writes files and stops.
 
 ## 6. Changing what you got
 
-Ask in plain words — "make the third scene funnier", "the hook is too slow" — or use:
+Ask in plain words ("make the third scene funnier", "the hook is too slow"), or use:
 
 | Flag | Does |
 |---|---|
@@ -332,7 +332,7 @@ npx @irvinosazee/shipreel doctor
 | A video with no music | `doctor` will say the bundled tracks are missing. Reinstall the skill. |
 | A check failed in `review.md` | Ask the agent to fix it ("fix what failed in review.md"), or `--reroll` that scene. |
 | Renders are very slow | Rendering is CPU and memory heavy. Close other heavy apps; a 20-second video should take a few minutes. |
-| `--capture` shows a blank page | The project did not start. Run its dev server yourself, check it loads, and try again — or pass a screenshot. |
+| `--capture` shows a blank page | The project did not start. Run its dev server yourself, check it loads, and try again, or pass a screenshot. |
 
 Still stuck? [Open an issue](https://github.com/irvinosazee/shipreel/issues) with the output of
 `shipreel doctor` and what you ran.
@@ -345,9 +345,9 @@ They are yours: post them, sell with them, use them commercially. No royalty and
 to shipreel.
 
 The bundled music is by **Sascha Ende** under **CC BY 4.0**, so a video that uses it must credit
-him: `Music by Sascha Ende — ende.app, CC BY 4.0`. Every launch kit writes that line into
+him: `Music by Sascha Ende (ende.app), CC BY 4.0`. Every launch kit writes that line into
 `credits.txt` for you. Never register a video containing that music with YouTube Content ID or any
-similar system. The sound effects are by **Kenney** under **CC0** — no conditions.
+similar system. The sound effects are by **Kenney** under **CC0**, with no conditions.
 
 shipreel itself is MIT: read it, change it, fork it. Nothing in it sends your code anywhere; it
 renders on your machine. Hyperframes, which it uses to render, reports anonymous usage of its own,
@@ -355,6 +355,6 @@ and `--metrics` calls GitHub or npm because you asked it to.
 
 ---
 
-Made by [Irvin Osazee](https://www.irvinosazee.me) — [GitHub](https://github.com/irvinosazee) ·
+Made by [Irvin Osazee](https://www.irvinosazee.me). [GitHub](https://github.com/irvinosazee) ·
 [LinkedIn](https://www.linkedin.com/in/irvin-osazee) · [Medium](https://medium.com/@uyiosazeeirvin).
 Forked from [/brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi.

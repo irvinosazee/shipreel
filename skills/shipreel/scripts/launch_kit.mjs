@@ -105,7 +105,7 @@ export function creditsFor(compositionHtml) {
   // CC BY 4.0 asks for author + licence, not just a link. ende.app waives credit as a courtesy;
   // the licence still requires it, and a paid product should not lean on a waiver.
   for (const vol of tracks) {
-    lines.push(`Music: "Happy Beats & Business Moves Vol. ${vol}" by Sascha Ende — ende.app, CC BY 4.0 (https://ende.app/en/standard-license)`);
+    lines.push(`Music: "Happy Beats & Business Moves Vol. ${vol}" by Sascha Ende (ende.app), CC BY 4.0 (https://ende.app/en/standard-license)`);
   }
   const sfx = new Set(sources.filter((s) => /(^|\/)sfx\//.test(s)));
   if (sfx.size) lines.push(`Sound effects: ${sfx.size} sound effect${sfx.size === 1 ? "" : "s"} by Kenney (https://kenney.nl/), CC0`);

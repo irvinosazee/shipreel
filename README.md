@@ -2,15 +2,15 @@
 
 **You shipped it. Now show it.**
 
-[![the /shipreel launch site — you shipped it, now show it](docs/assets/hero.png)](https://irvinosazee.github.io/shipreel/)
+[![the /shipreel launch site: you shipped it, now show it](docs/assets/hero.png)](https://irvinosazee.github.io/shipreel/)
 
-`/shipreel` is a Claude Code skill that turns the project you created into a short, shareable launch video — music, motion, and share copy included. One command, powered by [Hyperframes](https://hyperframes.heygen.com/).
+`/shipreel` is a Claude Code skill that turns the project you created into a short, shareable launch video, with music, motion, and share copy included. One command, powered by [Hyperframes](https://hyperframes.heygen.com/).
 
 The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) was made by `/shipreel` on this very repo. 
 
 > **Built on [/brag](https://github.com/latent-spaces/brag) by [Shunit Haviv Hakimi](https://github.com/shunithaviv).**
 > Her project is the original: the idea, the tone, the example suite, and the first version of this skill are hers.
-> `shipreel` is a fork that grew well past it — see [what changed](#what-changed-since-the-fork).
+> `shipreel` is a fork that grew well past it. See [what changed](#what-changed-since-the-fork).
 > The whole project is MIT, under [`LICENSE`](LICENSE), carrying both copyrights.
 
 ## What it does
@@ -64,7 +64,7 @@ Releases, with a video of what changed, are on the [releases page](https://githu
 
 ### Stay in the loop
 
-If shipreel made you a video you posted, **[star the repo](https://github.com/irvinosazee/shipreel)** —
+If shipreel made you a video you posted, **[star the repo](https://github.com/irvinosazee/shipreel)**:
 it is how other people find it. **Watch → Custom → Releases** gets you one notification per release.
 To follow what I build next: [GitHub](https://github.com/irvinosazee) ·
 [LinkedIn](https://www.linkedin.com/in/irvin-osazee) · [Medium](https://medium.com/@uyiosazeeirvin) ·
@@ -79,13 +79,13 @@ This repo exposes the skill at every agent's standard discovery path via symlink
 | **opencode** | Auto-detects from `.opencode/skills/shipreel/` at project root |
 | **Codex CLI** | Reads `.agents/skills/shipreel/`, walking up to repo root |
 | **Claude Code** | Reads `.claude/skills/shipreel/`, or `~/.claude/skills/shipreel/` for every project |
-| **Other agents** | Point custom instructions at `skills/shipreel/SKILL.md` — see [`docs/other-agents.md`](docs/other-agents.md) |
+| **Other agents** | Point custom instructions at `skills/shipreel/SKILL.md`; see [`docs/other-agents.md`](docs/other-agents.md) |
 
 > **Windows users:** Git requires `git config core.symlinks true` (or `git clone -c core.symlinks=true`) and Windows Developer Mode or Administrator privileges to create symlinks. If symlinks don't work on your system, copy `skills/shipreel/` to the agent's skill directory manually instead.
 
 ## Use it
 
-The full guide — every flag, every output file, troubleshooting — is the [manual](docs/manual.md).
+The full guide, with every flag, every output file, and troubleshooting, is the [manual](docs/manual.md).
 
 From any project directory, ask your agent:
 
@@ -99,7 +99,7 @@ Or steer the tone:
 /shipreel --tone "fake Series A launch from 2016"
 ```
 
-Post it everywhere — one plan, a layout for every screen, captions, and a ready-to-upload file per platform:
+Post it everywhere: one plan, a layout for every screen, captions, and a ready-to-upload file per platform:
 
 ```text
 /shipreel --for tiktok,reels,shorts,x,linkedin
@@ -147,14 +147,14 @@ Both use the composite action in `action.yml` (`uses: irvinosazee/shipreel@main`
 
 ## How it works
 
-`/shipreel` owns the story — the product angle, tone, and which moments to show. It hands a focused brief to [Hyperframes](https://hyperframes.heygen.com/), which builds, times, and renders the video.
+`/shipreel` owns the story: the product angle, tone, and which moments to show. It hands a focused brief to [Hyperframes](https://hyperframes.heygen.com/), which builds, times, and renders the video.
 
 ## Requirements
 
-- An agent that supports Agent Skills — Claude Code, opencode, Codex CLI, or any agent with custom instructions (see "Also works with" above)
+- An agent that supports Agent Skills: Claude Code, opencode, Codex CLI, or any agent with custom instructions (see "Also works with" above)
 - Node.js 22+
 - FFmpeg on `PATH`
-- Hyperframes CLI — `npx hyperframes` (check it with `npx hyperframes doctor`)
+- Hyperframes CLI: `npx hyperframes` (check it with `npx hyperframes doctor`)
 
 Check everything at once, including the bundled music and SFX:
 
@@ -166,19 +166,19 @@ npx @irvinosazee/shipreel doctor
 
 ## What's in this repo
 
-- `skills/shipreel/` — the skill, references, and bundled music + SFX
-- `examples/` — fake product sites used as a benchmark suite
-- `docs/` — the launch site (GitHub Pages)
-- `tests/` — Node test suite (`npm test`) and the examples eval baseline
-- `scripts/` — repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `@irvinosazee/shipreel` npm package into `dist/`, without publishing)
-- `action.yml` — composite GitHub Action for release videos and PR previews
-- `.github/workflows/ci.yml` — runs all of the above on every push and pull request
-- `.github/workflows/nightly-render.yml` — renders a fixture nightly with the latest Hyperframes and verifies it
-- `ROADMAP.md` — backlog and feature ideas
-- `.claude-plugin/` — plugin manifest, for installing this clone as a local Claude Code plugin
-- `.claude/skills/shipreel/` — symlink → `skills/shipreel/` (Claude Code discovery)
-- `.agents/skills/shipreel/` — symlink → `skills/shipreel/` (Codex CLI + opencode discovery)
-- `.opencode/skills/shipreel/` — symlink → `skills/shipreel/` (opencode discovery)
+- `skills/shipreel/`: the skill, references, and bundled music + SFX
+- `examples/`: fake product sites used as a benchmark suite
+- `docs/`: the launch site (GitHub Pages)
+- `tests/`: Node test suite (`npm test`) and the examples eval baseline
+- `scripts/`: repo checks: `npm run validate` (manifests, symlinks, links), `npm run eval` (examples vs. baseline), `npm run check:docs`, `npm run pack-cli` (stages and packs the `@irvinosazee/shipreel` npm package into `dist/`, without publishing)
+- `action.yml`: composite GitHub Action for release videos and PR previews
+- `.github/workflows/ci.yml`: runs all of the above on every push and pull request
+- `.github/workflows/nightly-render.yml`: renders a fixture nightly with the latest Hyperframes and verifies it
+- `ROADMAP.md`: backlog and feature ideas
+- `.claude-plugin/`: plugin manifest, for installing this clone as a local Claude Code plugin
+- `.claude/skills/shipreel/`: symlink → `skills/shipreel/` (Claude Code discovery)
+- `.agents/skills/shipreel/`: symlink → `skills/shipreel/` (Codex CLI + opencode discovery)
+- `.opencode/skills/shipreel/`: symlink → `skills/shipreel/` (opencode discovery)
 
 ## Publishing it
 
@@ -202,15 +202,15 @@ Same idea, same spirit, much longer leash. Full history in [ROADMAP.md](ROADMAP.
 
 ## Credits
 
-- Original project — [**/brag**](https://github.com/latent-spaces/brag) by [Shunit Haviv Hakimi](https://github.com/shunithaviv), MIT
-- Music — [ende.app](https://ende.app/en) "Happy Beats / Business Moves"
-- Sound effects — [Kenney](https://kenney.nl/)
-- Video generation — [Hyperframes](https://hyperframes.heygen.com/)
-- Fake demo sites — built with [Impeccable](https://impeccable.style/)
+- Original project: [**/brag**](https://github.com/latent-spaces/brag) by [Shunit Haviv Hakimi](https://github.com/shunithaviv), MIT
+- Music: [ende.app](https://ende.app/en) "Happy Beats / Business Moves"
+- Sound effects: [Kenney](https://kenney.nl/)
+- Video generation: [Hyperframes](https://hyperframes.heygen.com/)
+- Fake demo sites: built with [Impeccable](https://impeccable.style/)
 
 ## Contributing
 
-Contributions, ideas, and new demo reels are welcome — open an issue or a PR.
+Contributions, ideas, and new demo reels are welcome. Open an issue or a PR.
 
 Before opening a PR, run `npm test && npm run validate && npm run eval` (Node 22+ and FFmpeg). If you fix an example's render, run `node scripts/eval-examples.mjs --update-baseline` so the fix is locked in; after an intended visual change to an example, re-capture its reference frames with `--update-golden`.
 
