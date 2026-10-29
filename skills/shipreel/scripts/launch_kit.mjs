@@ -28,6 +28,8 @@ import { loadScenes, stillTime } from "./cuts.mjs";
 import { parseShareVariants } from "./upload_page.mjs";
 
 const X_LIMIT = 280;
+// Each post goes out with a "1/3" counter line in front of it, so leave room for "99/99\n".
+const X_BODY = X_LIMIT - 6;
 const PH_TAGLINE = 60;
 const PH_DESCRIPTION = 260;
 const PH_SIZE = [1270, 760];
@@ -70,9 +72,9 @@ export function splitPost(text, limit = X_LIMIT) {
 }
 
 export function xThread({ caption, highlights = [], url }) {
-  const posts = splitPost(caption);
+  const posts = splitPost(caption, X_BODY);
   let list = "what's inside:";
-  for (const item of highlights) if (`${list}\n• ${item}`.length <= X_LIMIT) list += `\n• ${item}`;
+  for (const item of highlights) if (`${list}\n• ${item}`.length <= X_BODY) list += `\n• ${item}`;
   if (highlights.length && list.includes("•")) posts.push(list);
   if (url) posts.push(`try it: ${url}`);
   return posts;
