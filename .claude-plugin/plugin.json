@@ -1,7 +1,7 @@
 {
   "name": "shipreel",
   "description": "Turn any project \u2014 site, app, CLI, library, API, mobile, game, or ML \u2014 into a short, polished, shareable launch video using HyperFrames.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": {
     "name": "Irvin Osazee",
     "email": "136273899+irvinosazee@users.noreply.github.com"
