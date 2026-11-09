@@ -1,16 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { deflateSync } from "node:zlib";
 
-import { CARD_TARGETS, cardGeometry, cardHtml, cardTexts, cardTheme, imageSize, planCards, renderCards, SAFE_MARGIN } from "../skills/shipreel/scripts/cards.mjs";
+import { CARD_TARGETS, cardGeometry, cardHtml, cardTexts, cardTheme, extractStills, imageSize, planCards, renderCards, SAFE_MARGIN, samePicture } from "../skills/shipreel/scripts/cards.mjs";
 import { contrastRatio } from "../skills/shipreel/scripts/captions.mjs";
 import { findChrome } from "../skills/shipreel/scripts/chrome.mjs";
 
 // A solid-colour PNG of any size, so planning can read real image headers.
-function png(file, w, h) {
+function png(file, w, h, fill = 0x55) {
   const crc = (buf) => {
     let c = ~0;
     for (const b of buf) {
@@ -26,7 +27,7 @@ function png(file, w, h) {
     return Buffer.concat([len, body, sum]);
   };
   const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 2;
-  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(w * 3, 0x55)]);
+  const row = Buffer.concat([Buffer.from([0]), Buffer.alloc(w * 3, fill)]);
   const raw = Buffer.concat(Array.from({ length: h }, () => row));
   writeFileSync(file, Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]));
 }
@@ -143,8 +144,9 @@ test("renderCards writes PNGs at their exact sizes, a carousel PDF, and a manife
 test("feature cards spread across the run's frames instead of repeating the poster", () => {
   const { dir, dossier } = fixture();
   try {
-    png(path.join(dir, "out", "review", "frame-02.png"), 160, 90);
-    png(path.join(dir, "out", "review", "frame-03.png"), 160, 90);
+    png(path.join(dir, "out", "review", "frame-01.png"), 160, 90, 0x10);
+    png(path.join(dir, "out", "review", "frame-02.png"), 160, 90, 0x80);
+    png(path.join(dir, "out", "review", "frame-03.png"), 160, 90, 0xf0);
     const d = { ...dossier, highlights: ["a b", "c d", "e f"], media: { ...dossier.media, frames: ["out/review/frame-01.png", "out/review/frame-02.png", "out/review/frame-03.png"] } };
     const gallery = planCards(d, { projectDir: dir, targets: ["producthunt"] });
     assert.equal(path.basename(gallery[0].image), "shipreel.png", "the hero shows the poster");
@@ -157,5 +159,46 @@ test("feature cards spread across the run's frames instead of repeating the post
 test("a GitHub project's kicker is owner/repo, not the long URL", () => {
   const [card] = planCards({ project: { name: "x", url: "https://github.com/someone/a-long-project-name" } }, { targets: ["og"] });
   assert.equal(card.kicker, "someone/a-long-project-name");
+});
+
+test("no two slides repeat a picture: a frame that matches the cover is skipped", () => {
+  const { dir, dossier } = fixture();
+  try {
+    // frame-01 shows the same moment as the cover poster (same fill); frame-02 and frame-03 differ.
+    png(path.join(dir, "out", "review", "frame-01.png"), 160, 90, 0x55);
+    png(path.join(dir, "out", "review", "frame-02.png"), 160, 90, 0x10);
+    png(path.join(dir, "out", "review", "frame-03.png"), 160, 90, 0xf0);
+    const d = { ...dossier, highlights: ["a b", "c d"], media: { ...dossier.media, frames: ["out/review/frame-01.png", "out/review/frame-02.png", "out/review/frame-03.png"] } };
+    const set = planCards(d, { projectDir: dir, targets: ["producthunt"] }).map((c) => path.basename(c.image));
+    assert.equal(set[0], "shipreel.png");
+    assert.ok(!set.slice(1).includes("frame-01.png"), set.join(","));
+    assert.equal(new Set(set).size, set.length);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("samePicture tells one moment from another", () => {
+  const a = Buffer.alloc(144, 100), b = Buffer.alloc(144, 108), c = Buffer.alloc(144, 140);
+  assert.equal(samePicture(a, b), true);
+  assert.equal(samePicture(a, c), false);
+  assert.equal(samePicture(a, null), false);
+});
+
+test("scene stills come from each scene's settled moment and feature cards prefer them", () => {
+  const { dir, dossier } = fixture();
+  try {
+    const out = path.join(dir, "out");
+    execFileSync("ffmpeg", ["-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=10:duration=4", "-pix_fmt", "yuv420p", path.join(out, "shipreel.mp4")]);
+    writeFileSync(path.join(out, "scenes.json"), JSON.stringify([{ name: "Hook", start: 0, end: 2, role: "hook", settled: 1 }, { name: "Payoff", start: 2, end: 4, role: "payoff", settled: 3, still: 3.5 }]));
+    const stills = extractStills(out);
+    assert.deepEqual(stills.map((f) => path.basename(f)), ["scene-01.jpg", "scene-02.jpg"]);
+    const d = { ...dossier, highlights: ["a b"], media: { ...dossier.media, stills: ["out/stills/scene-01.jpg", "out/stills/scene-02.jpg"] } };
+    const feature = planCards(d, { projectDir: dir, targets: ["producthunt"] })[1];
+    assert.match(path.basename(feature.image), /^scene-0\d\.jpg$/);
+    assert.deepEqual(extractStills(path.join(dir, "nothing-here")), []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 

@@ -120,7 +120,7 @@ test("buildDossier works without git, an output directory, or any CSS", () => {
     assert.equal(d.story, null);
     assert.equal(d.brand.source, "default");
     assert.deepEqual(d.claims, []);
-    assert.deepEqual(d.media, { posters: [], frames: [], captures: [], videos: [] });
+    assert.deepEqual(d.media, { posters: [], stills: [], frames: [], captures: [], videos: [] });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

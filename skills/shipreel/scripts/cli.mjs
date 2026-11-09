@@ -146,12 +146,13 @@ export function installWorkflow(projectDir, kind) {
 /** `shipreel images`: dossier, then cards, then the checks, in one go. Exits 1 when a card fails. */
 async function images(args) {
   const { buildDossier } = await import("./dossier.mjs");
-  const { renderCards } = await import("./cards.mjs");
+  const { extractStills, renderCards } = await import("./cards.mjs");
   const { verifyCards } = await import("./verify_image.mjs");
   const flag = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
   const dir = path.resolve(args.find((a, i) => !a.startsWith("--") && !["--out", "--only"].includes(args[i - 1])) ?? ".");
   const out = path.resolve(dir, flag("--out") ?? "shipreel-output");
   mkdirSync(out, { recursive: true });
+  extractStills(out);
   const dossier = buildDossier(dir, { outDir: out });
   writeFileSync(path.join(out, "dossier.json"), `${JSON.stringify(dossier, null, 2)}\n`);
   if (!dossier.media.posters.length && !dossier.media.frames.length && !dossier.media.captures.length) {

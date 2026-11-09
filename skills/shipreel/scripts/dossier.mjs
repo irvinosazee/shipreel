@@ -239,7 +239,7 @@ function brandFor(dir) {
 
 function mediaIn(dir, outDir) {
   const rel = (f) => path.relative(dir, f);
-  const media = { posters: [], frames: [], captures: [], videos: [] };
+  const media = { posters: [], stills: [], frames: [], captures: [], videos: [] };
   if (!outDir || !existsSync(outDir)) return media;
   for (const name of readdirSync(outDir).sort()) {
     const full = path.join(outDir, name);
@@ -249,6 +249,7 @@ function mediaIn(dir, outDir) {
   const images = (sub) => (existsSync(path.join(outDir, sub)) && statSync(path.join(outDir, sub)).isDirectory() ? walk(path.join(outDir, sub), (n) => /\.(png|jpe?g|webp)$/i.test(n)) : []);
   media.frames = images("review").filter((f) => /frame-\d+\.jpg$/.test(f)).map(rel);
   media.captures = images("capture").map(rel);
+  media.stills = images("stills").filter((f) => /scene-\d+\.jpg$/.test(f)).map(rel);
   return media;
 }
 

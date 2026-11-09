@@ -20,13 +20,14 @@
  * images it used, and every line of visible text, which verify_image.mjs audits.
  */
 
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { contrastRatio } from "./captions.mjs";
 import { withPage } from "./chrome.mjs";
-import { buildPdf } from "./cuts.mjs";
+import { buildPdf, loadScenes, stillTime } from "./cuts.mjs";
 import { buildDossier } from "./dossier.mjs";
 import { fitFontPx } from "./template_video.mjs";
 
@@ -89,6 +90,50 @@ export function imageSize(file) {
   return null;
 }
 
+/**
+ * A tiny greyscale fingerprint of an image (16x9 pixels through ffmpeg), so two files showing the same
+ * moment, a poster and the review frame taken at the same second, can be told apart from different ones.
+ * Null when ffmpeg cannot read the file; then nothing is treated as a duplicate.
+ */
+export function imagePrint(file) {
+  const r = spawnSync("ffmpeg", ["-v", "error", "-i", file, "-vf", "scale=16:9,format=gray", "-frames:v", "1", "-f", "rawvideo", "-"], { maxBuffer: 1 << 20 });
+  return r.status === 0 && r.stdout?.length === 144 ? r.stdout : null;
+}
+
+/** True when two fingerprints show the same picture: mean difference under 13 of 255 per pixel (a draft and a final render of one moment differ by about 10; different scenes by 17 or more). */
+export function samePicture(a, b) {
+  if (!a || !b) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
+  return d / a.length < 13;
+}
+
+/**
+ * One still per scene, at the moment the run marked settled (scenes.json `still`, else `settled`), from
+ * the finished landscape render: <outDir>/stills/scene-NN.jpg. Review frames include transitions; these
+ * never do. Returns the files written, or [] when the run has no scenes.json or render.
+ */
+export function extractStills(outDir) {
+  const scenesFile = path.join(outDir, "scenes.json");
+  const video = ["shipreel-landscape.mp4", "shipreel.mp4"].map((f) => path.join(outDir, f)).find(existsSync);
+  if (!existsSync(scenesFile) || !video) return [];
+  let scenes;
+  try {
+    scenes = loadScenes(scenesFile);
+  } catch {
+    return [];
+  }
+  const dir = path.join(outDir, "stills");
+  mkdirSync(dir, { recursive: true });
+  const files = [];
+  scenes.forEach((scene, i) => {
+    const file = path.join(dir, `scene-${String(i + 1).padStart(2, "0")}.jpg`);
+    const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-ss", String(stillTime(scene)), "-i", video, "-frames:v", "1", "-q:v", "2", file]);
+    if (r.status === 0 && existsSync(file)) files.push(file);
+  });
+  return files;
+}
+
 /** Where a card's copy and image sit. Shared by planning (to pick a well-shaped image) and the HTML. */
 export function cardGeometry({ size: [W, H], layout, kind }, hasImage = true) {
   const m = Math.round(Math.min(W, H) * SAFE_MARGIN);
@@ -106,7 +151,7 @@ export function cardGeometry({ size: [W, H], layout, kind }, hasImage = true) {
 /** The cards to render for each target: specs only (text, images, kind), no layout. */
 export function planCards(dossier, { targets = Object.keys(CARD_TARGETS), projectDir = "." } = {}) {
   const { project = {}, highlights = [], media = {} } = dossier;
-  const images = [...(media.posters ?? []), ...(media.frames ?? []), ...(media.captures ?? [])]
+  const images = [...(media.posters ?? []), ...(media.stills ?? []), ...(media.frames ?? []), ...(media.captures ?? [])]
     .map((f) => path.resolve(projectDir, f))
     .filter((f, i, all) => existsSync(f) && all.indexOf(f) === i)
     .map((file) => ({ file, size: imageSize(file) }))
@@ -124,12 +169,29 @@ export function planCards(dossier, { targets = Object.keys(CARD_TARGETS), projec
       const shaped = images.filter((img) => posters.has(img.file) && miss(img) < 0.7).sort((a, b) => miss(a) - miss(b));
       if (shaped.length) return shaped[0].file;
     }
+    // Scene stills first (each scene's settled moment, never a transition), then review frames and captures.
+    const stills = new Set((media.stills ?? []).map((f) => path.resolve(projectDir, f)));
     const others = images.filter((img) => !posters.has(img.file));
-    const pool = others.length ? others : images;
+    const settled = others.filter((img) => stills.has(img.file));
+    const pool = settled.length ? settled : others.length ? others : images;
     const best = Math.min(...pool.map(miss));
     const fits = pool.filter((img) => miss(img) <= best + 0.25);
-    return fits[Math.min(fits.length - 1, Math.floor(((k + 0.5) * fits.length) / Math.max(1, count)))].file;
+    // Start at this feature's evenly spread slot, then walk forward (wrapping) past any frame that shows
+    // the same moment as the set's cover or a slide already chosen, so no two slides repeat a picture.
+    const start = Math.min(fits.length - 1, Math.floor(((k + 0.5) * fits.length) / Math.max(1, count)));
+    const taken = used.get(card.target) ?? [];
+    for (let step = 0; step < fits.length; step++) {
+      const img = fits[(start + step) % fits.length];
+      if (!taken.some((t) => samePicture(print(t), print(img.file)))) return img.file;
+    }
+    return fits[start].file;
   };
+  const prints = new Map();
+  const print = (file) => {
+    if (!prints.has(file)) prints.set(file, imagePrint(file));
+    return prints.get(file);
+  };
+  const used = new Map();
   const words = (t) => String(t ?? "").split(/\s+/).filter(Boolean).length;
   const tagline = sentence(project.description && words(project.description) <= 24 ? project.description : project.tagline ?? project.description ?? "", 24);
   const link = host(project.url) ?? host(project.repository);
@@ -156,7 +218,9 @@ export function planCards(dossier, { targets = Object.keys(CARD_TARGETS), projec
     let k = 0;
     set.forEach((card, i) => {
       const full = { target, size: spec.size, layout: spec.layout, file: spec.file(i), ...card };
-      cards.push({ ...full, image: card.kind === "cta" ? null : pick(full, card.kind === "feature" ? k++ : 0, featureCount) });
+      const image = card.kind === "cta" ? null : pick(full, card.kind === "feature" ? k++ : 0, featureCount);
+      if (image) used.set(target, [...(used.get(target) ?? []), image]);
+      cards.push({ ...full, image });
     });
   }
   return cards;
