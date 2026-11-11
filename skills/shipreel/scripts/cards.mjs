@@ -39,6 +39,22 @@ export const CARD_TARGETS = {
   linkedin: { size: [1080, 1350], layout: "carousel", file: (i) => `linkedin-${String(i + 1).padStart(2, "0")}.png`, pdf: "linkedin-carousel.pdf" },
 };
 
+/**
+ * Card sizes for campaign pieces (content.mjs), beyond the launch set. A story keeps clear of the
+ * profile row at the top and the reply bar at the bottom: insets are [top, right, bottom, left] px.
+ */
+export const PIECE_SIZES = {
+  feed: { size: [1080, 1350], layout: "carousel" },
+  story: { size: [1080, 1920], layout: "carousel", insets: [250, 76, 340, 76] },
+  landscape: { size: [1600, 900], layout: "split" },
+};
+
+/** A card's inset from each edge, [top, right, bottom, left]: its own when set, else the safe margin. */
+export function cardInsets({ size: [W, H], insets }) {
+  const m = Math.round(Math.min(W, H) * SAFE_MARGIN);
+  return insets ?? [m, m, m, m];
+}
+
 const MAX_FEATURES = 4;
 // Inset from every edge, as a share of the short side: platforms crop and round corners.
 export const SAFE_MARGIN = 0.07;
@@ -135,17 +151,20 @@ export function extractStills(outDir) {
 }
 
 /** Where a card's copy and image sit. Shared by planning (to pick a well-shaped image) and the HTML. */
-export function cardGeometry({ size: [W, H], layout, kind }, hasImage = true) {
-  const m = Math.round(Math.min(W, H) * SAFE_MARGIN);
-  const gap = Math.round(m * 0.8);
+export function cardGeometry({ size: [W, H], layout, kind, insets }, hasImage = true) {
+  const [mt, mr, mb, ml] = cardInsets({ size: [W, H], insets });
+  const m = ml;
+  const gap = Math.round(Math.min(W, H) * SAFE_MARGIN * 0.8);
   const portrait = H > W;
-  if (kind === "cta" || !hasImage) return { m, gap, portrait, textW: W - 2 * m, media: null };
+  const innerW = W - ml - mr, innerH = H - mt - mb;
+  const base = { m, mt, mr, mb, ml, gap, portrait };
+  if (kind === "cta" || !hasImage) return { ...base, textW: innerW, media: null };
   if (portrait) {
-    const textH = Math.round((H - 2 * m) * (kind === "feature" ? 0.4 : 0.34));
-    return { m, gap, portrait, textW: W - 2 * m, textH, media: { w: W - 2 * m, h: H - 2 * m - textH - gap } };
+    const textH = Math.round(innerH * (kind === "feature" ? 0.4 : 0.34));
+    return { ...base, textW: innerW, textH, media: { w: innerW, h: innerH - textH - gap } };
   }
-  const textW = Math.round((W - 2 * m - gap) * (layout === "gallery" ? 0.36 : 0.4));
-  return { m, gap, portrait, textW, media: { w: W - 2 * m - gap - textW, h: H - 2 * m } };
+  const textW = Math.round((innerW - gap) * (layout === "gallery" ? 0.36 : 0.4));
+  return { ...base, textW, media: { w: innerW - gap - textW, h: innerH } };
 }
 
 /** The cards to render for each target: specs only (text, images, kind), no layout. */
@@ -243,13 +262,13 @@ function fontFaces(theme, projectDir) {
 export function cardHtml(card, theme, { projectDir = "." } = {}) {
   const [W, H] = card.size;
   const hasImage = Boolean(card.image);
-  const { m, gap, portrait, textW, textH } = cardGeometry(card, hasImage);
+  const { mt, mr, mb, ml, gap, portrait, textW, textH } = cardGeometry(card, hasImage);
   const short = Math.min(W, H);
   // Heavy display faces run wider than the estimator assumes.
   const titleFit = fitFontPx(card.title, { width: textW * 0.88, maxPx: Math.round(short * (card.kind === "feature" ? 0.11 : 0.15)), minPx: Math.round(short * 0.06), maxLines: card.kind === "feature" && !card.subtitle ? 3 : 2 });
   // Generous lines here: the in-page fit shrinks the real text, so the estimate should not cut words.
   const subFit = card.subtitle ? fitFontPx(card.subtitle, { width: textW, maxPx: Math.round(short * 0.05), minPx: Math.ceil(short * 28 / 1080), maxLines: 7 }) : null;
-  const detailFit = card.detail ? fitFontPx(card.detail, { width: (W - 2 * m - 2 * Math.round(short * 0.04)) * 0.78, maxPx: Math.round(short * 0.05), minPx: Math.round(short * 0.03), maxLines: 2 }) : null;
+  const detailFit = card.detail ? fitFontPx(card.detail, { width: (W - ml - mr - 2 * Math.round(short * 0.04)) * 0.78, maxPx: Math.round(short * 0.05), minPx: Math.round(short * 0.03), maxLines: 2 }) : null;
   const small = Math.round(short * 0.034);
   const display = theme.display ? `"${theme.display}", ` : "";
   const body = theme.body ? `"${theme.body}", ` : "";
@@ -285,7 +304,7 @@ ${fontFaces(theme, projectDir)}
 html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${theme.bg}; }
 body { position: relative; font-family: ${body}system-ui, sans-serif; color: ${theme.fg}; -webkit-font-smoothing: antialiased; }
 .glow { position: absolute; inset: 0; background: radial-gradient(60% 70% at ${portrait ? "50% 100%" : "100% 50%"}, ${theme.accent}22, transparent 65%); }
-.frame { position: absolute; left: ${m}px; top: ${m}px; width: ${W - 2 * m}px; height: ${H - 2 * m}px; display: ${portrait ? "flex" : "grid"}; ${portrait ? `flex-direction: column; gap: ${gap}px;` : `grid-template-columns: ${hasImage && card.kind !== "cta" ? `${textW}px 1fr` : "1fr"}; gap: ${gap}px; align-items: center;`} }
+.frame { position: absolute; left: ${ml}px; top: ${mt}px; width: ${W - ml - mr}px; height: ${H - mt - mb}px; display: ${portrait ? "flex" : "grid"}; ${portrait ? `flex-direction: column; gap: ${gap}px;` : `grid-template-columns: ${hasImage && card.kind !== "cta" ? `${textW}px 1fr` : "1fr"}; gap: ${gap}px; align-items: center;`} }
 .copy { ${portrait && textH && card.kind !== "cta" ? `height: ${textH}px; flex: none;` : ""} display: flex; flex-direction: column; justify-content: ${card.kind === "cta" ? "center" : portrait ? "flex-start" : "center"}; gap: ${Math.round(short * 0.025)}px; ${card.kind === "cta" ? "height: 100%;" : ""} }
 .kicker { font-family: ${mono}ui-monospace, monospace; font-size: ${small}px; letter-spacing: 0.12em; text-transform: uppercase; color: ${theme.accentText}; }
 h1 { overflow-wrap: normal; word-break: keep-all; font-family: ${display}system-ui, sans-serif; font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; color: ${theme.fg}; }
@@ -338,15 +357,15 @@ export function cardTexts(card) {
   return [card.kicker, card.title, card.subtitle, card.detail, card.footer].filter(Boolean);
 }
 
-/** Render every planned card to PNG (and the LinkedIn carousel to a PDF) under <outDir>/cards/. */
-export async function renderCards(dossier, { projectDir, outDir, targets } = {}) {
-  const dir = path.join(outDir, "cards");
+/**
+ * Render any list of cards (each with size, file, kind and text) to PNGs in `dir`, with their HTML
+ * in dir/html/. `pdf(card)` says which cards also become JPEG pages for a PDF. Returns the manifest
+ * entries (what verify_image.mjs reads) and the PDF pages.
+ */
+export async function renderCardSet(cards, theme, { dir, projectDir = ".", pdf = () => false } = {}) {
   const htmlDir = path.join(dir, "html");
   mkdirSync(htmlDir, { recursive: true });
-  const theme = cardTheme(dossier.brand);
-  const cards = planCards(dossier, { targets, projectDir });
   for (const card of cards) writeFileSync(path.join(htmlDir, card.file.replace(/\.png$/, ".html")), cardHtml(card, theme, { projectDir }));
-
   const manifest = [];
   const pdfPages = [];
   await withPage("about:blank", async (session) => {
@@ -361,15 +380,25 @@ export async function renderCards(dossier, { projectDir, outDir, targets } = {})
       const clip = { x: 0, y: 0, width, height, scale: 1 };
       const { data } = await session.send("Page.captureScreenshot", { format: "png", clip });
       writeFileSync(path.join(dir, card.file), Buffer.from(data, "base64"));
-      if (CARD_TARGETS[card.target].pdf) {
+      if (pdf(card)) {
         const jpeg = await session.send("Page.captureScreenshot", { format: "jpeg", quality: 92, clip });
         pdfPages.push({ data: Buffer.from(jpeg.data, "base64"), width, height });
       }
-      manifest.push({ file: card.file, target: card.target, kind: card.kind, size: card.size, texts: cardTexts(card), images: card.image ? [path.relative(projectDir, card.image)] : [], theme: { bg: theme.bg, fg: theme.fg, muted: theme.muted, accentText: theme.accentText, onAccent: theme.onAccent, accent: theme.accent } });
+      manifest.push({ file: card.file, target: card.target, kind: card.kind, size: card.size, ...(card.insets ? { insets: card.insets } : {}), texts: cardTexts(card), images: card.image ? [path.relative(projectDir, card.image)] : [], theme: { bg: theme.bg, fg: theme.fg, muted: theme.muted, accentText: theme.accentText, onAccent: theme.onAccent, accent: theme.accent } });
     }
   }, { extraArgs: ["--allow-file-access-from-files"] });
+  return { manifest, pdfPages };
+}
+
+/** Render every planned card to PNG (and the LinkedIn carousel to a PDF) under <outDir>/cards/. */
+export async function renderCards(dossier, { projectDir, outDir, targets } = {}) {
+  const dir = path.join(outDir, "cards");
+  const theme = cardTheme(dossier.brand);
+  const cards = planCards(dossier, { targets, projectDir });
+  const { manifest, pdfPages } = await renderCardSet(cards, theme, { dir, projectDir, pdf: (card) => Boolean(CARD_TARGETS[card.target]?.pdf) });
 
   if (pdfPages.length) writeFileSync(path.join(dir, CARD_TARGETS.linkedin.pdf), buildPdf(pdfPages));
+
   // Re-rendering some targets keeps the other targets' entries.
   const manifestFile = path.join(dir, "cards.json");
   const done = new Set(cards.map((c) => c.target));

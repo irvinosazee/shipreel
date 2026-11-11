@@ -102,6 +102,23 @@ export function hookOverlap(a, b) {
   return shared / Math.min(A.size, B.size);
 }
 
+/**
+ * Beats that each add something: a beat that opens with the hook keeps only what follows it ("Who does X
+ * love? A live table" after the hook "Who does X love?" becomes "A live table"), and a beat that repeats
+ * the hook or an earlier beat is dropped. The hook stays first.
+ */
+export function distinctBeats(hook, beats) {
+  const out = [hook];
+  const h = strip(hook).replace(/[?.!]+$/, "").toLowerCase();
+  for (let b of beats.filter(Boolean)) {
+    b = String(b).trim();
+    if (b.toLowerCase().startsWith(h) && b.length > h.length + 3) b = b.slice(h.length).replace(/^[\s?.!:,]+/, "");
+    if (!b || out.some((o) => hookOverlap(o, b) > 0.6)) continue;
+    out.push(b);
+  }
+  return out;
+}
+
 /** Plan the pieces for each platform. Pure. */
 export function planAngles(brief, { story = null, platforms = Object.keys(PLATFORMS) } = {}) {
   productName = brief.product ?? "";
@@ -125,7 +142,7 @@ export function planAngles(brief, { story = null, platforms = Object.keys(PLATFO
       }
       if (pieces.some((p) => hookOverlap(p.hook, d.hook) > 0.6)) continue;
       const [kind, format] = profile.formats[pieces.length % profile.formats.length];
-      pieces.push({ n: pieces.length + 1, id: `${String(pieces.length + 1).padStart(2, "0")}-${id}`, platform, angle: id, why: ANGLES[id], kind, format, hook: end(d.hook), beats: d.beats.filter(Boolean).map(cap1), cta });
+      pieces.push({ n: pieces.length + 1, id: `${String(pieces.length + 1).padStart(2, "0")}-${id}`, platform, angle: id, why: ANGLES[id], kind, format, hook: end(d.hook), beats: distinctBeats(d.hook, d.beats).map(cap1), cta });
     }
     plan[platform] = pieces;
     if (pieces.length < MIN_PER_PLATFORM) skipped.push({ platform, angle: null, reason: `only ${pieces.length} piece(s): fill in the brief's pain or workaround for more angles` });

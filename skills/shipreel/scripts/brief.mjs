@@ -34,7 +34,9 @@ export const ANGLES = {
 };
 // A brand kit's video tone, as the campaign tone it reads closest to.
 const TONE_FROM_VIDEO = { default: "bold", polished: "premium", cinematic: "premium", "yc-parody": "deadpan", deadpan: "deadpan", chaotic: "bold", "app-store": "plain", ...Object.fromEntries(["bold", "playful", "plain", "premium"].map((t) => [t, t])) };
-const FIELDS = ["audience", "pain", "workaround", "promise", "proof", "objections", "cta", "tone", "angles"];
+const FIELDS = ["audience", "pain", "workaround", "promise", "proof", "objections", "cta", "tone", "angles", "hashtags"];
+const DEV_TYPES = new Set(["cli", "library", "api"]);
+const DEV_TAGS = { type: { cli: ["devtools", "cli"], library: ["opensource", "devtools"], api: ["api", "devtools"] }, framework: { next: ["nextjs"], react: ["react"], vue: ["vuejs"], svelte: ["sveltekit"], astro: ["astro"], django: ["django"], rails: ["rails"] } };
 
 // Who a kind of project is for, when the README does not say.
 const AUDIENCE_BY_TYPE = {
@@ -114,6 +116,13 @@ export function prefillBrief(dossier, { projectDir = "." } = {}) {
     cta: field(project.install ? `Try it: ${project.install}` : link ? `Try it: ${link}` : "", project.install ? "install line" : signals.site ? "the live site in the README" : link ? "project link" : "needs you"),
     tone: field(TONE_FROM_VIDEO[dossier.brand?.tone] ?? "bold", dossier.brand?.tone ? "brand kit" : "default"),
     angles: field(angles.slice(0, 5), "default for this project"),
+    // Topic tags only where the audience is developers; anyone else's tags are the user's call.
+    hashtags: field(
+      DEV_TYPES.has(project.type) || /developer|engineer|programmer/i.test(signals.audience ?? "")
+        ? [...new Set([...(DEV_TAGS.framework[project.framework] ?? []), ...(DEV_TAGS.type[project.type] ?? []), "buildinpublic"])]
+        : [],
+      DEV_TYPES.has(project.type) ? "project type" : "needs you",
+    ),
   };
 }
 
@@ -129,6 +138,7 @@ const SECTIONS = {
   cta: "The one thing to do next",
   tone: `Tone (one of: ${TONES.join(", ")})`,
   angles: `Angles (from: ${Object.keys(ANGLES).join(", ")})`,
+  hashtags: "Hashtags your audience follows (without #; the product's own tag is added)",
 };
 
 /** brief.json as editable markdown. Lists are "- " bullets; objections are "- Question? Answer." */
@@ -169,6 +179,7 @@ export function applyBriefMarkdown(brief, markdown) {
         return m ? { q: m[1].trim(), a: m[2].trim() } : { q: b, a: "" };
       });
     } else if (key === "proof" || key === "angles") value = bullets;
+    else if (key === "hashtags") value = bullets.length ? bullets.map((b) => b.replace(/^#/, "")) : text.split(/[\s,]+/).map((t) => t.replace(/^#/, "")).filter(Boolean);
     else value = text.replace(/^_\(fill this in\)_$/, "").trim();
     if (key === "angles") value = value.map((a) => a.toLowerCase().replace(/\s+/g, "-"));
     if (key === "tone") value = value.toLowerCase();
@@ -193,6 +204,7 @@ export function validateBrief(brief, { facts = [] } = {}) {
   if (!TONES.includes(brief.tone?.value)) errors.push({ code: "tone", field: "tone", message: `tone "${brief.tone?.value}" is not one of ${TONES.join(", ")}.` });
   const unknown = (brief.angles?.value ?? []).filter((a) => !ANGLES[a]);
   if (unknown.length) errors.push({ code: "angle", field: "angles", message: `unknown angle${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}.` });
+  if (!(brief.hashtags?.value ?? []).length) warnings.push({ code: "hashtags", field: "hashtags", message: "no hashtags yet; add 2 to 4 your audience actually follows, or posts carry only the product's own tag." });
   if ((brief.angles?.value ?? []).length < 3) warnings.push({ code: "angles", field: "angles", message: "fewer than 3 angles; each platform gets 3 to 5 pieces, so they will repeat." });
   const known = facts.map((f) => String(f).toLowerCase());
   for (const p of brief.proof?.value ?? []) {
