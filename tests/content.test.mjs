@@ -65,7 +65,7 @@ test("a long line on a slide becomes body text under the slide number", () => {
 test("alt text names what each image says", () => {
   const alt = altFor(cardsFor(piece("instagram", "story"), { dossier }), { dossier });
   assert.match(alt, /^frame-01\.png: "Stuck with inbox triage at midnight\?" on a plain background\.$/m);
-  assert.match(alt, /frame-03\.png: "tidy npx tidy" with the link to try it\./);
+  assert.match(alt, /frame-03\.png: "tidy. npx tidy" with the link to try it\./);
 });
 
 test("distinctBeats drops repeats and the hook's echo", () => {

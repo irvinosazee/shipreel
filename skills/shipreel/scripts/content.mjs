@@ -137,7 +137,7 @@ export function cardsFor(piece, { dossier, projectDir = "." }) {
 /** Alt text for each image: what it says and what it shows. */
 export function altFor(cards, { dossier }) {
   const what = (c) => (c.image ? `over a screen from ${dossier.project?.name}` : "on a plain background");
-  return cards.map((c) => `${c.file}: "${[c.title, c.subtitle, c.detail].filter(Boolean).join(" ")}" ${c.kind === "cta" ? "with the link to try it" : what(c)}.`).join("\n");
+  return cards.map((c) => `${c.file}: "${[c.title, c.subtitle, c.detail].filter(Boolean).join(". ").replace(/([?!.])\. /g, "$1 ")}" ${c.kind === "cta" ? "with the link to try it" : what(c)}.`).join("\n");
 }
 
 /** The card-video engine's input for a video piece: the hook, the beats as highlights, the run's stills. */

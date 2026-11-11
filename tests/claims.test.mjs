@@ -67,3 +67,8 @@ test("findUncitedClaims ignores clause-ending numbers and -est words that are no
   assert.deepEqual(findUncitedClaims("baked into frame 0, and checked against the latest Hyperframes by the test suite", []), []);
   assert.deepEqual(findUncitedClaims("the fastest tool, 1,200 users, 10x faster", []), ["the fastest", "1,200 users", "10x faster"]);
 });
+
+test("a zero-padded slide or step number is not a claim", () => {
+  assert.deepEqual(findUncitedClaims("01 Who does X love? 02 / 04 slides", []), []);
+  assert.deepEqual(findUncitedClaims("1 Who does X love", []), ["1 Who"]);
+});

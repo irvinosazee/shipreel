@@ -1,17 +1,21 @@
 ---
 name: shipreel
-description: Turn the current project — website, web app, CLI, library, API, mobile app, game, or ML project — into a short, polished, shareable launch video using Hyperframes. Use when someone says "/shipreel", "let's brag about this", "make a launch video", "turn this into a video", or wants to share what they built. Reads the project code directly — no live URL or screenshots needed.
+description: Turn the current project (website, web app, CLI, library, API, mobile app, game, or ML project) into a launch video and, with `max`, a whole marketing campaign: 3 to 5 pieces per platform for TikTok, Instagram, YouTube Shorts, LinkedIn and X, with captions, hashtags, images and a calendar. Use when someone says "/shipreel", "/shipreel max", "let's brag about this", "make a launch video", "market this", "make content for every platform", or wants to share what they built. Reads the project code directly; no live URL or screenshots needed.
 ---
 
 # /shipreel
 
-You built it. Now let's show it.
+You shipped the code. Now ship the campaign.
 
 Forked from [/brag](https://github.com/latent-spaces/brag) by Shunit Haviv Hakimi (MIT), and extended well past it.
 
 ## Invocation dispatch (must happen first)
 
-Before inspecting the project, parse the complete `/shipreel` invocation. If the
+Before inspecting the project, parse the complete `/shipreel` invocation. If it
+starts with `max` (or the user asks for a campaign, content for every platform, or
+"aggressive marketing"), read [references/campaign.md](references/campaign.md) and follow
+it: make the video first when the project has none, then the brief, which the user
+edits and approves before anything is generated. If the
 invocation contains `--voice`, set `voice.enabled = true` for this run only.
 Narration is added on top of the normal workflow; it never replaces any step.
 Never enable narration without the flag or an explicit request.
@@ -71,6 +75,7 @@ Parse these options:
 | `--reroll` | scene name or number | none |
 | `--retone` | tone preset | none |
 | `--shorter` | flag — about 20% shorter | off |
+| `max` | keyword: a whole campaign, 3 to 5 pieces per platform, from a brief the user edits | off |
 | `--images` | flag — launch images from the run: link preview, X, GitHub social preview, Product Hunt gallery, LinkedIn carousel + PDF, each verified | off |
 | `--kit` | flag — bundle videos, covers, Product Hunt gallery, X thread, LinkedIn post, embeds, and credits into `launch-kit/` | off |
 | `--embed` | flag — a patch that adds the video to the project's own landing page or README | off |

@@ -25,7 +25,7 @@ export function packageJson() {
   return {
     name: PACKAGE_NAME,
     version: plugin.version,
-    description: "Launch videos, release videos, and PR previews for your projects, rendered with Hyperframes. The standalone CLI of the /shipreel skill.",
+    description: "You shipped the code. Now ship the campaign. Launch videos, launch images, and a checked marketing campaign for every platform, from your project. The standalone CLI of the /shipreel skill.",
     type: "module",
     bin: { [BIN_NAME]: "skills/shipreel/scripts/cli.mjs" },
     files: ["skills/shipreel", "README.md", "LICENSE"],

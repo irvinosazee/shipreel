@@ -1,6 +1,6 @@
 {
   "name": "shipreel",
-  "description": "You shipped it. Now show it. Turn the project you just shipped into a short, shareable launch video with one command.",
+  "description": "You shipped the code. Now ship the campaign. A launch video and a whole marketing campaign from the project you just shipped.",
   "owner": {
     "name": "Irvin Osazee",
     "email": "136273899+irvinosazee@users.noreply.github.com",
@@ -10,7 +10,7 @@
     {
       "name": "shipreel",
       "source": "./",
-      "description": "Turn the project you just shipped into a short, shareable launch video, measured before you post it. Free and open source."
+      "description": "Turn the project you just shipped into a launch video and a campaign for every platform, every piece checked before you post it. Free and open source."
     }
   ]
 }
