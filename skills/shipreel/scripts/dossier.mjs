@@ -229,6 +229,7 @@ function brandFor(dir) {
     palette,
     fonts: { display: kit?.brand?.fonts?.display ?? fonts.display, body: kit?.brand?.fonts?.body ?? fonts.body, mono: fonts.mono, files: kit?.brand?.fonts?.files ?? {} },
     name: kit?.brand?.name ?? null,
+    tone: kit?.brand?.tone ?? null,
     logo: kit?.brand?.logo ?? null,
     handle: kit?.brand?.handle ?? null,
     url: kit?.brand?.url ?? null,
