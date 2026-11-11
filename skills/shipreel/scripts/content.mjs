@@ -18,7 +18,7 @@
  * captions and hashtags in the brief's tone before anything renders.
  */
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import { buildPdf } from "./cuts.mjs";
@@ -38,7 +38,13 @@ export const PLATFORM_RULES = {
 
 const tag = (t) => `#${String(t).replace(/[^\p{L}\p{N}]+/gu, "")}`;
 const strip = (t) => String(t ?? "").trim();
-const linkFrom = (cta) => strip(cta).replace(/^try it:\s*/i, "");
+// The link or install command inside a call to action: "Who do YOU love? heartrank.lol" links to heartrank.lol.
+const linkFrom = (cta) => {
+  const text = strip(cta).replace(/^try it:\s*/i, "");
+  const command = text.match(/\b(?:npx|npm (?:i|install)|pnpm (?:add|dlx)|yarn (?:add|dlx)|bunx|pip install|pipx install|brew install|cargo (?:install|add)|go install|uv tool install)\s+\S.*$/i)?.[0];
+  const url = text.match(/https?:\/\/\S+|\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/\S*)?/i)?.[0];
+  return (command ?? url ?? text).replace(/[.,!?]+$/, "");
+};
 
 /** A small, relevant hashtag set for one platform: the product's own tag, then the brief's (which the user owns). */
 export function hashtagsFor(platform, dossier, brief = null) {
@@ -51,8 +57,11 @@ export function hashtagsFor(platform, dossier, brief = null) {
 }
 
 /** The post text for one piece, shaped for its platform. X posts and threads are built in xPosts. */
+// On a card a line can end bare; in a caption it is a sentence.
+const sentence = (t) => (/[.!?…:)]$/.test(String(t).trim()) ? String(t).trim() : `${String(t).trim()}.`);
+
 export function captionFor(piece, { hashtags = [] } = {}) {
-  const body = piece.beats.slice(1).filter((b) => b && b !== piece.hook);
+  const body = piece.beats.slice(1).filter((b) => b && b !== piece.hook).map(sentence);
   const link = linkFrom(piece.cta);
   const tags = hashtags.join(" ");
   if (piece.platform === "linkedin") {
@@ -68,10 +77,10 @@ export function xPosts(piece, { hashtags = [] } = {}) {
   const tags = hashtags.join(" ");
   const fit = (t) => (xLength(t) <= 280 ? t : t.slice(0, 276).replace(/\s+\S*$/, "") + "…");
   if (piece.kind !== "thread") {
-    const one = [piece.hook, piece.beats[1], piece.cta, tags].filter(Boolean).join("\n\n");
+    const one = [piece.hook, piece.beats[1] && sentence(piece.beats[1]), piece.cta, tags].filter(Boolean).join("\n\n");
     return [xLength(one) <= 280 ? one : fit([piece.hook, piece.cta].filter(Boolean).join("\n\n"))];
   }
-  const parts = [piece.hook, ...piece.beats.slice(1).filter((b) => b !== piece.hook), [piece.cta, tags].filter(Boolean).join("\n\n")].filter(Boolean);
+  const parts = [piece.hook, ...piece.beats.slice(1).filter((b) => b && b !== piece.hook).map(sentence), [piece.cta, tags].filter(Boolean).join("\n\n")].filter(Boolean);
   return parts.map((p, i) => fit(`${i + 1}/${parts.length}\n${p}`));
 }
 
@@ -148,8 +157,9 @@ export function videoContent(piece, { dossier, projectDir = ".", theme }) {
     kicker: dossier.project?.name,
     title: piece.hook,
     subtitle: body[0],
-    screenshots: shots.map((file, i) => ({ file, caption: body[i + 1] ?? body[0] ?? dossier.project?.name })),
-    highlights: body.length > 1 ? { heading: dossier.project?.name, items: body.slice(1, 4) } : undefined,
+    // Each beat is said once: the subtitle, then one per screen, then whatever is left as highlights.
+    screenshots: shots.map((file, i) => ({ file, ...(body[i + 1] ? { caption: body[i + 1] } : {}) })),
+    highlights: body.length > 1 + shots.length ? { heading: dossier.project?.name, items: body.slice(1 + shots.length, 4 + shots.length) } : undefined,
     outro: { line: dossier.project?.name, detail: linkFrom(piece.cta) },
     theme: theme ? { bg: theme.bg, fg: theme.fg, muted: theme.muted, accent: theme.accent } : undefined,
   };
@@ -215,10 +225,47 @@ export async function renderPieceCards(piece, cards, { theme, projectDir = ".", 
   return manifest;
 }
 
+const fontCache = new Map();
+/**
+ * The brand's display face as a local woff2, so a rendered video can use it (renders cannot load web
+ * fonts). Fetched once from Google Fonts per family; null when it is not there or the network is not.
+ */
+export async function fetchDisplayFont(family, cacheDir) {
+  if (!family) return null;
+  const file = path.join(cacheDir, `${family.replace(/\W+/g, "-")}.woff2`);
+  if (existsSync(file)) return file;
+  if (fontCache.has(family)) return fontCache.get(family);
+  let result = null;
+  try {
+    const ua = { headers: { "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" } };
+    const name = encodeURIComponent(family).replace(/%20/g, "+");
+    let css = await fetch(`https://fonts.googleapis.com/css2?family=${name}:wght@800&display=block`, ua).then((r) => (r.ok ? r.text() : ""));
+    if (!css) css = await fetch(`https://fonts.googleapis.com/css2?family=${name}&display=block`, ua).then((r) => (r.ok ? r.text() : ""));
+    // The last @font-face block is the latin subset, the one that covers English copy.
+    const url = [...css.matchAll(/url\((https:[^)]+\.woff2)\)/g)].map((m) => m[1]).at(-1);
+    if (url) {
+      const bytes = Buffer.from(await (await fetch(url)).arrayBuffer());
+      mkdirSync(cacheDir, { recursive: true });
+      writeFileSync(file, bytes);
+      result = file;
+    }
+  } catch {
+    result = null;
+  }
+  fontCache.set(family, result);
+  return result;
+}
+
 /** Render a video piece through the card-video engine: composition, render, loudness, baked poster. */
-export function renderPieceVideo(video, { projectDir = ".", dir, music = DEFAULT_MUSIC }) {
+export function renderPieceVideo(video, { projectDir = ".", dir, music = DEFAULT_MUSIC, fontFile = null, fontFamily = null }) {
   const compositionDir = path.join(dir, "composition");
-  const { plan } = writeCardProject(video.content, { outDir: compositionDir, format: video.format, theme: video.content.theme, music, baseDir: projectDir });
+  let theme = video.content.theme;
+  if (fontFile && fontFamily) {
+    mkdirSync(path.join(compositionDir, "assets"), { recursive: true });
+    copyFileSync(fontFile, path.join(compositionDir, "assets", "display.woff2"));
+    theme = { ...theme, displayFont: fontFamily, displayFontFile: "assets/display.woff2" };
+  }
+  const { plan } = writeCardProject(video.content, { outDir: compositionDir, format: video.format, theme, music, baseDir: projectDir });
   const output = path.join(dir, "video.mp4");
   renderComposition(compositionDir, { output });
   finishVideo(output, { posterAt: Math.min(plan.duration - 0.5, plan.scenes[0]?.duration ? plan.scenes[0].duration * 0.8 : 1.5), poster: path.join(dir, "video-poster.jpg") });

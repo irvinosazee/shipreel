@@ -97,3 +97,21 @@ test("writePiece writes the text files and returns what still needs rendering", 
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("fetchDisplayFont uses the cached file and needs no network for it", async () => {
+  const { fetchDisplayFont } = await import("../skills/shipreel/scripts/content.mjs");
+  const { writeFileSync, mkdirSync } = await import("node:fs");
+  const cache = mkdtempSync(path.join(tmpdir(), "shipreel-font-"));
+  mkdirSync(cache, { recursive: true });
+  writeFileSync(path.join(cache, "Space-Grotesk.woff2"), "x");
+  assert.equal(await fetchDisplayFont("Space Grotesk", cache), path.join(cache, "Space-Grotesk.woff2"));
+  assert.equal(await fetchDisplayFont(null, cache), null);
+  rmSync(cache, { recursive: true, force: true });
+});
+
+test("a video says each beat once", () => {
+  const piece = { n: 1, platform: "tiktok", kind: "video", hook: "Hot take.", beats: ["Hot take.", "It settles it.", "The promise."], cta: "Try it: x.dev" };
+  const c = videoContent(piece, { dossier: { project: { name: "x" }, media: {} } });
+  const said = [c.subtitle, ...c.screenshots.map((s) => s.caption), ...(c.highlights?.items ?? [])].filter(Boolean);
+  assert.equal(new Set(said).size, said.length);
+});

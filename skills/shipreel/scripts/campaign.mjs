@@ -26,7 +26,7 @@ import { PLATFORMS, planAngles } from "./angles.mjs";
 import { briefFacts, initBrief } from "./brief.mjs";
 import { cardTheme, extractStills } from "./cards.mjs";
 import { checkCampaign } from "./campaign_check.mjs";
-import { PLATFORM_RULES, renderPieceCards, renderPieceVideo, writePiece } from "./content.mjs";
+import { fetchDisplayFont, PLATFORM_RULES, renderPieceCards, renderPieceVideo, writePiece } from "./content.mjs";
 import { buildDossier } from "./dossier.mjs";
 
 const escapeHtml = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -101,8 +101,10 @@ export async function buildCampaign(projectDir, { outDir, platforms, briefOnly =
   writeFileSync(path.join(out, "angles.json"), `${JSON.stringify({ plan, skipped }, null, 2)}\n`);
 
   const campaignDir = path.join(out, "campaign");
-  rmSync(campaignDir, { recursive: true, force: true });
+  // Only the platforms being made are cleared: `--platforms x` must not wipe the TikTok pieces.
+  for (const platform of Object.keys(plan)) rmSync(path.join(campaignDir, platform), { recursive: true, force: true });
   const theme = cardTheme(dossier.brand);
+  const fontFile = videos ? await fetchDisplayFont(theme.display, path.join(out, ".fonts")) : null;
   for (const [platform, pieces] of Object.entries(plan)) {
     for (const piece of pieces) {
       const pdir = path.join(campaignDir, platform, piece.id);
@@ -110,7 +112,7 @@ export async function buildCampaign(projectDir, { outDir, platforms, briefOnly =
       if (images) await renderPieceCards(piece, cards, { theme, projectDir: dir, dir: pdir });
       if (videos && video) {
         log(`rendering ${platform}/${piece.id}`);
-        renderPieceVideo(video, { projectDir: dir, dir: pdir });
+        renderPieceVideo(video, { projectDir: dir, dir: pdir, fontFile, fontFamily: theme.display });
       }
     }
     log(`${platform}: ${pieces.length} piece(s)`);

@@ -171,6 +171,11 @@ export function buildCardComposition(content, { format = "landscape", theme, mus
   const plan = planCardVideo(content, { format });
   const box = contentBox(format);
   const colors = resolveTheme(theme ?? content.theme);
+  // A brand display face for titles, when the composition ships its file (content.mjs fetches it).
+  const display = (theme ?? content.theme)?.displayFont;
+  const displayFile = (theme ?? content.theme)?.displayFontFile;
+  const fontFace = display && displayFile ? `@font-face { font-family: "${display}"; src: url("${displayFile}") format("woff2"); font-weight: 100 900; }` : "";
+  const titleFont = fontFace ? `font-family: "${display}", sans-serif; letter-spacing: 0;` : "";
   const [W, H] = box.frame;
   const body = 48;
   const vertical = H > W;
@@ -185,7 +190,8 @@ export function buildCardComposition(content, { format = "landscape", theme, mus
     const stage = (inner, style = "") => `<section ${clip}>\n        <div id="${scene.id}-stage" class="stage" style="${style}">\n${inner}\n        </div>\n      </section>`;
 
     if (scene.id === "hook") {
-      const title = fitFontPx(content.title, { width: box.width, maxPx: box.titleMax, minPx: 64, maxLines: 3 });
+      // A vertical frame is narrow and tall: a long hook gets more lines rather than an ellipsis.
+      const title = fitFontPx(content.title, { width: box.width, maxPx: box.titleMax, minPx: 64, maxLines: vertical ? 5 : 3 });
       const subtitle = content.subtitle ? fitFontPx(content.subtitle, { width: box.width, maxPx: 60, minPx: 44, maxLines: 3 }) : null;
       if (content.kicker) enter("#hook-kicker", scene, 0.1, ["y", 30], 0.45);
       enter("#hook-title", scene, 0.2, ["y", 60], 0.6);
@@ -270,17 +276,18 @@ export function buildCardComposition(content, { format = "landscape", theme, mus
     <title>${escapeHtml(content.title)}</title>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
+      ${fontFace}
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: ${colors.bg}; }
       #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: ${colors.bg}; color: ${colors.fg}; font-family: sans-serif; }
       .scene { position: absolute; inset: 0; }
       .stage { position: absolute; left: ${box.x}px; top: ${box.y}px; width: ${box.width}px; height: ${box.height}px; display: flex; flex-direction: column; }
       .kicker { font-size: 40px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: ${colors.accent}; margin-bottom: 28px; }
-      .title { font-weight: 900; line-height: 1.02; letter-spacing: -0.02em; color: ${colors.fg}; }
+      .title { font-weight: 900; line-height: 1.02; letter-spacing: -0.02em; color: ${colors.fg}; ${titleFont} }
       .rule { width: 160px; height: 10px; margin: 40px 0 36px; border-radius: 5px; background: ${colors.accent}; transform-origin: 0 50%; }
       .subtitle { font-weight: 500; line-height: 1.25; color: ${colors.muted}; }
       .stat { display: flex; flex-direction: column; ${vertical ? "" : "flex: 1;"} }
-      .stat-value { font-weight: 900; line-height: 1; color: ${colors.accent}; }
+      .stat-value { font-weight: 900; line-height: 1; color: ${colors.accent}; ${titleFont} }
       .stat-label { margin-top: 14px; font-size: ${body}px; font-weight: 600; color: ${colors.muted}; }
       .frame { position: absolute; left: 0; width: 100%; border-radius: 22px; overflow: hidden; background: ${colors.panel}; }
       .frame-bar { height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 20px; background: ${colors.panel}; }

@@ -64,3 +64,18 @@ test("hookOverlap measures shared words", () => {
 test("an unknown platform is refused", () => {
   assert.throws(() => planAngles(full, { platforms: ["myspace"] }), /Unknown platform "myspace"/);
 });
+
+test("a pain that is not 'they are stuck with' stays a statement, and the hot take reads right for a list", () => {
+  const brief = { ...full, pain: f("Fan wars on X are all talk. Nobody keeps score."), workaround: f("quote-tweet wars, polls and follower counts"), angles: f(["pain-hook", "hot-take"]) };
+  const hooks = Object.fromEntries(planAngles(brief, { story }).plan.x.map((p) => [p.angle, p.hook]));
+  assert.equal(hooks["pain-hook"], "Fan wars on X are all talk.", "only the first sentence, no forced question mark");
+  assert.equal(hooks["hot-take"], "Hot take: quote-tweet wars, polls and follower counts prove nothing.");
+  const take = planAngles(brief, { story }).plan.x.find((p) => p.angle === "hot-take");
+  assert.equal(take.beats[1], "tidy settles it.");
+});
+
+test("a build story is only a hook when it was fast", () => {
+  const angles = (s) => new Set(Object.values(planAngles(full, { story: s }).plan).flat().map((p) => p.angle));
+  assert.ok(angles({ commits: 40, days: 6 }).has("build-story"));
+  assert.ok(!angles({ commits: 400, days: 147 }).has("build-story"));
+});

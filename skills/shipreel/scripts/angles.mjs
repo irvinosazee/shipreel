@@ -38,10 +38,11 @@ const lower1 = (t) => (t ? t.charAt(0).toLowerCase() + t.slice(1) : t);
 
 /** "They are stuck with X." becomes "Stuck with X?"; anything else is used as written. */
 function painAsQuestion(pain) {
-  const p = strip(pain);
-  const m = p.match(/^(?:they|you) (?:are|re|'re) (.+)$/i);
+  // The first sentence is the hook; "They are stuck with X" becomes "Stuck with X?", anything else stays a statement.
+  const first = strip(String(pain ?? "").match(/^[^.!?]*[.!?]?/)?.[0]);
+  const m = first.match(/^(?:they|you) (?:are|re|'re) (.+)$/i);
   if (m) return `${m[1].charAt(0).toUpperCase()}${m[1].slice(1)}?`;
-  return p ? `${p}?`.replace(/\?\?$/, "?") : null;
+  return first ? `${first}${/[?!]$/.test(String(pain).trim().split(/(?<=[.!?])\s/)[0]) ? "" : "."}`.replace(/\.\.$/, ".") : null;
 }
 
 // Capitalise a line's first letter, except the product's own name: "shipreel" stays lowercase.
@@ -64,7 +65,9 @@ function draft(id, brief, { story } = {}) {
   switch (id) {
     case "pain-hook": {
       const hook = pain ?? question;
-      return hook && { hook, beats: [hook, promise, proof[0]].filter(Boolean) };
+      // The rest of the pain says why it hurts; the promise answers it.
+      const rest = strip(String(v(brief, "pain") ?? "").replace(/^[^.!?]*[.!?]\s*/, "")) || null;
+      return hook && { hook, beats: [hook, rest, promise, proof[0]].filter(Boolean) };
     }
     case "before-after": {
       const before = workaround || strip(v(brief, "pain"));
@@ -73,18 +76,23 @@ function draft(id, brief, { story } = {}) {
     case "demo":
       return { hook: `${product}, start to finish.`, beats: [`${product}, start to finish.`, promise, ...proof.slice(0, 1)] };
     case "myth-buster":
-      return workaround && { hook: `You don't need ${lower1(workaround)}.`, beats: [`You don't need ${lower1(workaround)}.`, `${product}: ${lower1(promise)}`, proof[0]].filter(Boolean) };
-    case "proof":
-      return proof.length >= 2 && { hook: end(proof[0]), beats: proof.slice(0, 4) };
+      return workaround && { hook: `You don't need ${lower1(workaround)}.`, beats: [`You don't need ${lower1(workaround)}.`, proof[0] ?? `${product}: ${lower1(promise)}`, proof[1]].filter(Boolean) };
+    case "proof": {
+      // Lead with a proof point that says something ("Money buys hearts. Hearts buy rank."), not a bare label.
+      if (proof.length < 2) return null;
+      const lead = proof.find((p) => p.split(/\s+/).length >= 5 && !p.includes("·")) ?? proof[0];
+      return { hook: end(lead), beats: [lead, ...proof.filter((p) => p !== lead && !p.includes("·"))].slice(0, 4) };
+    }
     case "build-story":
       // A build story is a hook only when it was fast; "built in 147 days" is true but nobody stops for it.
-      return story?.commits && story.days <= 30 && { hook: `I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, beats: [`I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, `${story.commits} commits.`, promise] };
+      return story?.commits && story.days <= 30 && { hook: `I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, beats: [`I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, `${story.commits} commits.`, story.contributors === 1 ? "One developer." : promise] };
     case "how-to":
       // Only with a real install command: "1. open the website" is not a how-to.
       return install && { hook: `${product} in one line.`, beats: [`${product} in one line.`, install, promise] };
     case "hot-take": {
-      const target = workaround || strip(v(brief, "pain"));
-      return target && { hook: `Hot take: ${lower1(target)} is the problem.`, beats: [`Hot take: ${lower1(target)} is the problem.`, `${product} fixes it: ${lower1(promise)}`, proof[0]].filter(Boolean) };
+      // "X prove nothing" reads right whether X is one thing or a list.
+      const target = workaround || strip(String(v(brief, "pain") ?? "").match(/^[^.!?]*/)?.[0]);
+      return target && { hook: `Hot take: ${lower1(target)} prove nothing.`, beats: [`Hot take: ${lower1(target)} prove nothing.`, `${product} settles it.`, promise || proof[0]].filter(Boolean) };
     }
     default:
       return null;
