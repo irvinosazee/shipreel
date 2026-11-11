@@ -84,6 +84,8 @@ export function findUncitedClaims(screenText, claims) {
       const phrase = match[0].replace(/\s+/g, " ").trim();
       const words = phrase.split(" ");
       if (/^\d/.test(phrase) && (MEASURE_WORD.test(words.at(-1)) || /^(19|20)\d{2}$/.test(words[0]))) continue;
+      // "01", "02 / 04": a zero-padded number is a slide or step index, not a quantity.
+      if (/^0\d/.test(phrase)) continue;
       // "-est" nouns and recency words are not superlatives: "the test", "the latest Hyperframes".
       if (/^(the|most)\s/i.test(phrase) && NOT_SUPERLATIVE.test(words.at(-1))) continue;
       candidates.push({ index: match.index, phrase });

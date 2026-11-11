@@ -25,7 +25,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { contrastRatio } from "./captions.mjs";
-import { SAFE_MARGIN, imageSize } from "./cards.mjs";
+import { cardInsets, imageSize } from "./cards.mjs";
 import { withPage } from "./chrome.mjs";
 import { findUncitedClaims } from "./claims.mjs";
 
@@ -47,16 +47,16 @@ const hexOf = (rgb) => {
 };
 
 /** Problems in one card's measured text, given its size. Pure, so it is testable without a browser. */
-export function judgeText(measured, { size: [W, H] }) {
+export function judgeText(measured, { size: [W, H], insets }) {
   const errors = [];
-  const m = Math.round(Math.min(W, H) * SAFE_MARGIN);
+  const [mt, mr, mb, ml] = cardInsets({ size: [W, H], insets });
   const minPx = Math.ceil(Math.min(W, H) * MIN_TEXT_SHARE);
   for (const t of measured) {
     const label = `"${t.text.length > 40 ? `${t.text.slice(0, 40)}…` : t.text}"`;
     if (t.fontPx + 0.5 < minPx) errors.push({ code: "text-too-small", message: `${label} renders at ${Math.round(t.fontPx)}px; this ${W}x${H} image needs at least ${minPx}px to read on a phone.` });
     const { left, top, right, bottom } = t.box;
-    if (left < m - 1 || top < m - 1 || right > W - m + 1 || bottom > H - m + 1) {
-      errors.push({ code: "text-outside-safe", message: `${label} crosses the ${m}px safe margin (box ${Math.round(left)},${Math.round(top)} to ${Math.round(right)},${Math.round(bottom)}).` });
+    if (left < ml - 1 || top < mt - 1 || right > W - mr + 1 || bottom > H - mb + 1) {
+      errors.push({ code: "text-outside-safe", message: `${label} crosses the safe margin (${mt}/${mr}/${mb}/${ml}px) (box ${Math.round(left)},${Math.round(top)} to ${Math.round(right)},${Math.round(bottom)}).` });
     }
     if (t.overflow) errors.push({ code: "text-overflow", message: `${label} is wider than its box and gets cut off.` });
     if (t.overlaps) errors.push({ code: "text-overlaps-image", message: `${label} runs into the image.` });

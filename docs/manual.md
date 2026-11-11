@@ -1,7 +1,10 @@
 # The shipreel manual
 
+**You shipped the code. Now ship the campaign.**
+
 shipreel turns a project you built into a short launch video, with music, motion, captions, and share
-copy included, and checks the result before you post it. This manual is for using it. For how it
+copy included, and with `max`, into a whole marketing campaign for every platform. It checks all of it
+before you post. This manual is for using it. For how it
 is built, see the [README](../README.md).
 
 - [1. Install](#1-install)
@@ -202,6 +205,34 @@ which file goes where.
 shipreel never posts anything. It writes files and stops.
 
 ---
+
+### A whole campaign: `max`
+
+```
+/shipreel max
+```
+
+or, without an agent, `shipreel max ~/code/my-app`. You get a campaign, not one video:
+
+1. **A brief you edit.** shipreel reads the project and pre-fills `shipreel-output/brief.md`: who it is
+   for, what hurts today, what they do instead, what changes, the proof, the doubts and their answers,
+   the one thing to do next, the tone, the angles, and the hashtags your audience follows. Change
+   anything; your words win every time you run it again. With an agent, it fills in what the code alone
+   cannot say and asks you to approve the brief before making anything. `shipreel max --brief-only`
+   stops after the brief.
+2. **3 to 5 pieces per platform**, each a different angle (a pain hook, a before and after, a demo, a
+   myth-buster, the proof, the build story, a how-to, a hot take), in the formats each platform rewards:
+   TikTok and YouTube Shorts videos, Instagram reels with a carousel and story frames, a LinkedIn post,
+   carousel and video, an X thread and video.
+3. **Everything to post each one** in `shipreel-output/campaign/<platform>/<NN-angle>/`: the video or
+   images, `caption.txt` (or `thread.txt`), `hashtags.txt`, `alt.txt`, and `post.json` with the title,
+   link, posting window and the platform's limits. `--videos` renders the videos too.
+4. **A two-week calendar** (`campaign/calendar.md`) and an **upload page** (`campaign/index.html`) with
+   every caption and a copy button.
+
+Every piece is checked: platform limits, hashtag counts, alt text, every number cited to your repo,
+and nothing deceptive (no invented numbers, testimonials, deadlines or scarcity). `shipreel
+campaign-check` runs that check on its own. It is persuasive, never fake; nothing is posted for you.
 
 ## 6. Changing what you got
 

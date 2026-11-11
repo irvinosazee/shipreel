@@ -93,3 +93,16 @@ test("viewport-sized screenshots are fitted whole; only full-page screenshots pa
 test("the default theme passes contrast for body, muted, and accent text", () => {
   for (const key of ["fg", "muted", "accent"]) assert.ok(contrastRatio(CARD_THEME[key], CARD_THEME.bg) >= 4.5, key);
 });
+
+test("a brand display face ships with the composition and styles the titles", () => {
+  const { html } = buildCardComposition({ title: "Hearts, not bids" }, { format: "vertical", theme: { displayFont: "Anton", displayFontFile: "assets/display.woff2" } });
+  assert.match(html, /@font-face \{ font-family: "Anton"; src: url\("assets\/display\.woff2"\)/);
+  assert.match(html, /font-family: "Anton", sans-serif/);
+  assert.doesNotMatch(buildCardComposition({ title: "x" }, { format: "vertical" }).html, /@font-face/, "no face without its file");
+});
+
+test("a long hook in a vertical video wraps instead of being cut", () => {
+  const hook = "Hot take: quote-tweet wars, polls anyone can game, and follower counts prove nothing.";
+  const { html } = buildCardComposition({ title: hook }, { format: "vertical" });
+  assert.ok(html.includes(hook), "the whole hook is on screen");
+});
