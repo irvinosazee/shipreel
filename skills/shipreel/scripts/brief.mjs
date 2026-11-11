@@ -196,6 +196,11 @@ const DECEPTIVE = [
   [/["“][^"”]{12,}["”]\s*[-—–]\s*[A-Z][a-z]+/, "a quoted testimonial"],
 ];
 
+/** Every deceptive pattern a text contains: invented scarcity, urgency, social proof, or a quoted testimonial. */
+export function deceptiveHits(text) {
+  return DECEPTIVE.filter(([re]) => re.test(String(text))).map(([, what]) => what);
+}
+
 /** Problems that stop a brief from driving a campaign. `facts` are the verified claim texts and git facts proof may use. */
 export function validateBrief(brief, { facts = [] } = {}) {
   const errors = [], warnings = [];
