@@ -57,3 +57,9 @@ test("without a campaign, the desk waits for a dropped folder", () => {
   assert.match(html, /Drop a campaign folder here/);
   assert.match(html, /webkitdirectory/);
 });
+
+test("the desk has three looks, night by default, and its panels hide their scrollbars", () => {
+  assert.match(deskHtml(null), /<html lang="en" data-look="night">/);
+  assert.match(deskHtml(null, { look: "feed" }), /data-look="feed"/);
+  assert.match(deskHtml(null), /\.queue::-webkit-scrollbar[^{]*\{ display: none; \}/);
+});
