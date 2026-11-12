@@ -58,10 +58,12 @@ export function hashtagsFor(platform, dossier, brief = null) {
 
 /** The post text for one piece, shaped for its platform. X posts and threads are built in xPosts. */
 // On a card a line can end bare; in a caption it is a sentence.
-const sentence = (t) => (/[.!?…:)]$/.test(String(t).trim()) ? String(t).trim() : `${String(t).trim()}.`);
+// A command stays bare, so it can be copied and run.
+const sentence = (t) => (/[.!?…:)]$/.test(String(t).trim()) || /^(npx|npm|pip|brew|cargo|go|uv|pnpm|yarn|bunx)\s/.test(String(t).trim()) ? String(t).trim() : `${String(t).trim()}.`);
 
 export function captionFor(piece, { hashtags = [] } = {}) {
-  const body = piece.beats.slice(1).filter((b) => b && b !== piece.hook).map(sentence);
+  // A beat the call to action already says (the install line in a how-to) is not said twice.
+  const body = piece.beats.slice(1).filter((b) => b && b !== piece.hook && !String(piece.cta ?? "").includes(b)).map(sentence);
   const link = linkFrom(piece.cta);
   const tags = hashtags.join(" ");
   if (piece.platform === "linkedin") {

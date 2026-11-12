@@ -115,3 +115,11 @@ test("a video says each beat once", () => {
   const said = [c.subtitle, ...c.screenshots.map((s) => s.caption), ...(c.highlights?.items ?? [])].filter(Boolean);
   assert.equal(new Set(said).size, said.length);
 });
+
+test("a how-to keeps the command as written and does not repeat the call to action", () => {
+  const piece = { n: 1, platform: "tiktok", kind: "video", hook: "tidy in one line.", beats: ["tidy in one line.", "npx tidy init", "Inbox zero, finally"], cta: "Try it: npx tidy init" };
+  const caption = captionFor(piece);
+  assert.doesNotMatch(caption, /Npx/);
+  assert.equal(caption.match(/npx tidy init/g).length, 1, "the command appears once, in the call to action");
+  assert.match(caption, /Inbox zero, finally\./);
+});

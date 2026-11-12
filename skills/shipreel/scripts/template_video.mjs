@@ -192,7 +192,7 @@ export function buildCardComposition(content, { format = "landscape", theme, mus
     if (scene.id === "hook") {
       // A vertical frame is narrow and tall: a long hook gets more lines rather than an ellipsis.
       const title = fitFontPx(content.title, { width: box.width, maxPx: box.titleMax, minPx: 64, maxLines: vertical ? 5 : 3 });
-      const subtitle = content.subtitle ? fitFontPx(content.subtitle, { width: box.width, maxPx: 60, minPx: 44, maxLines: 3 }) : null;
+      const subtitle = content.subtitle ? fitFontPx(content.subtitle, { width: box.width, maxPx: 60, minPx: 44, maxLines: vertical ? 5 : 3 }) : null;
       if (content.kicker) enter("#hook-kicker", scene, 0.1, ["y", 30], 0.45);
       enter("#hook-title", scene, 0.2, ["y", 60], 0.6);
       tweens.push(`tl.fromTo("#hook-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.out" }, ${at(scene, 0.45)});`);

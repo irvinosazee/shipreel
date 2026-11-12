@@ -47,7 +47,9 @@ function painAsQuestion(pain) {
 
 // Capitalise a line's first letter, except the product's own name: "shipreel" stays lowercase.
 let productName = "";
-const cap1 = (t) => (!t || (productName && String(t).startsWith(productName)) ? t : t.charAt(0).toUpperCase() + t.slice(1));
+// A command ("npx tidy init") is never capitalised either: it has to run as written.
+const COMMAND = /^(npx|npm|pip|brew|cargo|go|uv|pnpm|yarn|bunx)\s/;
+const cap1 = (t) => (!t || (productName && String(t).startsWith(productName)) || COMMAND.test(t) ? t : t.charAt(0).toUpperCase() + t.slice(1));
 // Hooks end once: a question keeps its "?", anything else gets a full stop.
 const end = (t) => cap1(/[?!.]$/.test(String(t).trim()) ? String(t).trim() : `${String(t).trim()}.`);
 const firstQuestion = (t) => String(t ?? "").match(/^[^.!?]*\?/)?.[0] ?? null;

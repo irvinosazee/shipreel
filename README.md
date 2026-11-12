@@ -192,7 +192,7 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 | | /brag (original) | shipreel |
 |---|---|---|
 | Skill scripts | 1 | 45 |
-| Tests | none | 335, on every push |
+| Tests | none | 338, on every push |
 | Reference docs | 6 | 16 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels, launch images |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes; launch images and launch copy checked against each platform's limits |

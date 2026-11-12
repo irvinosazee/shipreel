@@ -106,3 +106,8 @@ test("a long hook in a vertical video wraps instead of being cut", () => {
   const { html } = buildCardComposition({ title: hook }, { format: "vertical" });
   assert.ok(html.includes(hook), "the whole hook is on screen");
 });
+
+test("a long subtitle in a vertical video wraps instead of being cut", () => {
+  const sub = "The launch video, the images and a post for every platform are a second project, so they never happen.";
+  assert.ok(buildCardComposition({ title: "You shipped it and nobody saw it.", subtitle: sub }, { format: "vertical" }).html.includes(sub));
+});

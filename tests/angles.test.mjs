@@ -79,3 +79,8 @@ test("a build story is only a hook when it was fast", () => {
   assert.ok(angles({ commits: 40, days: 6 }).has("build-story"));
   assert.ok(!angles({ commits: 400, days: 147 }).has("build-story"));
 });
+
+test("a how-to beat keeps the install command lowercase", () => {
+  const p = Object.values(planAngles(full, { story }).plan).flat().find((x) => x.angle === "how-to");
+  assert.equal(p.beats[1], "npx tidy");
+});
