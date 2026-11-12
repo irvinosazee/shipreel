@@ -265,7 +265,10 @@ export function cardHtml(card, theme, { projectDir = "." } = {}) {
   const { mt, mr, mb, ml, gap, portrait, textW, textH } = cardGeometry(card, hasImage);
   const short = Math.min(W, H);
   // Heavy display faces run wider than the estimator assumes.
-  const titleFit = fitFontPx(card.title, { width: textW * 0.88, maxPx: Math.round(short * (card.kind === "feature" ? 0.11 : 0.15)), minPx: Math.round(short * 0.06), maxLines: card.kind === "feature" && !card.subtitle ? 3 : 2 });
+  const titleArgs = { width: textW * 0.88, maxPx: Math.round(short * (card.kind === "feature" ? 0.11 : 0.15)), minPx: Math.round(short * 0.06) };
+  // A headline is never cut: when two lines are not enough, it takes a third, then a fourth.
+  let titleFit = fitFontPx(card.title, { ...titleArgs, maxLines: card.kind === "feature" && !card.subtitle ? 3 : 2 });
+  for (const lines of [3, 4]) if (titleFit.text.endsWith("…") && !String(card.title).trim().endsWith("…")) titleFit = fitFontPx(card.title, { ...titleArgs, maxLines: lines });
   // Generous lines here: the in-page fit shrinks the real text, so the estimate should not cut words.
   const subFit = card.subtitle ? fitFontPx(card.subtitle, { width: textW, maxPx: Math.round(short * 0.05), minPx: Math.ceil(short * 28 / 1080), maxLines: 7 }) : null;
   const detailFit = card.detail ? fitFontPx(card.detail, { width: (W - ml - mr - 2 * Math.round(short * 0.04)) * 0.78, maxPx: Math.round(short * 0.05), minPx: Math.round(short * 0.03), maxLines: 2 }) : null;

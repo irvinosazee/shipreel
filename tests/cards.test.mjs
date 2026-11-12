@@ -202,3 +202,10 @@ test("scene stills come from each scene's settled moment and feature cards prefe
   }
 });
 
+
+test("a long slide headline takes more lines instead of being cut", () => {
+  const title = "Before: a video editor, a screen recorder and a free weekend. After: shipreel.";
+  const card = { kind: "hero", title, subtitle: null, size: [1080, 1350], layout: "stack", image: null };
+  const html = cardHtml(card, cardTheme({}));
+  assert.ok(html.includes(title.replace(/&/g, "&amp;")), "the whole headline is on the card");
+});
