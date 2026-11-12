@@ -32,6 +32,7 @@ export const COMMANDS = {
   release: { script: "release_video.mjs", summary: "a release video from a git tag" },
   preview: { script: "pr_preview.mjs", summary: "a before/after clip of the pages a pull request changes" },
   max: { script: "campaign.mjs", summary: "a whole campaign: brief, 3 to 5 pieces per platform, calendar, checked" },
+  desk: { script: "desk.mjs", summary: "post a campaign from one page: every caption, hashtag and alt text a click to copy" },
   brief: { script: "brief.mjs", summary: "the marketing brief behind a campaign (init|read)" },
   "campaign-check": { script: "campaign_check.mjs", summary: "check a campaign: limits, hashtags, alt text, claims, honesty" },
   images: { summary: "launch images (link preview, X, GitHub, Product Hunt, LinkedIn), checked" },

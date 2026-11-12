@@ -1,6 +1,6 @@
 # `max`: the whole campaign
 
-`/shipreel max` turns a project into a two-week campaign: 3 to 5 different pieces for each of TikTok, Instagram, YouTube Shorts, LinkedIn and X, each with its video or images, caption, hashtags, alt text and posting metadata, plus a calendar and an upload page. You shipped the code. Now ship the campaign.
+`/shipreel max` turns a project into a two-week campaign: 3 to 5 different pieces for each of TikTok, Instagram, YouTube Shorts, LinkedIn and X, each with its video or images, caption, hashtags, alt text and posting metadata, plus a calendar and a posting desk (`campaign/index.html`). You shipped the code. Now ship the campaign.
 
 Aggressive here means persuasive: sharp hooks, the pain named plainly, proof up front, one clear call to action. It never means deceptive: no invented numbers, no invented quotes or testimonials, no fake deadlines or scarcity. `campaign_check.mjs` fails a campaign that does any of these.
 
@@ -35,7 +35,7 @@ Edit `brief.md` directly (keep the section headings). Then **show the user the b
 node <skill-root>/scripts/campaign.mjs <project-dir> [--platforms tiktok,instagram,...] [--videos]
 ```
 
-It plans the angles (`angles.json`), writes every piece into `campaign/<platform>/<NN-angle>/`, renders the images, writes `calendar.md` and `index.html`, and runs the full check. `--videos` also renders each video piece through the card-video engine (about a minute each); without it, video pieces have their `content.json`, cover and caption, ready to render.
+It plans the angles (`angles.json`), writes every piece into `campaign/<platform>/<NN-angle>/`, renders the images, writes `calendar.md` and the posting desk (`index.html`, from `desk.mjs`), and runs the full check. `--videos` also renders each video piece through the card-video engine (about a minute each); without it, video pieces have their `content.json`, cover and caption, ready to render.
 
 ## 3. Make every piece good, in the brief's voice
 
@@ -57,4 +57,6 @@ Fix every error. Look at the images yourself (open `campaign/index.html`): a wea
 
 ## 4. Deliver
 
-Tell the user where the campaign is (`campaign/index.html` to review, `calendar.md` for the order), how many pieces per platform, and that nothing has been posted. Credit the music on any post that uses a video with bundled music.
+After rewriting captions, rebuild the desk so it shows them: `node <skill-root>/scripts/desk.mjs <output-dir>/campaign --no-open`.
+
+Tell the user where the campaign is (`campaign/index.html` is the posting desk: open it, or run `shipreel desk`; `calendar.md` for the order), how many pieces per platform, and that nothing has been posted. Credit the music on any post that uses a video with bundled music.

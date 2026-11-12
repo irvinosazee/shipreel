@@ -11,14 +11,14 @@
  *   4. content    campaign/<platform>/<NN-angle>/: caption, hashtags, alt text, post.json, and the images;
  *                 with --videos, each video piece rendered through the card-video engine (slow)
  *   5. calendar   campaign/calendar.md: what to post where, day by day, over two weeks
- *   6. upload     campaign/index.html: every piece with its caption, a copy button, and its files
+ *   6. desk       campaign/index.html: every piece in posting order, every text a click to copy (desk.mjs)
  *   7. check      campaign_check.mjs over all of it; campaign/check.json
  *
  * --brief-only stops after step 2, so the brief can be edited before anything is made. A brief with
  * errors (unverified proof, deception, no call to action) stops the run. Nothing is posted anywhere.
  */
 
-import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,8 +28,7 @@ import { cardTheme, extractStills } from "./cards.mjs";
 import { checkCampaign } from "./campaign_check.mjs";
 import { fetchDisplayFont, PLATFORM_RULES, renderPieceCards, renderPieceVideo, writePiece } from "./content.mjs";
 import { buildDossier } from "./dossier.mjs";
-
-const escapeHtml = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+import { writeDesk } from "./desk.mjs";
 
 /**
  * Two weeks of posts: each day takes the next unposted piece from up to three platforms, rotating
@@ -57,30 +56,6 @@ export function calendarMarkdown(calendar, { product }) {
     lines.push("");
   }
   return `${lines.join("\n").trim()}\n`;
-}
-
-/** campaign/index.html: every piece, its caption with a copy button, hashtags, and links to its files. */
-export function uploadPage({ product, plan, dir }) {
-  const read = (platform, p, f) => (existsSync(path.join(dir, platform, p.id, f)) ? readFileSync(path.join(dir, platform, p.id, f), "utf8").trim() : "");
-  const sections = Object.entries(plan).map(([platform, pieces]) => {
-    const cards = pieces.map((p, i) => {
-      const meta = JSON.parse(read(platform, p, "post.json") || "{}");
-      const text = read(platform, p, "thread.txt") || read(platform, p, "caption.txt");
-      const files = (meta.files ?? []).filter((f) => existsSync(path.join(dir, platform, p.id, f)));
-      const thumb = files.find((f) => /\.(png|jpg)$/.test(f));
-      return `<article><header><b>${escapeHtml(p.id)}</b><span>${escapeHtml(p.kind)} · ${escapeHtml(meta.postingWindow ?? "")}</span></header>
-${thumb ? `<img src="${platform}/${p.id}/${thumb}" alt="" loading="lazy">` : ""}
-<pre id="c-${platform}-${i}">${escapeHtml(text)}</pre><button data-copy="c-${platform}-${i}">copy caption</button>
-<p>${files.map((f) => `<a href="${platform}/${p.id}/${f}">${escapeHtml(f)}</a>`).join(" · ")}</p></article>`;
-    });
-    return `<section><h2>${escapeHtml(PLATFORMS[platform].label)}</h2><div class="grid">${cards.join("\n")}</div></section>`;
-  });
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(product)} campaign</title>
-<style>body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#111;color:#eee;padding:24px}h1{font-size:28px}h2{margin-top:40px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}article{background:#1c1c1c;border:1px solid #333;border-radius:12px;padding:14px}header{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:#aaa}header b{color:#fff}img{width:100%;border-radius:8px;margin-top:10px}pre{white-space:pre-wrap;font:13px/1.45 ui-monospace,monospace;background:#0b0b0b;padding:10px;border-radius:8px;max-height:220px;overflow:auto}button{font:inherit;padding:6px 12px;border-radius:999px;border:1px solid #555;background:#222;color:#fff;cursor:pointer}a{color:#9cf}</style></head>
-<body><h1>${escapeHtml(product)} campaign</h1><p>Nothing here has been posted. See <a href="calendar.md">calendar.md</a> for the order.</p>
-${sections.join("\n")}
-<script>document.querySelectorAll("[data-copy]").forEach((b)=>b.onclick=()=>{navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);b.textContent="copied";setTimeout(()=>b.textContent="copy caption",1200)});</script></body></html>
-`;
 }
 
 /** Make the whole campaign. Returns the brief check, the plan, the calendar and the campaign check. */
@@ -120,7 +95,8 @@ export async function buildCampaign(projectDir, { outDir, platforms, briefOnly =
 
   const calendar = planCalendar(plan);
   writeFileSync(path.join(campaignDir, "calendar.md"), calendarMarkdown(calendar, { product: brief.product }));
-  writeFileSync(path.join(campaignDir, "index.html"), uploadPage({ product: brief.product, plan, dir: campaignDir }));
+  // The desk: every piece in the calendar's order, every text a click to copy (desk.mjs).
+  writeDesk(campaignDir, { product: brief.product, accent: theme.accent, onAccent: theme.onAccent });
 
   // Claims the campaign may make: the run's verified claims, plus the facts the brief's proof may cite.
   const claims = [...dossier.claims.filter((c) => c.verified), ...briefFacts(dossier).map((text) => ({ text }))];

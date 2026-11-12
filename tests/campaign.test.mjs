@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { buildCampaign, calendarMarkdown, planCalendar, uploadPage } from "../skills/shipreel/scripts/campaign.mjs";
+import { buildCampaign, calendarMarkdown, planCalendar } from "../skills/shipreel/scripts/campaign.mjs";
 
 const piece = (platform, n) => ({ id: `0${n}-a${n}`, hook: `Hook ${platform} ${n}`, kind: "video" });
 const plan = { tiktok: [1, 2, 3].map((n) => piece("tiktok", n)), x: [1, 2, 3].map((n) => piece("x", n)), linkedin: [1, 2, 3, 4].map((n) => piece("linkedin", n)) };
@@ -20,13 +20,6 @@ test("the calendar spreads every piece over the days, at most three a day, rotat
   const md = calendarMarkdown(cal, { product: "tidy" });
   assert.match(md, /^# tidy: two-week campaign/);
   assert.match(md, /## Day 1\n- \*\*TikTok\*\* · video · `tiktok\/01-a1`/);
-});
-
-test("the upload page lists each piece with its caption and a copy button, escaping text", () => {
-  const html = uploadPage({ product: "<tidy>", plan: { tiktok: [piece("tiktok", 1)] }, dir: "/nowhere" });
-  assert.match(html, /<title>&lt;tidy&gt; campaign<\/title>/);
-  assert.match(html, /data-copy="c-tiktok-0"/);
-  assert.match(html, /Nothing here has been posted/);
 });
 
 test("buildCampaign: brief first, stop there with --brief-only; then every piece, the calendar, the check", async () => {

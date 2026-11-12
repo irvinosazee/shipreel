@@ -227,8 +227,12 @@ or, without an agent, `shipreel max ~/code/my-app`. You get a campaign, not one 
 3. **Everything to post each one** in `shipreel-output/campaign/<platform>/<NN-angle>/`: the video or
    images, `caption.txt` (or `thread.txt`), `hashtags.txt`, `alt.txt`, and `post.json` with the title,
    link, posting window and the platform's limits. `--videos` renders the videos too.
-4. **A two-week calendar** (`campaign/calendar.md`) and an **upload page** (`campaign/index.html`) with
-   every caption and a copy button.
+4. **A two-week calendar** (`campaign/calendar.md`) and a **posting desk** (`campaign/index.html`):
+   every piece in posting order with its video or images, and every text it needs (the caption, each
+   post of an X thread, the title, hashtags, the link, alt text for each image) as a block you click to
+   copy, with its length against the platform's limit. Tick a piece when it is posted; the browser
+   remembers. Double-click the page, or run `shipreel desk` to open it; drop any campaign folder onto
+   it to open that one. It runs in your browser and uploads nothing.
 
 Every piece is checked: platform limits, hashtag counts, alt text, every number cited to your repo,
 and nothing deceptive (no invented numbers, testimonials, deadlines or scarcity). `shipreel
