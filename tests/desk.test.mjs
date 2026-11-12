@@ -63,3 +63,9 @@ test("the desk has three looks, night by default, and its panels hide their scro
   assert.match(deskHtml(null, { look: "feed" }), /data-look="feed"/);
   assert.match(deskHtml(null), /\.queue::-webkit-scrollbar[^{]*\{ display: none; \}/);
 });
+
+test("the night desk previews each piece as a post, with the files a switch away", () => {
+  const html = deskHtml(null);
+  assert.match(html, /function phonePost\(p\)/, "vertical video and stories in a phone, caption over the bottom");
+  assert.match(html, /k === "post" \? "Post" : "Files"/);
+});

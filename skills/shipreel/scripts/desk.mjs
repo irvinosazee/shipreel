@@ -235,9 +235,33 @@ kbd { font: 600 11.5px var(--body); border: 1px solid var(--line); border-bottom
 [data-look="night"] .queue { padding: 14px 10px; display: flex; flex-direction: column; gap: 4px; }
 [data-look="night"] .queue .filters { padding: 0 6px 10px; }
 [data-look="night"] .queue .day { padding: 12px 10px 4px; }
-[data-look="night"] .stage { overflow: auto; display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 10px; }
+[data-look="night"] .stage { overflow: auto; display: flex; flex-direction: column; justify-content: safe center; gap: 18px; padding: 10px; }
 [data-look="night"] .stage .media { justify-content: safe center; }
 [data-look="night"] .copy { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- night and strip: Post or Files ---------- */
+.views { align-self: center; display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); backdrop-filter: blur(14px); }
+.views button { border: 0; background: transparent; border-radius: 999px; padding: 5px 16px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); }
+.views button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+.post-view { align-items: center; }
+.post-view .why { align-self: center; text-align: center; }
+.phone-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.phone { position: relative; }
+.phone video, .phone img { object-fit: cover; cursor: pointer; }
+.phone .overlay { position: absolute; left: 0; right: 0; bottom: 0; padding: 60px 16px 18px 14px; background: linear-gradient(to top, rgba(0,0,0,.82), rgba(0,0,0,0)); color: #fff; pointer-events: none; }
+.phone .who { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.phone .who .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font: 900 13px var(--head); }
+.phone .who b { font-size: 14px; }
+.phone .overlay p { margin: 0; font-size: 13.5px; line-height: 1.4; max-width: 34ch; }
+.phone .overlay .more { color: rgba(255,255,255,.7); }
+.phone .bars { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 4px; pointer-events: none; }
+.phone .bars i { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.35); }
+.phone .bars i.on { background: #fff; }
+.phone .play { position: absolute; top: 14px; right: 14px; border: 0; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; background: rgba(0,0,0,.5); color: #fff; cursor: pointer; backdrop-filter: blur(6px); }
+.phone-col .files, .feed-col .files { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 12.5px; }
+.phone-col .files a { color: var(--muted); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+.phone-col .files a:hover { color: var(--ink); }
+[data-look="night"] .post, [data-look="strip"] .post { background: var(--solid); box-shadow: 0 0 0 1px var(--line), 0 30px 80px -30px rgba(0,0,0,.7); border: 0; }
 
 /* ---------- feed: the post as it will look ---------- */
 [data-look="feed"] .app { display: grid; grid-template-columns: 300px minmax(0, 1fr) minmax(380px, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100vh; }
@@ -269,7 +293,7 @@ kbd { font: 600 11.5px var(--body); border: 1px solid var(--line); border-bottom
 /* ---------- strip: one big preview, the campaign along the bottom ---------- */
 [data-look="strip"] .app { display: grid; grid-template-columns: minmax(0, 1fr) minmax(400px, 0.85fr); grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; gap: 0; }
 [data-look="strip"] .bar { grid-column: 1 / -1; grid-row: 1; padding: 16px 24px; }
-[data-look="strip"] .stage { grid-column: 1; grid-row: 2; overflow: auto; display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 8px 24px 20px; }
+[data-look="strip"] .stage { grid-column: 1; grid-row: 2; overflow: auto; display: flex; flex-direction: column; justify-content: safe center; gap: 18px; padding: 8px 24px 20px; }
 [data-look="strip"] .stage .media { justify-content: safe center; }
 [data-look="strip"] .copy { grid-column: 2; grid-row: 2; overflow: auto; padding: 8px 24px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
 [data-look="strip"] .queue { grid-column: 1 / -1; grid-row: 3; display: flex; gap: 22px; overflow-x: auto; padding: 14px 24px 18px; border-top: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); align-items: flex-start; }
@@ -427,6 +451,38 @@ function feedPost(p) {
     h("div", { class: "files" }, p.media.map((m) => h("a", { href: urlOf(p.key, m.file), download: p.platform + "-" + p.id + "-" + m.file }, "Download " + m.file))));
 }
 
+// A vertical video or story, as the apps show it: full screen, the caption over the bottom.
+function phonePost(p) {
+  const text = p.caption || p.hook || "";
+  const first = text.split("\\n").filter(Boolean).slice(0, 2).join(" ");
+  const cut = first.length > 110 ? first.slice(0, 110).replace(/\\s+\\S*$/, "") : first;
+  const m = p.media[0];
+  const video = m.type === "video";
+  const el = mediaEl(p, m, p.alts.find((a) => a.file === m.file)?.text);
+  if (video) { el.removeAttribute("controls"); el.loop = true; el.muted = true; el.addEventListener("click", () => (el.paused ? el.play() : el.pause())); }
+  // A story is several frames: bars along the top, and a click moves to the next one.
+  const frames = video ? [] : p.media.filter((x) => x.type === "image" && x.file !== "cover.png");
+  let at = 0;
+  const bars = frames.length > 1 ? h("div", { class: "bars" }, frames.map((_, i) => h("i", { class: i === 0 ? "on" : "" }))) : null;
+  if (bars) el.addEventListener("click", () => {
+    at = (at + 1) % frames.length;
+    el.src = urlOf(p.key, frames[at].file); el.alt = p.alts.find((a) => a.file === frames[at].file)?.text || "";
+    [...bars.children].forEach((b, i) => b.classList.toggle("on", i <= at));
+  });
+  return h("div", { class: "phone-col" },
+    h("div", { class: "frame portrait phone" }, el, bars,
+      h("div", { class: "overlay" },
+        h("div", { class: "who" }, h("span", { class: "avatar" }, data.product.charAt(0).toUpperCase()), h("b", {}, data.product)),
+        h("p", {}, cut, text.length > cut.length ? h("span", { class: "more" }, " ...more") : null)),
+      video ? h("button", { class: "play", type: "button", "aria-label": "Play or pause", onclick: (e) => { const v = e.currentTarget.parentNode.querySelector("video"); v.paused ? v.play() : v.pause(); } }, "Play") : null),
+    h("div", { class: "files" }, p.media.map((x) => h("a", { href: urlOf(p.key, x.file), download: p.platform + "-" + p.id + "-" + x.file }, "Download " + x.file))));
+}
+const isPhone = (p) => p.media.length && (p.format === "vertical" || p.kind === "story") && (p.kind !== "carousel");
+const view = {
+  get() { try { return localStorage.getItem("shipreel-desk:view") || "post"; } catch { return "post"; } },
+  set(v) { try { localStorage.setItem("shipreel-desk:view", v); } catch {} render(); },
+};
+
 function render() {
   const root = $("#root");
   root.replaceChildren();
@@ -458,9 +514,14 @@ function render() {
 
   const p = data.pieces[current];
   const why = p.why ? h("p", { class: look() === "feed" ? "why feed-why" : "why" }, h("b", {}, "Why this piece: "), p.why) : null;
+  const v = view.get();
+  const toggle = h("div", { class: "views", role: "group", "aria-label": "Preview" },
+    ["post", "files"].map((k) => h("button", { type: "button", "aria-pressed": String(v === k), onclick: () => view.set(k) }, k === "post" ? "Post" : "Files")));
   const stage = look() === "feed"
     ? h("main", { class: "stage" }, h("div", { class: "feed-col" }, feedPost(p), why))
-    : h("main", { class: "stage" },
+    : v === "post"
+    ? h("main", { class: "stage post-view" }, toggle, isPhone(p) ? phonePost(p) : h("div", { class: "feed-col" }, feedPost(p)), why)
+    : h("main", { class: "stage" }, toggle,
         h("div", { class: "media" }, p.media.map((m) => h("figure", {}, framed(p, m, p.alts.find((a) => a.file === m.file)?.text),
           h("figcaption", {}, h("span", {}, m.file), h("a", { href: urlOf(p.key, m.file), download: p.platform + "-" + p.id + "-" + m.file }, "Download"))))),
         why);
