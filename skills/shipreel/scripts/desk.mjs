@@ -192,6 +192,7 @@ button { font: inherit; color: inherit; }
 
 .slab { position: relative; display: block; width: 100%; text-align: left; cursor: copy; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--solid); padding: 14px 16px 16px; overflow: hidden; transition: border-color .15s, transform .15s; }
 .slab:hover { border-color: var(--muted); }
+.slab:focus:not(:focus-visible) { outline: none; }
 .slab:active { transform: scale(.995); }
 .slab .label { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
 .slab .label b { font: 700 13px var(--head); color: var(--ink); letter-spacing: -0.01em; }
@@ -200,12 +201,15 @@ button { font: inherit; color: inherit; }
 .slab .count.over { color: #ff5a4f; font-weight: 700; }
 .slab .said { border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; }
 .slab .text { position: relative; z-index: 1; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; font-size: 15px; }
-/* The one motion that answers you: a copy sweeps the block in the campaign's colour. */
-.slab::before { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; }
-.slab.copied::before { animation: sweep .75s cubic-bezier(.2,.7,.2,1); }
-.slab.copied .label, .slab.copied .label b, .slab.copied .text { color: var(--on-accent); }
-.slab.copied .said { border-color: currentColor; }
-@keyframes sweep { 0% { transform: scaleX(0); opacity: 1; } 40% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+/* The one motion that answers you: a soft sweep in the campaign's colour, then the block stays
+   lit (accent border, faint tint, a filled "Copied" pill) while the text stays readable. */
+.slab::before { content: ""; position: absolute; inset: 0; background: var(--accent); opacity: 0; transform: scaleX(0); transform-origin: left; pointer-events: none; }
+.slab.copied { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--solid)); }
+.slab.copied::before { animation: sweep .6s cubic-bezier(.2,.7,.2,1); }
+.slab.copied .said { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
+.slab .said { transition: background .2s, color .2s, border-color .2s; }
+.slab { transition: border-color .25s, background-color .25s, transform .15s; }
+@keyframes sweep { 0% { transform: scaleX(0); opacity: .22; } 60% { transform: scaleX(1); opacity: .16; } 100% { transform: scaleX(1); opacity: 0; } }
 .group { display: flex; flex-direction: column; gap: 8px; }
 /* Copy blocks keep their full height; the column scrolls instead. */
 .copy > *, .group > *, .stage > * { flex-shrink: 0; }
@@ -381,7 +385,9 @@ async function copy(text, slab) {
     document.execCommand("copy"); ta.remove();
   }
   slab.classList.remove("copied"); void slab.offsetWidth; slab.classList.add("copied");
-  const said = slab.querySelector(".said"); if (said) { said.textContent = "Copied"; setTimeout(() => (said.textContent = "Copy"), 1400); }
+  const said = slab.querySelector(".said"); if (said) said.textContent = "Copied";
+  clearTimeout(slab._t);
+  slab._t = setTimeout(() => { slab.classList.remove("copied"); if (said) said.textContent = "Copy"; }, 1500);
 }
 
 function slab(label, text, { limit = null, count = null } = {}) {
