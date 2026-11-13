@@ -165,7 +165,7 @@ test("feedback is backed by the answer: Python support found in the README", () 
   - Writes `changes.md`, calls `writeDesk`, and runs `checkCampaign` with the current claims.
 - Produces: the CLI `campaign_update.mjs <campaign-dir> --note "<text>" [--day N | --posted k1,k2] [--plan-only] [--project <dir>]`. With `--plan-only` it prints the plan as JSON and writes nothing.
 
-- [ ] **Step 1: Write the failing tests** on a fixture campaign built by `buildCampaign` (reuse the `campaign.test.mjs` fixture), then commit a change to the fixture repo:
+- [x] **Step 1: Write the failing tests** on a fixture campaign built by `buildCampaign` (reuse the `campaign.test.mjs` fixture), then commit a change to the fixture repo:
   - "posted pieces are never in rewrite, add or followUps edits": the plan with `posted = postedThroughDay(days, 2)` never lists a posted key in `rewrite`, and after `applyUpdate` the posted pieces' files are byte-identical.
   - "a claim that no longer verifies makes the unposted pieces that use it stale": delete the quoted README line, and every unposted piece whose text has that claim is in `rewrite` with a `why` naming the claim.
   - "only unbacked points: nothing is rewritten or added, and each point is reported": `note = "Now 10x faster."` gives `rewrite = []`, `add = []` and `unbacked = ["Now 10x faster."]`.
@@ -173,10 +173,16 @@ test("feedback is backed by the answer: Python support found in the README", () 
   - "everything posted: only follow-ups and new days after the last one".
   - "a pre-0.5 campaign (no commit, no claims.json) still plans".
   - "the campaign check passes after an update" (`check.ok === true`).
-- [ ] **Step 2: Run** `node --test tests/campaign_update.test.mjs`. Expected: FAIL.
-- [ ] **Step 3: Implement** `planUpdate`, `applyUpdate`, the `update` angle and `startDay`.
-- [ ] **Step 4: Run** `npm test`. Expected: all pass, including the existing `planCalendar` tests (the default `startDay = 1` changes nothing).
-- [ ] **Step 5: Commit:** "Update: rewrite only the unposted pieces a backed change affects; posted ones never move". Update the README counts.
+- [x] **Step 2: Run** `node --test tests/campaign_update.test.mjs`. Expected: FAIL.
+- [x] **Step 3: Implement** `planUpdate`, `applyUpdate`, the `update` angle and `startDay`.
+- [x] **Step 4: Run** `npm test`. Expected: all pass, including the existing `planCalendar` tests (the default `startDay = 1` changes nothing).
+- [x] **Step 5: Commit:** "Update: rewrite only the unposted pieces a backed change affects; posted ones never move". Update the README counts.
+
+**As built (differences from the plan above):**
+- `update` is not added to `ANGLES` in `brief.mjs`: that list is shown in brief.md as angles a user can pick, and an update piece is never picked from the brief. `angles.mjs` exports `updatePiece(point, { brief, platform, n })` and `UPDATE_WHY` instead.
+- Stale also covers git-story facts that have no source: "1 day · 1 commit · 1 contributor" is stale once today's dossier no longer states it word for word. `freshBrief(brief, brokenTexts, storyNow)` redrafts from a copy of the brief with that line moved to today's figures. `brief.md` is not edited; `changes.md` lists its stale lines.
+- `checkCampaign` takes `skip` (posted keys). Posted pieces are history and are not re-checked, but their hooks still count against repeats.
+- A backed `feedback` point is not turned into a piece mechanically. It is listed in `plan.feedback` with its evidence, for the agent to answer in the brief's tone.
 
 ### Task 5: CLI command and the skill's update flow
 

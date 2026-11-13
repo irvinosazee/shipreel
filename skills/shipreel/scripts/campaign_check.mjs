@@ -112,13 +112,20 @@ export function sameAngles(metas) {
 
 const subdirs = (dir) => (existsSync(dir) ? readdirSync(dir).filter((d) => statSync(path.join(dir, d)).isDirectory()).sort() : []);
 
-/** Check every piece in a campaign directory. */
-export async function checkCampaign(dir, { claims = [], brand = null, images = true } = {}) {
+/**
+ * Check every piece in a campaign directory. `skip` lists piece keys ("x/01-pain-hook") already posted:
+ * they were checked when made and cannot change, so only their hooks still count against repeats.
+ */
+export async function checkCampaign(dir, { claims = [], brand = null, images = true, skip = [] } = {}) {
   const platforms = [];
   for (const platform of subdirs(dir).filter((d) => PLATFORM_RULES[d])) {
     const pieces = [];
     for (const piece of subdirs(path.join(dir, platform))) {
       const pdir = path.join(dir, platform, piece);
+      if (skip.includes(`${platform}/${piece}`)) {
+        pieces.push({ piece, errors: [], warnings: [], meta: JSON.parse(read(pdir, "post.json") ?? "null"), posted: true });
+        continue;
+      }
       const r = checkPiece(pdir, { claims, brand });
       if (images && existsSync(path.join(pdir, "cards.json"))) {
         const v = await verifyCards(pdir, { claims });

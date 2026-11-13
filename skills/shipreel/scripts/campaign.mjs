@@ -35,11 +35,13 @@ import { writeDesk } from "./desk.mjs";
  * Two weeks of posts: each day takes the next unposted piece from up to three platforms, rotating
  * which platform leads, so no platform goes quiet and no day carries more than three posts.
  */
-export function planCalendar(plan, { days = 14, perDay = 3 } = {}) {
+export function planCalendar(plan, { days = 14, perDay = 3, startDay = 1 } = {}) {
   const queues = Object.entries(plan).map(([platform, pieces]) => ({ platform, pieces: [...pieces] }));
   const calendar = [];
-  for (let day = 1; day <= days && queues.some((q) => q.pieces.length); day++) {
-    const order = queues.slice((day - 1) % queues.length).concat(queues.slice(0, (day - 1) % queues.length)).filter((q) => q.pieces.length);
+  // An update re-plans what is left from the day after the user's current one (startDay).
+  for (let i = 0; i < days && queues.some((q) => q.pieces.length); i++) {
+    const day = startDay + i;
+    const order = queues.slice(i % queues.length).concat(queues.slice(0, i % queues.length)).filter((q) => q.pieces.length);
     const posts = order.slice(0, perDay).map((q) => {
       const p = q.pieces.shift();
       return { platform: q.platform, piece: p.id, hook: p.hook, kind: p.kind, window: PLATFORM_RULES[q.platform].window };
@@ -68,6 +70,11 @@ export function headCommit(dir) {
   } catch {
     return null;
   }
+}
+
+/** Claims a campaign may make: the run's verified claims, plus the facts the brief's proof may cite. */
+export function campaignClaims(dossier) {
+  return [...dossier.claims.filter((c) => c.verified), ...briefFacts(dossier).map((text) => ({ text }))];
 }
 
 /** Make the whole campaign. Returns the brief check, the plan, the calendar and the campaign check. */
@@ -110,8 +117,7 @@ export async function buildCampaign(projectDir, { outDir, platforms, briefOnly =
   // The desk: every piece in the calendar's order, every text a click to copy (desk.mjs).
   writeDesk(campaignDir, { product: brief.product, accent: theme.accent, onAccent: theme.onAccent });
 
-  // Claims the campaign may make: the run's verified claims, plus the facts the brief's proof may cite.
-  const claims = [...dossier.claims.filter((c) => c.verified), ...briefFacts(dossier).map((text) => ({ text }))];
+  const claims = campaignClaims(dossier);
   // What the campaign was built from, so `update` can read only the history since and re-check these claims.
   writeFileSync(path.join(campaignDir, "claims.json"), `${JSON.stringify(claims, null, 2)}\n`);
   const saved = JSON.parse(readIf(path.join(campaignDir, "campaign.json")) || "{}");

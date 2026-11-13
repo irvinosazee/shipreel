@@ -160,6 +160,23 @@ export function planAngles(brief, { story = null, platforms = Object.keys(PLATFO
   return { plan, skipped };
 }
 
+/** Why an update piece exists. Not a brief angle: it comes from `max update`, never from the brief's list. */
+export const UPDATE_WHY = "what changed since the campaign started, from a talking point the repo backs";
+
+/**
+ * A piece for one backed talking point (campaign_update.mjs): the point is the hook, the promise follows,
+ * then the call to action. It takes the platform's lead format, the one its first piece used.
+ */
+export function updatePiece(point, { brief, platform, n }) {
+  productName = brief.product ?? "";
+  const profile = PLATFORMS[platform];
+  if (!profile) throw new Error(`Unknown platform "${platform}". Use: ${Object.keys(PLATFORMS).join(", ")}.`);
+  const [kind, format] = profile.formats[0];
+  const hook = end(strip(point) || point);
+  const promise = strip(v(brief, "promise"));
+  return { n, id: `${String(n).padStart(2, "0")}-update`, platform, angle: "update", why: UPDATE_WHY, kind, format, hook, beats: distinctBeats(hook, [promise]).map(cap1), cta: strip(v(brief, "cta")) };
+}
+
 if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
   const dir = path.resolve(args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--platforms") ?? "shipreel-output");
