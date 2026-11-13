@@ -200,11 +200,11 @@ The `references/campaign.md` section fixes the agent's order, which is the user'
 5. **Apply,** then rewrite the new and changed captions in the brief's tone (the same step 3 as `max`), then run the claims check.
 6. **Report** what changed (`changes.md`) and remind the user that nothing is posted.
 
-- [ ] **Step 1: Write the failing test:** `cli.test.mjs` "update is a command" (asserts that the help output lists `update`).
-- [ ] **Step 2: Run** `node --test tests/cli.test.mjs`. Expected: FAIL.
-- [ ] **Step 3: Implement** the CLI entry and write the docs sections as listed above.
-- [ ] **Step 4: Run** `npm test`. Expected: all pass.
-- [ ] **Step 5: Commit:** "Max update: ask where the campaign is, check what changed, then rewrite only what's left".
+- [x] **Step 1: Write the failing test:** `cli.test.mjs` "update is a command" (asserts that the help output lists `update`).
+- [x] **Step 2: Run** `node --test tests/cli.test.mjs`. Expected: FAIL.
+- [x] **Step 3: Implement** the CLI entry and write the docs sections as listed above.
+- [x] **Step 4: Run** `npm test`. Expected: all pass.
+- [x] **Step 5: Commit:** "Max update: ask where the campaign is, check what changed, then rewrite only what's left".
 
 ### Task 6: The desk knows what is posted and what changed
 

@@ -15,7 +15,7 @@ The looping video on the [launch site](https://irvinosazee.github.io/shipreel/) 
 
 ## What it does
 
-- A whole campaign: `/shipreel max` reads your project, pre-fills a marketing brief you edit, then makes 3 to 5 different pieces for each of TikTok, Instagram, YouTube Shorts, LinkedIn and X, with captions, hashtags, alt text, images, a two-week calendar and a posting desk where every caption, hashtag and alt text is one click to copy. Persuasive, never deceptive: every claim is checked.
+- A whole campaign: `/shipreel max` reads your project, pre-fills a marketing brief you edit, then makes 3 to 5 different pieces for each of TikTok, Instagram, YouTube Shorts, LinkedIn and X, with captions, hashtags, alt text, images, a two-week calendar and a posting desk where every caption, hashtag and alt text is one click to copy. Persuasive, never deceptive: every claim is checked. When the product changes mid-campaign, `/shipreel max update` asks which day you're on, checks what changed against your code and git history, and rewrites only the posts you haven't sent.
 - Checks its own work: every render is measured for loudness, phone-legible text, safe zones and contrast before you post it.
 - Every screen: one plan becomes a ready-to-upload file for 26 platforms, reflowed, not cropped.
 - Claims you can back up: every number on screen is cited to a file in your repo.
@@ -192,7 +192,7 @@ The original `/brag` was a prompt-and-assets skill: it told an agent how to make
 | | /brag (original) | shipreel |
 |---|---|---|
 | Skill scripts | 1 | 50 |
-| Tests | none | 369, on every push |
+| Tests | none | 370, on every push |
 | Reference docs | 6 | 16 |
 | Output | one landscape video | every frame size, per-platform exports, captions, covers, cutdowns, stories, carousels, launch images |
 | Verification | none | render verified (duration, frame size, audio, loudness, baked poster), on-screen text audited for legibility and reading time, contrast checked, golden-frame regression, nightly render against the latest Hyperframes; launch images and launch copy checked against each platform's limits |

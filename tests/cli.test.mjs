@@ -84,3 +84,8 @@ test("readmeHighlights skips repository layout lists and file-path bullets", asy
   assert.deepEqual(readmeHighlights(md), ["Checks: every render is measured before you post it…", "Ships: a file per platform"]);
   assert.equal(readmeHighlights(md, 4, { maxWords: 40 })[0], "Checks: every render is measured before you post it, with a very long tail of words here");
 });
+
+test("update is a command: bring a running campaign up to date", () => {
+  assert.equal(COMMANDS.update?.script, "campaign_update.mjs");
+  assert.match(cli("--help").stdout, /\n  update\b/);
+});

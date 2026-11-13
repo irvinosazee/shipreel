@@ -15,7 +15,9 @@ Before inspecting the project, parse the complete `/shipreel` invocation. If it
 starts with `max` (or the user asks for a campaign, content for every platform, or
 "aggressive marketing"), read [references/campaign.md](references/campaign.md) and follow
 it: make the video first when the project has none, then the brief, which the user
-edits and approves before anything is generated. If the
+edits and approves before anything is generated. If it starts with `max update` (or the
+user says the product changed mid-campaign, or shares feedback to work in), follow
+"Updating a running campaign" in the same file instead. If the
 invocation contains `--voice`, set `voice.enabled = true` for this run only.
 Narration is added on top of the normal workflow; it never replaces any step.
 Never enable narration without the flag or an explicit request.

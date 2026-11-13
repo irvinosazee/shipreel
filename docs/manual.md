@@ -234,6 +234,15 @@ or, without an agent, `shipreel max ~/code/my-app`. You get a campaign, not one 
    remembers. Double-click the page, or run `shipreel desk` to open it; drop any campaign folder onto
    it to open that one. It runs in your browser and uploads nothing.
 
+When the product changes mid-campaign, run `/shipreel max update` and say what changed ("0.4.2 fixed
+the slide headlines"). It asks which day of the calendar you are on, rescans your code and the git
+history since the campaign was made, and checks each thing you said against a commit, a claim or your
+docs. Anything it cannot back up stays out. It shows you a plan first, then rewrites only the pieces
+you have not posted, adds a piece for each real change, and plans the rest from tomorrow. Posted pieces
+never change. Paste what people said into `campaign/feedback.md` and it works in what your repo can
+answer. Without an agent: `shipreel update <campaign-dir> --note "..." --day 3 --plan-only`, then
+again without `--plan-only`.
+
 Every piece is checked: platform limits, hashtag counts, alt text, every number cited to your repo,
 and nothing deceptive (no invented numbers, testimonials, deadlines or scarcity). `shipreel
 campaign-check` runs that check on its own. It is persuasive, never fake; nothing is posted for you.
