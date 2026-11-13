@@ -50,7 +50,7 @@
 - Produces: `postedThroughDay(days: {day:number|null, posts:string[]}[], day: number) -> string[]`. Returns every key on days `<= day`.
 - Produces: `remaining(days, postedKeys: string[]) -> {day, posts}[]`. The days with posted keys removed, and empty days dropped.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test("a day number marks that day and every earlier day posted", () => {
@@ -68,10 +68,10 @@ test("the ledger round-trips sorted and unique; a missing or broken file is empt
 });
 ```
 
-- [ ] **Step 2: Run** `node --test tests/ledger.test.mjs`. Expected: FAIL, because the module is not found.
-- [ ] **Step 3: Implement** the four functions in `ledger.mjs`, following the signatures above.
-- [ ] **Step 4: Run** `node --test tests/ledger.test.mjs`. Expected: PASS.
-- [ ] **Step 5: Commit:** `git add skills/shipreel/scripts/ledger.mjs tests/ledger.test.mjs README.md && git commit -m "Ledger: posted.json records which campaign pieces have gone out"`. Bump the README script count by 1 and the test count by 2.
+- [x] **Step 2: Run** `node --test tests/ledger.test.mjs`. Expected: FAIL, because the module is not found.
+- [x] **Step 3: Implement** the four functions in `ledger.mjs`, following the signatures above.
+- [x] **Step 4: Run** `node --test tests/ledger.test.mjs`. Expected: PASS.
+- [x] **Step 5: Commit:** `git add skills/shipreel/scripts/ledger.mjs tests/ledger.test.mjs README.md && git commit -m "Ledger: posted.json records which campaign pieces have gone out"`. Bump the README script count by 1 and the test count by 2.
 
 ### Task 2: A campaign remembers what it was built from
 
