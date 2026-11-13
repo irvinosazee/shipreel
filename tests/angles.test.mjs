@@ -84,3 +84,10 @@ test("a how-to beat keeps the install command lowercase", () => {
   const p = Object.values(planAngles(full, { story }).plan).flat().find((x) => x.angle === "how-to");
   assert.equal(p.beats[1], "npx tidy");
 });
+
+test("a one-commit build story says one commit, never \"1 commits\"", () => {
+  const piece = Object.values(planAngles(full, { story: { commits: 1, days: 1, contributors: 1 } }).plan).flat().find((p) => p.angle === "build-story");
+  assert.ok(piece);
+  assert.ok(piece.beats.includes("One commit."), piece.beats.join(" | "));
+  assert.ok(!piece.beats.some((b) => /\b1 commits\b/.test(b)));
+});

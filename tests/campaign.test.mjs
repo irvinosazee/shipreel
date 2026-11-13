@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -32,6 +33,10 @@ test("buildCampaign: brief first, stop there with --brief-only; then every piece
     assert.ok(existsSync(path.join(dir, "shipreel-output", "brief.md")));
     assert.ok(!existsSync(path.join(dir, "shipreel-output", "campaign")));
 
+    // A campaign remembers the commit it was built from, so an update reads only the history since.
+    const git = (...a) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", ...a], { cwd: dir });
+    git("init", "-q"); git("add", "-A"); git("commit", "-qm", "init");
+    const head = git("rev-parse", "HEAD").toString().trim();
     const r = await buildCampaign(dir, { images: false, platforms: ["tiktok", "x"] });
     assert.deepEqual(Object.keys(r.plan), ["tiktok", "x"]);
     for (const pieces of Object.values(r.plan)) assert.ok(pieces.length >= 3, `${pieces.length}`);
@@ -40,6 +45,10 @@ test("buildCampaign: brief first, stop there with --brief-only; then every piece
     assert.ok(existsSync(path.join(camp, "tiktok", r.plan.tiktok[0].id, "caption.txt")));
     assert.equal(r.check.ok, true, JSON.stringify(r.check.platforms.map((p) => p.pieces.map((x) => x.errors)), null, 1));
     assert.match(readFileSync(path.join(camp, "tiktok", r.plan.tiktok[0].id, "caption.txt"), "utf8"), /npx tidy/);
+    const saved = JSON.parse(readFileSync(path.join(camp, "campaign.json"), "utf8"));
+    assert.equal(saved.commit, head);
+    assert.ok(!Number.isNaN(Date.parse(saved.builtAt)));
+    assert.ok(Array.isArray(JSON.parse(readFileSync(path.join(camp, "claims.json"), "utf8"))));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

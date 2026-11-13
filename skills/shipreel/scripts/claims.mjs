@@ -64,6 +64,13 @@ export function verifyClaims(claims, { projectDir }) {
   return { verified, problems };
 }
 
+/** The claims a piece's text repeats: the ones an update must re-check before the piece can stay. */
+export function claimsUsed(text, claims) {
+  const haystack = normalizeText(text ?? "");
+  if (!haystack) return [];
+  return claims.filter((c) => c?.text && haystack.includes(normalizeText(c.text)));
+}
+
 const NOT_SUPERLATIVE = /^(latest|test|rest|request|interest|contest|forest|guest|honest|modest|chest|west|nest|quest|digest|manifest|protest|harvest|arrest|suggest|invest|crest|pest|vest|zest|jest|unrest)$/i;
 
 /** Numbers-with-a-noun, multipliers, and superlatives on screen that no claim's text covers. */

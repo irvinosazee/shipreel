@@ -18,7 +18,8 @@
  * errors (unverified proof, deception, no call to action) stops the run. Nothing is posted anywhere.
  */
 
-import { mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -56,6 +57,17 @@ export function calendarMarkdown(calendar, { product }) {
     lines.push("");
   }
   return `${lines.join("\n").trim()}\n`;
+}
+
+const readIf = (file) => (existsSync(file) ? readFileSync(file, "utf8") : null);
+
+/** The commit HEAD points at, or null outside git (or before the first commit). */
+export function headCommit(dir) {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: dir, stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 /** Make the whole campaign. Returns the brief check, the plan, the calendar and the campaign check. */
@@ -100,6 +112,10 @@ export async function buildCampaign(projectDir, { outDir, platforms, briefOnly =
 
   // Claims the campaign may make: the run's verified claims, plus the facts the brief's proof may cite.
   const claims = [...dossier.claims.filter((c) => c.verified), ...briefFacts(dossier).map((text) => ({ text }))];
+  // What the campaign was built from, so `update` can read only the history since and re-check these claims.
+  writeFileSync(path.join(campaignDir, "claims.json"), `${JSON.stringify(claims, null, 2)}\n`);
+  const saved = JSON.parse(readIf(path.join(campaignDir, "campaign.json")) || "{}");
+  writeFileSync(path.join(campaignDir, "campaign.json"), `${JSON.stringify({ ...saved, commit: headCommit(dir), builtAt: new Date().toISOString() }, null, 2)}\n`);
   const check = await checkCampaign(campaignDir, { claims, brand: dossier.brand, images });
   writeFileSync(path.join(campaignDir, "check.json"), `${JSON.stringify(check, null, 2)}\n`);
   return { brief, briefCheck, plan, skipped, calendar, check, dir: campaignDir };

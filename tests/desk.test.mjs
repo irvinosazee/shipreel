@@ -69,3 +69,16 @@ test("the night desk previews each piece as a post, with the files a switch away
   assert.match(html, /function phonePost\(p\)/, "vertical video and stories in a phone, caption over the bottom");
   assert.match(html, /k === "post" \? "Post" : "Files"/);
 });
+
+test("writeDesk keeps keys it does not own in campaign.json", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "desk-keep-"));
+  try {
+    writeFileSync(path.join(dir, "campaign.json"), JSON.stringify({ commit: "abc", builtAt: "2026-11-13T00:00:00.000Z" }));
+    writeDesk(dir, { product: "tidy", accent: "#112233" });
+    const saved = JSON.parse(readFileSync(path.join(dir, "campaign.json"), "utf8"));
+    assert.equal(saved.commit, "abc");
+    assert.equal(saved.accent, "#112233");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

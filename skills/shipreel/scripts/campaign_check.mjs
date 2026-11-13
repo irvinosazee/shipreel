@@ -37,6 +37,16 @@ const issue = (code, message) => ({ code, message });
 const read = (dir, f) => (existsSync(path.join(dir, f)) ? readFileSync(path.join(dir, f), "utf8") : null);
 
 /** Every check on one piece that needs no browser. Pure apart from reading `dir`. */
+/** Everything a piece says in words: caption, thread, alt text and the text on its cards. */
+export function pieceText(dir) {
+  const strings = (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(strings) : v && typeof v === "object" ? Object.values(v).flatMap(strings) : []);
+  let cards = [];
+  try {
+    cards = strings(JSON.parse(read(dir, "cards.json") ?? "null"));
+  } catch {}
+  return [read(dir, "caption.txt"), read(dir, "thread.txt"), read(dir, "alt.txt"), ...cards].filter(Boolean).join("\n");
+}
+
 export function checkPiece(dir, { claims = [], brand = null } = {}) {
   const errors = [], warnings = [];
   const meta = JSON.parse(read(dir, "post.json") ?? "null");

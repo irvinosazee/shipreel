@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { normalizeText, sourceText, findUncitedClaims, verifyClaims } from "../skills/shipreel/scripts/claims.mjs";
+import { claimsUsed, normalizeText, sourceText, findUncitedClaims, verifyClaims } from "../skills/shipreel/scripts/claims.mjs";
 
 function project() {
   const dir = mkdtempSync(path.join(tmpdir(), "shipreel-claims-"));
@@ -71,4 +71,9 @@ test("findUncitedClaims ignores clause-ending numbers and -est words that are no
 test("a zero-padded slide or step number is not a claim", () => {
   assert.deepEqual(findUncitedClaims("01 Who does X love? 02 / 04 slides", []), []);
   assert.deepEqual(findUncitedClaims("1 Who does X love", []), ["1 Who"]);
+});
+
+test("claimsUsed finds the claims a piece repeats", () => {
+  assert.deepEqual(claimsUsed("Free. 344 tests, on every push.", [{ text: "344 tests" }, { text: "MIT" }]), [{ text: "344 tests" }]);
+  assert.deepEqual(claimsUsed("", [{ text: "MIT" }]), []);
 });

@@ -87,14 +87,14 @@ test("the ledger round-trips sorted and unique; a missing or broken file is empt
 - Produces: `claimsUsed(text: string, claims: {text:string}[]) -> {text:string}[]` in `claims.mjs`. Returns the claims whose `normalizeText(text)` appears in `normalizeText(pieceText)`.
 - Produces: `pieceText(pieceDir: string) -> string` in `campaign_check.mjs` (export the existing caption + thread + cards text join, or add it there). Task 3 uses it.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
   - `campaign.test.mjs` "a built campaign records its commit, build time and the claims it was checked against": after the existing fixture run, `campaign.json.commit` matches `/^[0-9a-f]{40}$/`, `builtAt` parses as a date, and `claims.json` is a non-empty array.
   - `desk.test.mjs` "writeDesk keeps keys it does not own in campaign.json": pre-write `{ "commit": "abc" }`, call `writeDesk`, and `commit` is still `"abc"`.
   - `claims.test.mjs` "claimsUsed finds the claims a piece repeats": `claimsUsed("Free. 344 tests, on every push.", [{text:"344 tests"},{text:"MIT"}])` deep-equals `[{text:"344 tests"}]`.
-- [ ] **Step 2: Run** `node --test tests/campaign.test.mjs tests/desk.test.mjs tests/claims.test.mjs`. Expected: the three new tests FAIL.
-- [ ] **Step 3: Implement.** The commit comes from `git rev-parse HEAD` in `projectDir`, or `null` outside git.
-- [ ] **Step 4: Run** the same command. Expected: PASS.
-- [ ] **Step 5: Commit:** "Campaign: records the commit and claims it was built from".
+- [x] **Step 2: Run** `node --test tests/campaign.test.mjs tests/desk.test.mjs tests/claims.test.mjs`. Expected: the three new tests FAIL.
+- [x] **Step 3: Implement.** The commit comes from `git rev-parse HEAD` in `projectDir`, or `null` outside git.
+- [x] **Step 4: Run** the same command. Expected: PASS.
+- [x] **Step 5: Commit:** "Campaign: records the commit and claims it was built from".
 
 ### Task 3: Talking points checked against the repo
 

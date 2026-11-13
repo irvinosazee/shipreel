@@ -690,7 +690,9 @@ export function writeDesk(dir, { product = null, accent = null, onAccent = null 
   const data = readCampaign(dir, { product, accent });
   if (onAccent) data.onAccent = onAccent;
   else if (!data.onAccent) data.onAccent = JSON.parse(read(path.join(dir, "campaign.json")) || "{}").onAccent ?? null;
-  writeFileSync(path.join(dir, "campaign.json"), `${JSON.stringify({ product: data.product, accent: data.accent, onAccent: data.onAccent }, null, 2)}\n`);
+  // campaign.json also holds what the campaign was built from (commit, builtAt); keep what the desk does not own.
+  const saved = JSON.parse(read(path.join(dir, "campaign.json")) || "{}");
+  writeFileSync(path.join(dir, "campaign.json"), `${JSON.stringify({ ...saved, product: data.product, accent: data.accent, onAccent: data.onAccent }, null, 2)}\n`);
   writeFileSync(path.join(dir, "index.html"), deskHtml(data));
   return path.join(dir, "index.html");
 }

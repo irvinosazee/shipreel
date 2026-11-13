@@ -87,7 +87,7 @@ function draft(id, brief, { story } = {}) {
     }
     case "build-story":
       // A build story is a hook only when it was fast; "built in 147 days" is true but nobody stops for it.
-      return story?.commits && story.days <= 30 && { hook: `I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, beats: [`I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, `${story.commits} commits.`, story.contributors === 1 ? "One developer." : promise] };
+      return story?.commits && story.days <= 30 && { hook: `I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, beats: [`I built ${product} in ${story.days === 1 ? "a day" : `${story.days} days`}.`, story.commits === 1 ? "One commit." : `${story.commits} commits.`, story.contributors === 1 ? "One developer." : promise] };
     case "how-to":
       // Only with a real install command: "1. open the website" is not a how-to.
       return install && { hook: `${product} in one line.`, beats: [`${product} in one line.`, install, promise] };
