@@ -3,7 +3,7 @@
  * `shipreel max update`: bring a running campaign up to date without touching what has gone out.
  *
  *   node <skill-root>/scripts/campaign_update.mjs <campaign-dir> --note "<what changed>"
- *        [--project <dir>] [--feedback <file>] [--day N | --posted key1,key2] [--plan-only] [--no-images]
+ *        [--project <dir>] [--out <output-dir>] [--feedback <file>] [--day N | --posted key1,key2] [--plan-only] [--no-images]
  *
  *   1. position   where the user is: --day N (that day and every earlier day posted) or --posted keys,
  *                 written to posted.json; without either, posted.json as the desk saved it (ledger.mjs)
@@ -26,12 +26,12 @@ import { initBrief } from "./brief.mjs";
 import { cardTheme } from "./cards.mjs";
 import { calendarMarkdown, campaignClaims, planCalendar } from "./campaign.mjs";
 import { checkCampaign, pieceText } from "./campaign_check.mjs";
-import { claimsUsed, verifyClaims } from "./claims.mjs";
+import { claimsUsed, normalizeText, sourceText, verifyClaims } from "./claims.mjs";
 import { PLATFORM_RULES, renderPieceCards, writePiece } from "./content.mjs";
 import { parseCalendar, writeDesk } from "./desk.mjs";
 import { buildDossier } from "./dossier.mjs";
 import { postedThroughDay, readPosted, writePosted } from "./ledger.mjs";
-import { parsePoints, topicWords, validatePoints } from "./talking_points.mjs";
+import { parsePoints, sameTopic, topicWords, validatePoints } from "./talking_points.mjs";
 
 const MAX_ADDED = 5;
 const readJson = (file, fallback) => {
@@ -42,8 +42,15 @@ const readJson = (file, fallback) => {
   }
 };
 
-/** Where brief.md lives: the folder above a `campaign` folder, or the campaign folder itself (a copied campaign). */
-const outDirFor = (campaignDir) => (path.basename(campaignDir) === "campaign" ? path.dirname(campaignDir) : campaignDir);
+/**
+ * Where brief.md and claims.json live: the folder above a `campaign` folder; for a campaign copied elsewhere,
+ * the project's own shipreel-output when it has one, else the campaign folder itself.
+ */
+export function outDirFor(campaignDir, projectDir) {
+  if (path.basename(campaignDir) === "campaign") return path.dirname(campaignDir);
+  const own = path.join(path.resolve(projectDir), "shipreel-output");
+  return existsSync(path.join(own, "brief.md")) || existsSync(path.join(own, "claims.json")) ? own : campaignDir;
+}
 
 function pieceKeys(campaignDir) {
   const keys = [];
@@ -53,13 +60,12 @@ function pieceKeys(campaignDir) {
   return keys;
 }
 
-const shared = (a, b) => a.filter((w) => b.includes(w));
 
 /**
  * What an update would do, without changing anything. `posted` defaults to posted.json; `currentDay`
  * defaults to the last calendar day with a posted piece.
  */
-export function planUpdate(campaignDir, { projectDir, note = "", feedback = null, posted = null, currentDay = null }) {
+export function planUpdate(campaignDir, { projectDir, outDir = null, note = "", feedback = null, posted = null, currentDay = null }) {
   const dir = path.resolve(campaignDir);
   const days = parseCalendar(existsSync(path.join(dir, "calendar.md")) ? readFileSync(path.join(dir, "calendar.md"), "utf8") : "").days;
   if (currentDay != null && posted == null) posted = postedThroughDay(days, currentDay);
@@ -67,7 +73,7 @@ export function planUpdate(campaignDir, { projectDir, note = "", feedback = null
   if (currentDay == null) currentDay = Math.max(0, ...days.filter((d) => d.day != null && d.posts.some((k) => posted.includes(k))).map((d) => d.day));
 
   const saved = readJson(path.join(dir, "campaign.json"), {});
-  const dossier = buildDossier(path.resolve(projectDir), { outDir: outDirFor(dir) });
+  const dossier = buildDossier(path.resolve(projectDir), { outDir: outDir ?? outDirFor(dir, projectDir) });
   const current = campaignClaims(dossier);
   // The claims the campaign was checked against; a campaign from before 0.5 has none saved, so use today's.
   const snapshot = readJson(path.join(dir, "claims.json"), null) ?? dossier.claims;
@@ -78,15 +84,27 @@ export function planUpdate(campaignDir, { projectDir, note = "", feedback = null
     since: saved.commit ?? null,
     sinceDate: saved.commit ? null : (saved.builtAt ?? null),
     claims: current,
+    product: saved.product ?? dossier.project?.name ?? null,
   });
   const backed = points.filter((p) => p.backed);
 
+  const own = new Set(topicWords(saved.product ?? dossier.project?.name ?? ""));
+  const words = (t) => topicWords(t).filter((w) => !own.has(w));
   const all = pieceKeys(dir);
-  const rewrite = [], followUps = [];
+  const rewrite = [], followUps = [], staleQuotes = [];
+  // A sourced claim holds while its quote is in its file; if the quote moved but the claim's own words are
+  // still there, the claim holds and only claims.json needs a new quote (reported, nothing rewritten).
+  const holds = (c) => {
+    if (verifyClaims([c], { projectDir: path.resolve(projectDir) }).verified === 1) return true;
+    const file = path.resolve(projectDir, c.source);
+    const still = existsSync(file) && sourceText(file).includes(normalizeText(c.text));
+    if (still && !staleQuotes.some((q) => q.text === c.text)) staleQuotes.push({ text: c.text, source: c.source, quote: c.quote });
+    return still;
+  };
   for (const key of all) {
     const text = pieceText(path.join(dir, key));
-    const words = topicWords(text);
-    const about = backed.filter((p) => shared(topicWords(p.text), words).length >= 2);
+    const said = words(text);
+    const about = backed.filter((p) => sameTopic(words(p.text), said) > 0);
     if (posted.includes(key)) {
       for (const p of about.filter((p) => p.kind === "change")) followUps.push({ key, point: p.text });
       continue;
@@ -94,22 +112,28 @@ export function planUpdate(campaignDir, { projectDir, note = "", feedback = null
     // A sourced claim is re-checked against its file; a fact with no source (the git story, "1 day · 13 commits")
     // still holds only if today's dossier states it word for word.
     const now = new Set(current.map((c) => c.text));
-    const broken = claimsUsed(text, snapshot).filter((c) => (c.source && c.quote ? verifyClaims([c], { projectDir: path.resolve(projectDir) }).verified === 0 : !now.has(c.text)));
+    const broken = claimsUsed(text, snapshot).filter((c) => (c.source && c.quote ? !holds(c) : !now.has(c.text)));
     const why = [...broken.map((c) => `"${c.text}" no longer verifies`), ...about.map((p) => `about "${p.text}"`)];
     if (why.length) rewrite.push({ key, why: why.join("; "), broken: broken.map((c) => c.text) });
   }
 
-  const platforms = [...new Set(all.map((k) => k.split("/")[0]))];
+  // New pieces: shared across the changes, X and LinkedIn first (news reads best as text), at most MAX_ADDED.
+  const order = ["x", "linkedin", "tiktok", "instagram", "youtube-shorts"];
+  const platforms = [...new Set(all.map((k) => k.split("/")[0]))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  const changes = backed.filter((p) => p.kind === "change");
+  const perPoint = changes.length ? Math.max(1, Math.floor(MAX_ADDED / changes.length)) : 0;
   const add = [];
-  for (const p of backed.filter((p) => p.kind === "change")) for (const platform of platforms) if (add.length < MAX_ADDED) add.push({ platform, angle: "update", point: p.text });
+  for (const p of changes) for (const platform of platforms.slice(0, perPoint)) if (add.length < MAX_ADDED) add.push({ platform, angle: "update", point: p.text });
 
   return {
+    outDir: outDir ?? outDirFor(dir, projectDir),
     position: { currentDay, posted },
     points,
     keep: all.filter((k) => !rewrite.some((r) => r.key === k)),
     rewrite,
     add,
     followUps,
+    staleQuotes,
     feedback: backed.filter((p) => p.kind === "feedback"),
     unbacked: points.filter((p) => !p.backed).map((p) => p.text),
   };
@@ -141,6 +165,7 @@ function changesMarkdown(plan, { at, changed, stale = [] }) {
   for (const k of changed.filter((k) => k.endsWith("-update"))) lines.push(`- Added: \`${k}\``);
   if (!changed.length) lines.push("- Nothing.");
   if (plan.followUps.length) lines.push("", "## Already posted, now followed up", "", ...plan.followUps.map((f) => `- \`${f.key}\`: ${f.point}`));
+  if (plan.staleQuotes?.length) lines.push("", "## claims.json quotes to update", "", "These claims still hold (their words are in the file), but the quote they cite has changed. Nothing was rewritten for them; give each a current quote.", "", ...plan.staleQuotes.map((q) => `- "${q.text}": "${q.quote}" is no longer in ${q.source}`));
   if (stale.length) lines.push("", "## brief.md is out of date", "", "These lines in brief.md no longer hold. The update wrote around them; edit brief.md so the next run does too.", "", ...stale.map((t) => `- ${t}`));
   if (plan.feedback.length) lines.push("", "## Feedback the repo answers", "", ...plan.feedback.map((p) => `- ${p.text} (${p.evidence[0].kind} ${p.evidence[0].ref}: "${p.evidence[0].line}")`));
   return `${lines.join("\n")}\n`;
@@ -152,7 +177,7 @@ export async function applyUpdate(campaignDir, plan, { projectDir, images = true
   const project = path.resolve(projectDir);
   const posted = new Set(plan.position.posted);
   const at = new Date().toISOString();
-  const outDir = outDirFor(dir);
+  const outDir = plan.outDir ?? outDirFor(dir, project);
   const dossier = buildDossier(project, { outDir });
   const { brief: userBrief } = initBrief(project, { outDir });
   const { brief, stale } = freshBrief(userBrief, plan.rewrite.flatMap((r) => r.broken ?? []), dossier.story?.line ?? null);
@@ -216,7 +241,7 @@ export async function applyUpdate(campaignDir, plan, { projectDir, images = true
 
 if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const args = process.argv.slice(2);
-  const valued = ["--note", "--project", "--feedback", "--day", "--posted"];
+  const valued = ["--note", "--project", "--out", "--feedback", "--day", "--posted"];
   const flag = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
   const campaignDir = path.resolve(args.find((a, i) => !a.startsWith("--") && !valued.includes(args[i - 1])) ?? "shipreel-output/campaign");
   const projectDir = path.resolve(flag("--project") ?? ".");
@@ -228,6 +253,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToP
   if (posted && !args.includes("--plan-only")) writePosted(campaignDir, posted);
   const plan = planUpdate(campaignDir, {
     projectDir,
+    outDir: flag("--out") ? path.resolve(flag("--out")) : null,
     note: flag("--note") ?? "",
     feedback: feedbackFile ? readFileSync(feedbackFile, "utf8") : null,
     posted,

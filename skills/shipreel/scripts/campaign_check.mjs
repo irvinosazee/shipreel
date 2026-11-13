@@ -103,7 +103,8 @@ export function sameAngles(metas) {
   for (let i = 0; i < metas.length; i++) {
     for (let j = i + 1; j < metas.length; j++) {
       const [a, b] = [metas[i], metas[j]];
-      if (a.angle === b.angle) problems.push(issue("same-angle", `${a.piece} and ${b.piece} are both "${a.angle}".`));
+      // Two updates share the angle by design (each is different news); only their hooks can repeat.
+      if (a.angle === b.angle && a.angle !== "update") problems.push(issue("same-angle", `${a.piece} and ${b.piece} are both "${a.angle}".`));
       else if (hookOverlap(a.hook, b.hook) > 0.6) problems.push(issue("same-angle", `${a.piece} and ${b.piece} open with nearly the same hook.`));
     }
   }

@@ -139,3 +139,32 @@ test("freshBrief moves a git-story fact to today's line and drops other broken c
   assert.equal(brief.proof.value[0], "1 day · 1 commit · 1 contributor");
   assert.deepEqual(freshBrief(brief, [], null), { brief, stale: [] });
 });
+
+test("a campaign copied out of the project reads brief and claims from the project's shipreel-output", async () => {
+  const f = await fixture();
+  const { outDirFor } = await import("../skills/shipreel/scripts/campaign_update.mjs");
+  try {
+    assert.equal(outDirFor(f.camp, f.dir), path.join(f.dir, "shipreel-output"));
+    assert.equal(outDirFor(path.join(tmpdir(), "somewhere"), f.dir), path.join(f.dir, "shipreel-output"));
+    const bare = mkdtempSync(path.join(tmpdir(), "bare-"));
+    assert.equal(outDirFor(path.join(bare, "copy"), bare), path.join(bare, "copy"));
+    rmSync(bare, { recursive: true, force: true });
+  } finally {
+    f.done();
+  }
+});
+
+test("a claim whose quote moved but whose words are still in the file holds: no rewrite, the quote is reported", async () => {
+  const f = await fixture();
+  try {
+    const key = f.days()[2].posts[0];
+    const hook = JSON.parse(readFileSync(path.join(f.camp, key, "post.json"), "utf8")).hook.replace(/[.?!]$/, "");
+    writeFileSync(path.join(f.camp, "claims.json"), JSON.stringify([{ text: hook, source: "README.md", quote: "a sentence that was edited away" }]));
+    writeFileSync(path.join(f.dir, "README.md"), `# tidy\n\n${hook}.\n`);
+    const plan = planUpdate(f.camp, { projectDir: f.dir, note: "", currentDay: 2 });
+    assert.ok(!plan.rewrite.some((r) => r.key === key), JSON.stringify(plan.rewrite));
+    assert.deepEqual(plan.staleQuotes.map((q) => q.text), [hook]);
+  } finally {
+    f.done();
+  }
+});

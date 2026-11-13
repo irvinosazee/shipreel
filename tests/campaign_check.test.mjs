@@ -86,3 +86,9 @@ test("checkCampaign walks every platform and piece", async () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("two update pieces on a platform are fine unless their hooks repeat", () => {
+  const u = { piece: "06-update", angle: "update", hook: "Slide headlines are never cut now." };
+  assert.deepEqual(sameAngles([u, { piece: "07-update", angle: "update", hook: "Every page carries the favicon." }]), []);
+  assert.equal(sameAngles([u, { piece: "07-update", angle: "update", hook: "Slide headlines are never cut now!" }]).length, 1);
+});

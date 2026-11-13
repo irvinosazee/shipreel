@@ -55,11 +55,17 @@ export function parsePoints(note = "", feedbackMd = "") {
 }
 
 const overlap = (a, b) => a.filter((w) => b.includes(w));
-// Two shared topic words (or all of them, for a one-word point), or the same version.
-const matches = (words, other) => {
+
+/**
+ * How strongly two texts' topic words agree: 0 when they are not about the same thing, else the number of
+ * words they share. The same version string is enough; otherwise they must share two words, or 40% of a
+ * long point's words, so "line" and "instead" alone never tie a headline fix to an unrelated commit.
+ */
+export function sameTopic(words, other) {
   const shared = overlap(words, other);
-  return shared.some(isVersion) || shared.length >= Math.min(2, words.length);
-};
+  if (shared.some(isVersion)) return shared.length + 1;
+  return shared.length >= Math.min(words.length, Math.max(2, Math.ceil(words.length * 0.4))) ? shared.length : 0;
+}
 
 function docLines(projectDir) {
   const files = ["README.md"];
@@ -83,18 +89,23 @@ function commitsSince(projectDir, since, sinceDate) {
  * Each point with whether the repo backs it and the evidence: commits first, then claims, then files.
  * `since` is the commit the campaign was built from; `sinceDate` limits history for campaigns built before commits were recorded.
  */
-export function validatePoints(points, { projectDir, since = null, sinceDate = null, claims = [] }) {
+export function validatePoints(points, { projectDir, since = null, sinceDate = null, claims = [], product = null }) {
+  // The product's own name is in nearly every line; it says nothing about which line a point is about.
+  const own = new Set(topicWords(product ?? ""));
+  const words = (t) => topicWords(t).filter((w) => !own.has(w));
   const commits = commitsSince(projectDir, since, sinceDate);
   const live = claims.filter((c) => c?.text && verifyClaims([c], { projectDir }).verified === 1);
   const lines = docLines(projectDir);
   return points.map((point) => {
-    const words = topicWords(point.text);
-    const evidence = [];
-    if (words.length) {
-      for (const c of commits) if (matches(words, topicWords(c.subject))) evidence.push({ kind: "commit", ref: c.hash.slice(0, 7), line: c.subject });
-      for (const c of live) if (matches(words, topicWords(c.text))) evidence.push({ kind: "claim", ref: c.source ?? "claims.json", line: c.text });
-      for (const l of lines) if (matches(words, topicWords(l.line))) evidence.push({ kind: "file", ref: l.ref, line: l.line });
+    const mine = words(point.text);
+    const found = [];
+    if (mine.length) {
+      for (const c of commits) found.push({ kind: "commit", ref: c.hash.slice(0, 7), line: c.subject, score: sameTopic(mine, words(c.subject)) });
+      for (const c of live) found.push({ kind: "claim", ref: c.source ?? "claims.json", line: c.text, score: sameTopic(mine, words(c.text)) });
+      for (const l of lines) found.push({ kind: "file", ref: l.ref, line: l.line, score: sameTopic(mine, words(l.line)) });
     }
+    // Strongest first; at equal strength commits, then claims, then files (the order they were found in).
+    const evidence = found.filter((e) => e.score > 0).sort((a, b) => b.score - a.score).map(({ score, ...e }) => e);
     return { ...point, backed: evidence.length > 0, evidence };
   });
 }
