@@ -17,6 +17,7 @@ import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFil
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { faviconTag, MARK } from "./favicon.mjs";
+import { readPosted } from "./ledger.mjs";
 
 const LABELS = { tiktok: "TikTok", instagram: "Instagram", "youtube-shorts": "YouTube Shorts", linkedin: "LinkedIn", x: "X" };
 const read = (file) => (existsSync(file) ? readFileSync(file, "utf8").trim() : "");
@@ -84,6 +85,7 @@ export function readPiece(dir, platform, id) {
     media,
     files: files.filter((f) => !["post.json", "cards.json", "content.json"].includes(f)),
     format: meta.format ?? null,
+    changed: meta.changed ?? null,
     // A still for the queue: the video's poster, else the first image.
     thumb: files.includes("video-poster.jpg") ? "video-poster.jpg" : (media.find((m) => m.type === "image")?.file ?? null),
   };
@@ -103,7 +105,7 @@ export function readCampaign(dir, { product = null, accent = null } = {}) {
   const days = cal.days.map((d) => ({ ...d, posts: d.posts.filter((k) => pieces[k]) })).filter((d) => d.posts.length);
   const rest = Object.keys(pieces).filter((k) => !listed.has(k));
   if (rest.length) days.push({ day: null, posts: rest });
-  return { product: product ?? cal.product ?? saved.product ?? path.basename(path.resolve(dir, "..", "..")), accent: accent ?? saved.accent ?? null, days, pieces };
+  return { product: product ?? cal.product ?? saved.product ?? path.basename(path.resolve(dir, "..", "..")), accent: accent ?? saved.accent ?? null, days, pieces, posted: readPosted(dir).keys };
 }
 
 const escapeHtml = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -170,6 +172,10 @@ button { font: inherit; color: inherit; }
 .filters { display: flex; flex-wrap: wrap; gap: 6px; }
 .filters button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; color: var(--muted); }
 .filters button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.badge { font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 7px; border-radius: 999px; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.chip.changed { border-color: var(--accent); color: var(--ink); }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 20; max-width: calc(100vw - 32px); padding: 10px 16px; border-radius: 999px; background: var(--ink); color: var(--page); font-size: 14px; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+.toast:empty { display: none; }
 .day { font: 700 12px var(--head); letter-spacing: 0.02em; color: var(--muted); }
 .item { display: grid; grid-template-columns: 44px 1fr 16px; gap: 12px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; padding: 8px 10px; border-radius: 12px; cursor: pointer; }
 .item:hover { background: var(--sunk); }
@@ -347,6 +353,7 @@ body.dragging .app { outline: 2px solid var(--accent); outline-offset: -8px; bor
 <body>
 <canvas id="field" aria-hidden="true"></canvas>
 <div id="root"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <input type="file" id="pick" webkitdirectory multiple class="sr" aria-hidden="true" tabindex="-1">
 <script id="campaign" type="application/json">${json}</script>
 <script>
@@ -373,8 +380,13 @@ let filter = "all";
 // The browser remembers what is posted; private windows may refuse, and the page still works.
 const store = {
   key: (k) => "shipreel-desk:" + data.product + ":" + k,
-  get(k) { try { return localStorage.getItem(this.key(k)) === "1"; } catch { return false; } },
-  set(k, v) { try { v ? localStorage.setItem(this.key(k), "1") : localStorage.removeItem(this.key(k)); } catch {} },
+  // posted.json (Save progress, or max update) says what has gone out; a tick in this browser overrides it either way.
+  get(k) {
+    let v = null;
+    try { v = localStorage.getItem(this.key(k)); } catch {}
+    return v === "1" || (v !== "0" && (data.posted || []).includes(k));
+  },
+  set(k, v) { try { localStorage.setItem(this.key(k), v ? "1" : "0"); } catch {} },
 };
 
 // X counts a link as 23 and an emoji as 2.
@@ -403,7 +415,30 @@ function slab(label, text, { limit = null, count = null } = {}) {
   return el;
 }
 
-const keys = () => data.days.flatMap((d) => d.posts).filter((k) => filter === "all" || data.pieces[k].platform === filter);
+const shown = (k) => filter === "all" || (filter === "changed" ? !!data.pieces[k].changed : data.pieces[k].platform === filter);
+const keys = () => data.days.flatMap((d) => d.posts).filter(shown);
+
+// Save progress: posted.json into the campaign folder, so an update knows what has gone out.
+function toast(text) {
+  const t = $("#toast"); t.textContent = text;
+  clearTimeout(t._t); t._t = setTimeout(() => { t.textContent = ""; }, 6000);
+}
+async function saveProgress() {
+  const posted = data.days.flatMap((d) => d.posts).filter((k) => store.get(k)).sort();
+  const json = JSON.stringify({ at: new Date().toISOString(), keys: posted }, null, 2) + "\\n";
+  if (window.showDirectoryPicker) {
+    try {
+      const dir = await window.showDirectoryPicker({ mode: "readwrite" });
+      const file = await dir.getFileHandle("posted.json", { create: true });
+      const out = await file.createWritable(); await out.write(json); await out.close();
+      data.posted = posted;
+      return toast("Saved posted.json in " + dir.name + ": " + posted.length + " posted.");
+    } catch (e) { if (e.name === "AbortError") return; }
+  }
+  const a = h("a", { href: URL.createObjectURL(new Blob([json], { type: "application/json" })), download: "posted.json" });
+  document.body.append(a); a.click(); a.remove();
+  toast("Saved posted.json to your downloads: move it into the campaign folder.");
+}
 const select = (k) => { current = k; render(); };
 
 // Fit a frame to its media once its size is known: a phone for vertical, a screen for wide.
@@ -441,7 +476,7 @@ function queueItem(k) {
   const thumb = p.thumb ? h("img", { class: "thumb", src: urlOf(p.key, p.thumb), alt: "", loading: "lazy" }) : h("span", { class: "thumb none" }, p.label.slice(0, 2));
   return h("button", { class: "item" + (store.get(k) ? " posted" : ""), type: "button", "aria-current": String(k === current), title: p.hook || p.id, onclick: () => select(k) },
     thumb,
-    h("span", {}, h("span", { class: "plat" }, p.label + ", " + p.kind), h("span", { class: "hook" }, p.hook || p.id)),
+    h("span", {}, h("span", { class: "plat" }, p.label + ", " + p.kind, p.changed ? [" ", h("span", { class: "badge" }, "Changed")] : null), h("span", { class: "hook" }, p.hook || p.id)),
     h("span", { class: "tick", "aria-label": store.get(k) ? "posted" : "not posted" }));
 }
 
@@ -508,12 +543,14 @@ function render() {
     h("div", { class: "brand" }, h("span", { class: "mark", "aria-hidden": "true" }, data.product.charAt(0).toUpperCase()),
       h("h1", {}, data.product, h("span", {}, " campaign"))),
     h("span", { class: "progress" }, ring(done, all.length), h("span", {}, done + " of " + all.length, h("span", { class: "label-long" }, " posted"))),
+    h("button", { class: "pill-btn", type: "button", title: "Write posted.json into the campaign folder", onclick: saveProgress }, "Save progress"),
     h("button", { class: "pill-btn", type: "button", onclick: () => $("#pick").click() }, "Open another folder"));
 
-  const filters = h("div", { class: "filters" }, ["all", ...platforms].map((pl) =>
-    h("button", { type: "button", "aria-pressed": String(filter === pl), onclick: () => { filter = pl; current = keys()[0]; render(); } }, pl === "all" ? "All" : labelOf(pl))));
+  const anyChanged = all.some((k) => data.pieces[k].changed);
+  const filters = h("div", { class: "filters" }, ["all", ...(anyChanged ? ["changed"] : []), ...platforms].map((pl) =>
+    h("button", { type: "button", "aria-pressed": String(filter === pl), onclick: () => { filter = pl; current = keys()[0]; render(); } }, pl === "all" ? "All" : pl === "changed" ? "Changed" : labelOf(pl))));
   const days = data.days.map((d) => {
-    const posts = d.posts.filter((k) => filter === "all" || data.pieces[k].platform === filter);
+    const posts = d.posts.filter(shown);
     if (!posts.length) return null;
     const label = h("div", { class: "day" }, d.day ? "Day " + d.day : "Not on the calendar");
     return look() === "strip" ? h("div", { class: "daycol" }, label, h("div", { class: "row" }, posts.map(queueItem))) : [label, posts.map(queueItem)];
@@ -539,7 +576,7 @@ function render() {
     h("div", {}, h("div", { class: "head" }, h("h2", {}, p.hook || p.id),
       h("button", { class: "posted-toggle", type: "button", "aria-pressed": String(store.get(p.key)), onclick: () => { store.set(p.key, !store.get(p.key)); render(); } },
         store.get(p.key) ? "Posted" : "Mark as posted")),
-      h("div", { class: "meta" }, h("span", { class: "chip plat" }, p.label), p.kind ? h("span", { class: "chip" }, p.kind) : null, p.window ? h("span", { class: "chip" }, "Post " + p.window) : null)),
+      h("div", { class: "meta" }, h("span", { class: "chip plat" }, p.label), p.changed ? h("span", { class: "chip changed", title: p.changed.why }, "Changed: " + p.changed.why) : null, p.kind ? h("span", { class: "chip" }, p.kind) : null, p.window ? h("span", { class: "chip" }, "Post " + p.window) : null)),
     p.thread
       ? h("div", { class: "group" }, h("h3", {}, "Thread, " + p.thread.length + " posts"),
           p.thread.map((t, i) => slab("Post " + (i + 1), t, { limit: 280, count: xLength })),
@@ -624,6 +661,7 @@ async function loadFiles(list) {
       alts: (await text(key + "/alt.txt")).split("\\n").map((l) => l.match(/^([\\w.-]+\\.(?:png|jpe?g|mp4)):\\s*(.+)$/i)).filter(Boolean).map((m) => ({ file: m[1], text: m[2].trim() })),
       media, files,
       thumb: files.includes("video-poster.jpg") ? "video-poster.jpg" : (media.find((m) => m.type === "image") || {}).file || null,
+      changed: meta.changed || null,
     };
   }
   const md = await text("calendar.md");
@@ -638,7 +676,9 @@ async function loadFiles(list) {
   if (rest.length) days.push({ day: null, posts: rest });
   const made = new Map();
   urlOf = (key, file) => { const k = key + "/" + file; if (!made.has(k) && urls.has(k)) made.set(k, urls.get(k)()); return made.get(k) || ""; };
-  data = { product, accent: saved.accent || null, onAccent: saved.onAccent || null, days: days.filter((d) => d.posts.length), pieces };
+  let posted = [];
+  try { posted = JSON.parse((await text("posted.json")) || "{}").keys || []; } catch {}
+  data = { product, accent: saved.accent || null, onAccent: saved.onAccent || null, days: days.filter((d) => d.posts.length), pieces, posted };
   current = null; filter = "all";
   render();
 }

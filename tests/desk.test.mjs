@@ -82,3 +82,29 @@ test("writeDesk keeps keys it does not own in campaign.json", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("readCampaign carries the posted keys and each piece's changed note", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "desk-posted-"));
+  try {
+    for (const id of ["01-pain-hook", "06-update"]) {
+      mkdirSync(path.join(dir, "x", id), { recursive: true });
+      writeFileSync(path.join(dir, "x", id, "post.json"), JSON.stringify({ hook: id, ...(id === "06-update" ? { changed: { at: "2026-11-13T00:00:00.000Z", why: "new: bulk archive" } } : {}) }));
+    }
+    writeFileSync(path.join(dir, "calendar.md"), "# tidy: two-week campaign\n\n## Day 1\n- **X** · thread · `x/01-pain-hook` · 8am\n\n## Day 2\n- **X** · video · `x/06-update` · 8am\n");
+    writeFileSync(path.join(dir, "posted.json"), JSON.stringify({ at: "2026-11-13T00:00:00.000Z", keys: ["x/01-pain-hook"] }));
+    const data = readCampaign(dir);
+    assert.deepEqual(data.posted, ["x/01-pain-hook"]);
+    assert.equal(data.pieces["x/06-update"].changed.why, "new: bulk archive");
+    assert.equal(data.pieces["x/01-pain-hook"].changed, null);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the page has a Changed filter and Save progress, writing posted.json or downloading it", () => {
+  const html = deskHtml({ product: "tidy", days: [], pieces: {}, posted: [] });
+  for (const s of ["Save progress", "showDirectoryPicker", "posted.json", "Changed", "move it into the campaign folder"]) assert.ok(html.includes(s), s);
+  // The folder loader reads posted.json and the changed note too.
+  assert.match(html, /text\("posted\.json"\)/);
+  assert.match(html, /changed: meta\.changed/);
+});

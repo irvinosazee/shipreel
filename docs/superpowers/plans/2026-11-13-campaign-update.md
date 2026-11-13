@@ -220,13 +220,13 @@ The `references/campaign.md` section fixes the agent's order, which is the user'
   - A "Changed" badge on pieces with `changed`, and a "Changed" filter pill in the bar.
   - A "Save progress" button. When `showDirectoryPicker` exists, it writes `posted.json` into the picked folder. Otherwise it downloads `posted.json` and shows "Saved posted.json to your downloads: move it into the campaign folder."
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
   - "readCampaign carries posted keys and each piece's changed note": a fixture with `posted.json` and a `post.json` with `changed` gives `data.posted` and `pieces[k].changed`.
   - "the page has a Changed filter and a Save progress control with a download fallback": `deskHtml(data)` contains `Save progress`, `showDirectoryPicker`, `posted.json` and `Changed`.
-- [ ] **Step 2: Run** `node --test tests/desk.test.mjs`. Expected: FAIL.
-- [ ] **Step 3: Implement.** Keep the night look's pill bar and put the filter pill there. Check screenshots at 1440 and 390 px wide (`chrome.mjs` `withPage` with `Emulation.setDeviceMetricsOverride`) and confirm there is no horizontal scroll.
-- [ ] **Step 4: Run** `npm test`. Expected: all pass.
-- [ ] **Step 5: Commit:** "Desk: ticks seeded from posted.json, Save progress, Changed badge and filter".
+- [x] **Step 2: Run** `node --test tests/desk.test.mjs`. Expected: FAIL.
+- [x] **Step 3: Implement.** Keep the night look's pill bar and put the filter pill there. Check screenshots at 1440 and 390 px wide (`chrome.mjs` `withPage` with `Emulation.setDeviceMetricsOverride`) and confirm there is no horizontal scroll.
+- [x] **Step 4: Run** `npm test`. Expected: all pass.
+- [x] **Step 5: Commit:** "Desk: ticks seeded from posted.json, Save progress, Changed badge and filter".
 
 ### Task 7: Dogfood and release prep
 
