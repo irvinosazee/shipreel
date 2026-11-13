@@ -230,6 +230,6 @@ The `references/campaign.md` section fixes the agent's order, which is the user'
 
 ### Task 7: Dogfood and release prep
 
-- [ ] **Step 1:** Run the update on the shipreel campaign in `~/Downloads/shipreel-campaign` (copy it to the scratchpad first) with `--day 1` and the note "0.4.2: slide headlines take a third or fourth line instead of being cut. Every page has the shipreel favicon." Confirm that both points come back backed by commits `f055b0d`/`81fcd9c` and `a7ff320`, that the Day 1 pieces are byte-identical, and that the check passes.
-- [ ] **Step 2:** Write `reviews/0.5.0-update-shipreel.md`, covering what was weak and what changed, in the format of `reviews/0.4.0-max-heartrank.md`.
-- [ ] **Step 3:** Bump `.claude-plugin/plugin.json` to `0.5.0` and run `npm test`. **Stop and ask the user** before merging, pushing, publishing, tagging or updating the site.
+- [x] **Step 1:** Run the update on the shipreel campaign in `~/Downloads/shipreel-campaign` (copy it to the scratchpad first) with `--day 1` and the note "0.4.2: slide headlines take a third or fourth line instead of being cut. Every page has the shipreel favicon." Confirm that both points come back backed by commits `f055b0d`/`81fcd9c` and `a7ff320`, that the Day 1 pieces are byte-identical, and that the check passes.
+- [x] **Step 2:** Write `reviews/0.5.0-update-shipreel.md`, covering what was weak and what changed, in the format of `reviews/0.4.0-max-heartrank.md`.
+- [x] **Step 3:** Bump `.claude-plugin/plugin.json` to `0.5.0` and run `npm test`. **Stop and ask the user** before merging, pushing, publishing, tagging or updating the site.
