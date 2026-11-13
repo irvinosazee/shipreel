@@ -16,6 +16,7 @@ import { createReadStream, existsSync, readdirSync, readFileSync, realpathSync, 
 import http from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { faviconTag } from "./favicon.mjs";
 
 import { listVersions } from "./versions.mjs";
 
@@ -57,6 +58,7 @@ export function buildStudioPage({ title, renders, scenes = [], shareCopy = "", v
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Shipreel Studio · ${escapeHtml(title)}</title>
+    ${faviconTag()}
     <style>
       :root { --bg: #f6f2ee; --panel: #ffffff; --ink: #1d1612; --soft: #6e6058; --rule: #e5dcd4; --accent: #d9481c; --active: #fff0e8; }
       @media (prefers-color-scheme: dark) { :root { --bg: #110b09; --panel: #1b1310; --ink: #f5eee8; --soft: #b0a197; --rule: #32251e; --accent: #ff7a4d; --active: #2a1a12; } }

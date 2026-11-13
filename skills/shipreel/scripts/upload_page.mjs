@@ -14,6 +14,7 @@
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { faviconTag } from "./favicon.mjs";
 
 import { loadPlatforms } from "./platforms.mjs";
 
@@ -81,6 +82,7 @@ export function buildUploadPage({ title = "shipreel", exports, shareCopy = "", v
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Upload checklist · ${escapeHtml(title)}</title>
+    ${faviconTag()}
     <style>
       :root { --bg: #f7f4f0; --card: #ffffff; --ink: #1c1511; --soft: #6b5d55; --rule: #e6ded6; --accent: #d9481c; }
       @media (prefers-color-scheme: dark) { :root { --bg: #120c0a; --card: #1c1411; --ink: #f6efe9; --soft: #b3a59c; --rule: #33271f; --accent: #ff7a4d; } }

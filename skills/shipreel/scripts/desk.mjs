@@ -16,6 +16,7 @@ import { execFile } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { faviconTag, MARK } from "./favicon.mjs";
 
 const LABELS = { tiktok: "TikTok", instagram: "Instagram", "youtube-shorts": "YouTube Shorts", linkedin: "LinkedIn", x: "X" };
 const read = (file) => (existsSync(file) ? readFileSync(file, "utf8").trim() : "");
@@ -121,6 +122,7 @@ export function deskHtml(data = null, { look = "night" } = {}) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
+${faviconTag({ fill: data?.accent ?? MARK.fill, ink: data?.onAccent ?? MARK.ink })}
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@500;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
