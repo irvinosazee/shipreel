@@ -115,7 +115,7 @@ test("the ledger round-trips sorted and unique; a missing or broken file is empt
 
   `backed` is true when there is any evidence. A `feedback` point is backed only when the answer to it is backed, so "people ask if it works for Python" needs evidence for `python`.
 
-- [ ] **Step 1: Write the failing tests.** Use a temp git repo fixture: README "Works with Python and Node.", plus a commit "Cards: a long slide headline takes a third line" tagged after `since`.
+- [x] **Step 1: Write the failing tests.** Use a temp git repo fixture: README "Works with Python and Node.", plus a commit "Cards: a long slide headline takes a third line" tagged after `since`.
 
 ```js
 test("a change backed by a commit since the campaign is backed, with the commit as evidence", () => {
@@ -132,10 +132,10 @@ test("feedback is backed by the answer: Python support found in the README", () 
 });
 ```
 
-- [ ] **Step 2: Run** `node --test tests/talking_points.test.mjs`. Expected: FAIL.
-- [ ] **Step 3: Implement** the module, following the signatures and evidence rules above.
-- [ ] **Step 4: Run** the same command. Expected: PASS.
-- [ ] **Step 5: Commit:** "Talking points: every point in an update is checked against commits, claims and files". Update the README counts.
+- [x] **Step 2: Run** `node --test tests/talking_points.test.mjs`. Expected: FAIL.
+- [x] **Step 3: Implement** the module, following the signatures and evidence rules above.
+- [x] **Step 4: Run** the same command. Expected: PASS.
+- [x] **Step 5: Commit:** "Talking points: every point in an update is checked against commits, claims and files". Update the README counts.
 
 ### Task 4: Plan and apply an update
 

@@ -25,7 +25,7 @@ function git(dir, args) {
 const day = (iso) => iso.slice(0, 10);
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
-function readLog(dir, range) {
+export function readLog(dir, range) {
   const format = ["%H", "%ae", "%aI", "%P", "%s"].join("%x1f");
   return git(dir, ["log", "--reverse", `--format=${format}`, ...(range ? [range] : [])])
     .split("\n")
